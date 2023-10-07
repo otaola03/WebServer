@@ -9,7 +9,7 @@ CXXFLAGS = -std=c++98 -Wall -Werror -Wextra $(EFLAGS)
 RM = rm -rf
 SANI := -fsanitize=address -g3
 
-SRCS = main.cpp $(CLASS)Server.cpp
+SRCS = main.cpp $(CLASS)Server.cpp $(CLASS)HttpRequest.cpp
 OBJS = $(SRCS:.cpp=.o)
 
 all: $(NAME)

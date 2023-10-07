@@ -68,6 +68,7 @@ void	Server::startServer(int port)
 	}
 }
 
+//Pon el constructo vacio privado y haz uno que requeora un puerto como int
 Server::Server()
 {
 	startServer(80);
