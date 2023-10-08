@@ -18,7 +18,7 @@ int main()
         	exit(1);
     	}
 		buf[numbytes] = '\0';
-		std::cout << buf << "\n\n";
+		/* std::cout << buf << "\n\n"; */
 
 		std::string str(buf);
 		HttpRequest	request(str);

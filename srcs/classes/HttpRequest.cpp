@@ -4,16 +4,6 @@ HttpRequest::HttpRequest()
 {
 }
 
-static void	splitRequest(std::vector<std::string>& lines, const std::string& toProcess)
-{
-	std::istringstream stream(toProcess);
-	std::string	line;
-
-	while (std::getline(stream, line))
-		if (!line.empty())
-			lines.push_back(line);
-}
-
 static	RequestType whatTypeIs(std::string type)
 {
 	if (type == "GET")
@@ -25,11 +15,32 @@ static	RequestType whatTypeIs(std::string type)
 	return UNDEFINED;
 }
 
-//Ponlo bonito
-HttpRequest::HttpRequest(std::string toProcess)
+void	HttpRequest::saveRequest(const std::string& toProcess)
+{
+	std::string request = toProcess.substr(0, toProcess.find('\n'));
+
+	size_t p = request.find(' ');
+	type = whatTypeIs(request.substr(0, p));
+
+	size_t p2 = request.find(' ', p + 1);
+	source = request.substr(p + 1, p2 - p);
+}
+
+
+static void	splitRequest(std::vector<std::string>& lines, const std::string& toProcess)
+{
+	std::istringstream stream(toProcess);
+	std::string	line;
+
+	while (std::getline(stream, line))
+		if (!line.empty())
+			lines.push_back(line);
+}
+
+void	HttpRequest::saveHeaders(const std::string& toProccess)
 {
 	std::vector<std::string> lines;
-	splitRequest(lines, toProcess);
+	splitRequest(lines, toProccess);
 
 
 	for (std::vector<std::string>::iterator it = lines.begin(); it != lines.end(); ++it)
@@ -39,15 +50,15 @@ HttpRequest::HttpRequest(std::string toProcess)
 			continue;
 		std::pair<std::string, std::string> auxPair = std::make_pair(\
 			it->substr(0, p), it->substr(p + 2));
-		request.push_back(auxPair);
+		headers.push_back(auxPair);
 	}
+}
 
 
-	size_t p = lines[0].find(' ');
-	type = whatTypeIs(lines[0].substr(0, p));
-	size_t p2 = lines[0].find(' ', p + 1);
-	source = lines[0].substr(p + 1, p2 - p);
-	std::cout << source << "\n";
+HttpRequest::HttpRequest(const std::string& toProcess)
+{
+	saveRequest(toProcess);
+	saveHeaders(toProcess);
 }
 
 HttpRequest::HttpRequest(const HttpRequest& toCopy)
@@ -61,8 +72,8 @@ HttpRequest::~HttpRequest()
 
 void	HttpRequest::printRequest()
 {
-	for (std::vector< std::pair<std::string, std::string> >::iterator it = request.begin(); \
-		it != request.end(); ++it)
+	for (std::vector< std::pair<std::string, std::string> >::iterator it = headers.begin(); \
+		it != headers.end(); ++it)
 		std::cout << (*it).first << ": " << (*it).second << "\n";
 }
 

@@ -11,14 +11,16 @@ enum RequestType {GET, POST, DELETE, UNDEFINED};
 class HttpRequest
 {
 	private:
-		std::vector< std::pair<std::string, std::string> >	request;
+		std::vector< std::pair<std::string, std::string> >	headers;
 		RequestType	type;
 		std::string	source;
 
 		HttpRequest();
+		void	saveRequest(const std::string& toProcess);
+		void	saveHeaders(const std::string& toProcess);
 
 	public:
-		HttpRequest(std::string toProcess);
+		HttpRequest(const std::string& toProcess);
 		HttpRequest(const HttpRequest& toCopy);
 		~HttpRequest();
 
