@@ -23,7 +23,7 @@ void	HttpRequest::saveRequest(const std::string& toProcess)
 	type = whatTypeIs(request.substr(0, p));
 
 	size_t p2 = request.find(' ', p + 1);
-	source = request.substr(p + 1, p2 - p);
+	path = request.substr(p + 1, p2 - p);
 }
 
 

@@ -13,7 +13,8 @@ class HttpRequest
 	private:
 		std::vector< std::pair<std::string, std::string> >	headers;
 		RequestType	type;
-		std::string	source;
+		std::string	path;
+		// Crea un campo paara el body
 
 		HttpRequest();
 		void	saveRequest(const std::string& toProcess);
