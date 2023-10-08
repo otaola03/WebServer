@@ -7,8 +7,8 @@ server:
     listen: [80, 50]
 
     error_page:
-        - 404: ./public/html/404.html
-        - 405: ./public/html/405.html
+        - "404": ./public/html/404.html
+        - "405": ./public/html/405.html
 
     location:
         path: /login
