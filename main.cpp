@@ -3,12 +3,13 @@
 
 int main()
 {
-	Server server;
+	Port port(1090);
 	int	new_fd;
 
 	 while(1) {  // main accept() loop
 		std::cout << "Waiting to accept\n";
-		new_fd = server.acceptConnection();
+		port.activatePort();
+		new_fd = port.acceptConnection();
 		
 		char buf[1000];
 		int numbytes;
