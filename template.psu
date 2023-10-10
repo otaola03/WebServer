@@ -1,0 +1,27 @@
+Webserver {
+	Server {
+		Port 80
+		Port 85
+	}
+
+	Server {
+		Port 1090
+		Port 1095
+	}
+}
+
+while (1)
+{
+	master = {80, 85, 1090, 1095}
+	read_fds = master
+
+	select(read_fds)
+
+	for (fd : master)
+	{
+		if (fd in read_fds)
+		{
+			if (fd in {80, 85, 1090, 1095})
+		}
+	}
+}
