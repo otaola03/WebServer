@@ -11,19 +11,18 @@ Webserver {
 }
 
 
-Server {
+// Haz un mapa que relacione fd de clientes con el el Servidor a traves del que se ha conectado
+// Que cada servdiro tenga una lista de clientes vector<int> o crea un mapa map<clientFd, servidor>
 
-}
-
-map(fd, port)
-
-void	saveNewCleint()
+void	saveNewCleint(newClientFd, port)
 {
-	newClient = webserver.getSocket(fd).accept()
+	Port& fdPort = webserver
+	newClient = webserver.getPort(newClientFd).accept()
 	master.add(newClient);
 }
 
-void	reciveData()
+// Aqui tengo que saber a que servidor corresponde clientFd
+void	reciveData(clientFd)
 {
 	nbytes = webserver.getSocket(fd).recv()
 	if (nbytes <= 0)
@@ -33,8 +32,8 @@ void	reciveData()
 	}
 	else
 	{
-		sendData();
 		webserver.getSocket(fd).isValidData()
+		sendData();
 	}
 }
 
@@ -49,10 +48,13 @@ while (1)
 	{
 		if (fd in read_fds)
 		{
-			if (fd in {80, 85, 1090, 1095})
-				saveNewClient()
+			if ((port = isFdAPort(fd)) != -1)
+				saveNewClient(fd, port)
 			else
-				reciveData();
+			{
+				HttpRequest = reciveData(fd)
+				webserver.getServer(fd).checkData(HttpRequest)
+			}
 		}
 	}
 }

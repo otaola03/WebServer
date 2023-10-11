@@ -1,17 +1,3 @@
-#include "WebServer.hpp"
-
-WebServer::WebServer()
-{
-}
-
-WebServer::WebServer(const WebServer& toCopy)
-{
-}
-
-WebServer::~WebServer()
-{
-}
-
 void	WebServer::serverLoop()
 {
 	// main loop
@@ -78,17 +64,3 @@ void	WebServer::serverLoop()
     	} // END looping through file descriptors
 	} // END for(;;)--and you thought it would never end!
 }
-
-Server&	WebServer::getServer(const int fd)
-{
-	for (serversVector::iterator it = seversList.begin(); it != serversList.end(); ++it)
-	{
-
-	}
-}
-
-WebServer& WebServer::operator=(const WebServer& toAssign)
-{
-	return *this;
-}
-
