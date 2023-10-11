@@ -15,6 +15,29 @@ Server {
 
 }
 
+map(fd, port)
+
+void	saveNewCleint()
+{
+	newClient = webserver.getSocket(fd).accept()
+	master.add(newClient);
+}
+
+void	reciveData()
+{
+	nbytes = webserver.getSocket(fd).recv()
+	if (nbytes <= 0)
+	{
+		close(fd);
+		master.remove(fd);
+	}
+	else
+	{
+		sendData();
+		webserver.getSocket(fd).isValidData()
+	}
+}
+
 while (1)
 {
 	fd_set master = {80, 85, 1090, 1095}
@@ -27,21 +50,9 @@ while (1)
 		if (fd in read_fds)
 		{
 			if (fd in {80, 85, 1090, 1095})
-			{
-				newClient = accept();
-				master.add(newClient);
-			}
+				saveNewClient()
 			else
-			{
-				nbytes = recv()
-				if (nbytes <= 0)
-				{
-					close(fd);
-					master.remove(fd);
-				}
-				else
-					sendData();
-			}
+				reciveData();
 		}
 	}
 }
