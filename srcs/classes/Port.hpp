@@ -21,6 +21,7 @@ class Port
 {
 	private:
 		int				sockfd;
+		int				port;
 		Port();
 
 	public:

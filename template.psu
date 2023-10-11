@@ -10,10 +10,15 @@ Webserver {
 	}
 }
 
+
+Server {
+
+}
+
 while (1)
 {
-	master = {80, 85, 1090, 1095}
-	read_fds = master
+	fd_set master = {80, 85, 1090, 1095}
+	fd_set read_fds = master
 
 	select(read_fds)
 
@@ -22,6 +27,21 @@ while (1)
 		if (fd in read_fds)
 		{
 			if (fd in {80, 85, 1090, 1095})
+			{
+				newClient = accept();
+				master.add(newClient);
+			}
+			else
+			{
+				nbytes = recv()
+				if (nbytes <= 0)
+				{
+					close(fd);
+					master.remove(fd);
+				}
+				else
+					sendData();
+			}
 		}
 	}
 }

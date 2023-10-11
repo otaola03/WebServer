@@ -1,24 +1,46 @@
 server:
-    server_name: WebServer
-    listen: [80, 50]
-    error_pages:
-        - "404": ./public/html/404.html
-        - "405": ./public/html/405.html
+    - server_name: WebServer
+      listen: [80, 50]
+      error_pages:
+          - "404": ./public/html/404.html
+          - "405": ./public/html/405.html
 
-    locations:
-        - path: /login
-          root: ./public/html
-          allowed_methods: [GET, POST, DELETE]
-          autoindex: on
-          max_body_size: 15000
-          redirection: "google.com"
+      locations:
+          - path: /login
+            root: ./public/html
+            allowed_methods: [GET, POST, DELETE]
+            autoindex: on
+            max_body_size: 15000
+            redirection: "google.com"
 
-        - path: /imgs
-          root: ./public/html
-          index: index.html
-          allowed_methods: [GET, POST, DELETE]
-          autoindex: on
-          redirection: "google.com"
-          destination: ./images #direccion donde se guarda el POST
-          cgi_destinaation: ./cgi-bin #direccion del cgi
+          - path: /imgs
+            root: ./public/html
+            index: index.html
+            allowed_methods: [GET, POST, DELETE]
+            autoindex: on
+            redirection: "google.com"
+            destination: ./images #direccion donde se guarda el POST
+            cgi_destinaation: ./cgi-bin #direccion del cgi
+ 
+    - server_name: WebServer
+      listen: [80, 50]
+      error_pages:
+          - "404": ./public/html/404.html
+          - "405": ./public/html/405.html
 
+      locations:
+          - path: /login
+            root: ./public/html
+            allowed_methods: [GET, POST, DELETE]
+            autoindex: on
+            max_body_size: 15000
+            redirection: "google.com"
+
+          - path: /imgs
+            root: ./public/html
+            index: index.html
+            allowed_methods: [GET, POST, DELETE]
+            autoindex: on
+            redirection: "google.com"
+            destination: ./images #direccion donde se guarda el POST
+            cgi_destinaation: ./cgi-bin #direccion del cgi

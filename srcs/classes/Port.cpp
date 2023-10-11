@@ -42,7 +42,7 @@ static int	getListenFd(struct addrinfo *portInfo)
 Port::Port() {}
 
 //Pon el constructo vacio privado y haz uno que requeora un puerto como int
-Port::Port(const int port)
+Port::Port(const int port) : port(port)
 {
 	struct addrinfo	templateAddr, *portInfo;
 	std::stringstream ss;
