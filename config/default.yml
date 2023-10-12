@@ -1,5 +1,6 @@
 server:
     - server_name: WebServer
+      root: /public
       listen: [80, 50]
       error_pages:
           - "404": ./public/html/404.html
@@ -21,7 +22,7 @@ server:
             redirection: "google.com"
             destination: ./images #direccion donde se guarda el POST
             cgi_destinaation: ./cgi-bin #direccion del cgi
- 
+
     - server_name: WebServer
       listen: [80, 50]
       error_pages:

@@ -2,6 +2,8 @@
 
 # define LOCATION_HPP
 
+#include <iostream>
+
 class Location
 {
 	private:
@@ -14,10 +16,20 @@ class Location
 		std::string	redirection;
 		std::string	destination;
 
+		Location();
 
 	public:
-		Location();
-		Location(const Location& toCopy);
+		Location(\
+				const std::string	path, \
+				const std::string	root, \
+				const bool			GET, \
+				const bool			POST, \
+				const bool			DELETE, \
+				const bool			autoindex, \
+				std::string			redirection, \
+				std::string			destination \
+		);
+		/* Location(const Location& toCopy); */
 		~Location();
 
 		Location& operator=(const Location& toCopy);

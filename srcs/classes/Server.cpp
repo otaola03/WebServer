@@ -4,7 +4,13 @@ Server::Server()
 {
 }
 
-Server::Server(const std::string& name, const std::vector<int> ports) : name(name)
+Server::Server(\
+	const std::string& name, \
+	const std::string& root, \
+	const intVector& ports, \
+	const intCharMap& errorPages, \
+	const locationVector& locations\
+) : name(name), root(root), errorPages(errorPages), locations(locations)
 {
 	for (int i = 0; ports[i]; i++)
 	{

@@ -16,25 +16,25 @@ Webserver {
 
 void	saveNewCleint(newClientFd, port)
 {
-	Port& fdPort = webserver
-	newClient = webserver.getPort(newClientFd).accept()
+	newClient = webserver.getPort(port).accept()
+	Server& fdServer = webserver.getServer(port);
+	webserver.clientServerList[newClientFd] = Server;
 	master.add(newClient);
 }
 
 // Aqui tengo que saber a que servidor corresponde clientFd
 void	reciveData(clientFd)
 {
-	nbytes = webserver.getSocket(fd).recv()
+	nbytes = recv()
 	if (nbytes <= 0)
 	{
-		close(fd);
-		master.remove(fd);
+		close(clientFd);
+		master.remove(clientFd);
+		clientServerList.remove(cleintFd)
+		return NULL
 	}
 	else
-	{
-		webserver.getSocket(fd).isValidData()
-		sendData();
-	}
+		return HttpRequest
 }
 
 while (1)
@@ -53,7 +53,9 @@ while (1)
 			else
 			{
 				HttpRequest = reciveData(fd)
-				webserver.getServer(fd).checkData(HttpRequest)
+				//webserver.getServer(fd).checkData(HttpRequest)
+				clientServerList[fd].checkData(HttpRequesrt)
+				webserver.sendData()
 			}
 		}
 	}
