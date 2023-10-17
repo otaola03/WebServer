@@ -4,26 +4,26 @@
 
 #include "Port.hpp"
 #include "Location.hpp"
-#include <vector>
-#include <map>
-#include <algorithm>
 
-typedef std::vector<int> intVector;
-typedef std::vector<Port> portsVector;
-typedef std::vector<Location> locationVector;
-typedef std::map<int, Port> intPortMap;
-typedef std::map<int, std::string> intCharMap;
+#include "../../includes/templates.h"
+
+#include <algorithm>
+#include <exception>
+
 
 class Server
 {
 	private:
 		std::string name;
 		std::string root;
-		intPortMap	fdPortList;	//map(fd, Port)
+		intPortMap	fdPortsList;	//map(fd, Port)
 		intCharMap errorPages;
 		locationVector locations;
 
 		Server();
+
+	public:
+		int fdMax;
 
 	public:
 		Server(\
@@ -38,6 +38,8 @@ class Server
 		~Server();
 
 		Port&	getPort(const int fd);
+
+		void	addPortsToSet(fd_set& portsList);
 
 		Server& operator=(const Server& toAssign);
 };

@@ -4,12 +4,13 @@
 
 #include "Server.hpp"
 
-typedef std::vector<Sever> serverVector;
-typedef std::Map<int, Port> intPortMap;
+typedef std::vector<Server*> serverVector;
+typedef std::map<int, Port*> intPortMap;
 
 class WebServer
 {
 	private:
+		fd_set	portsList;
 		fd_set	socketList;
 		serverVector	serversList;
 
@@ -19,7 +20,7 @@ class WebServer
 		~WebServer();
 
 		void	serverLoop();
-		Sever&	getServer(const int fd);
+		Server&	getServer(const int fd);
 		Port&	getPort(const int fd);
 
 		WebServer& operator=(const WebServer& toAssign);

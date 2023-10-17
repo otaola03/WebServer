@@ -78,7 +78,7 @@ Port::~Port()
 	close(sockfd);
 }
 
-int	Port::getSockfd() {return sockfd;}
+int	Port::getSockFd() {return sockfd;}
 
 void	Port::activatePort()
 {
@@ -122,7 +122,9 @@ void	Port::closePort() {close(sockfd);}
 
 Port& Port::operator=(const Port& toAssign)
 {
-	(void)toAssign;
+	std::cout << "ASGINADO\n"; 
+	sockfd = toAssign.sockfd;
+	port = toAssign.port;
 	return *this;
 }
 

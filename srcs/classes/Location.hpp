@@ -16,9 +16,9 @@ class Location
 		std::string	redirection;
 		std::string	destination;
 
-		Location();
 
 	public:
+		Location();
 		Location(\
 				const std::string	path, \
 				const std::string	root, \
