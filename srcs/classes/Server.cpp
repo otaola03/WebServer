@@ -12,15 +12,19 @@ Server::Server(\
 	const locationVector& locations\
 ) : name(name), root(root), errorPages(errorPages), locations(locations)
 {
-	for (int i = 0; ports[i]; i++)
+	for (int i = 0; i != (int)ports.size(); i++)
 	{
-		Port port(ports[i]);
-		portsMap[port.getSockFd()] = port;
+		Port *port = new Port(ports[i]);
+		fdMax = port->getSockFd();
+		port->activatePort();
+		fdPortsList[port->getSockFd()] = port;
 	}
+	std::cout << "fdMax: " << fdMax << "\n";
 }
 
 Server::Server(const Server& toCopy)
 {
+	(void)toCopy;
 }
 
 Server::~Server()
@@ -29,14 +33,21 @@ Server::~Server()
 
 Port&	Server::getPort(const int fd)
 {
-	portMap::iterator it = portMap.find(fd);
-	if (it == portMap.end())
-		throw std::Exception();
-	return (it->second);
+	intPortMap::iterator it = fdPortsList.find(fd);
+	if (it == fdPortsList.end())
+		throw std::exception();
+	return *(it->second);
+}
+
+void	Server::addPortsToSet(fd_set& portsFdSet)
+{
+	for (intPortMap::iterator it = fdPortsList.begin(); it != fdPortsList.end(); ++it)
+		FD_SET(it->first, &portsFdSet);
 }
 
 Server& Server::operator=(const Server& toAssign)
 {
+	(void)toAssign;
 	return *this;
 }
 

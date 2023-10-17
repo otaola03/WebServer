@@ -2,41 +2,82 @@
 
 WebServer::WebServer()
 {
+	intVector	ports;
+	ports.push_back(85);
+	ports.push_back(105);
+
+	intCharMap	errorPages;
+	errorPages[404] = "/404.html";
+
+	Location	location;
+	locationVector	locations;
+	locations.push_back(location);
+
+	Server *server = new Server("server1", "/", ports, errorPages, locations);
+	std::cout << "fdMax: " << server->fdMax << "\n";
+
+	FD_ZERO(&socketList);
+	FD_ZERO(&portsList);
+
+	server->addPortsToSet(portsList);
+
+	socketList = portsList;
+	serversList.push_back(server);
 }
 
 WebServer::WebServer(const WebServer& toCopy)
 {
+	(void)toCopy;
 }
 
 WebServer::~WebServer()
 {
 }
 
+static void *get_in_addr(struct sockaddr *sa)
+{
+    if (sa->sa_family == AF_INET) {
+        return &(((struct sockaddr_in*)sa)->sin_addr);
+    }
+
+    return &(((struct sockaddr_in6*)sa)->sin6_addr);
+}
+
 void	WebServer::serverLoop()
 {
+	fd_set	read_fds;
+	char remoteIP[INET6_ADDRSTRLEN];
+	char buf[256];
+	int newfd;
+	struct sockaddr_storage remoteaddr;
+	int nbytes;
+	socklen_t addrlen;
+	int fdmax = serversList[0]->fdMax;
+
+	std::cout << "----> " << fdmax << "\n";
 	// main loop
     while (1) 
 	{
-        read_fds = master; // copy it
-        if (select(fdmax+1, &read_fds, NULL, NULL, NULL) == -1) {
+        read_fds = socketList; // copy it
+        if (select(fdmax + 1, &read_fds, NULL, NULL, NULL) == -1) {
             perror("select");
             exit(4);
         }
 
         // run through the existing connections looking for data to read
-        for(i = 0; i <= fdmax; i++) {
+        for(int i = 0; i <= fdmax; i++) {
             if (FD_ISSET(i, &read_fds)) { // we got one!!
-                if (i == listener) {
+                if (FD_ISSET(i, &portsList)) {
                     // handle new connections
                     addrlen = sizeof remoteaddr;
-                    newfd = accept(listener,
+                    newfd = accept(i,
                         (struct sockaddr *)&remoteaddr,
                         &addrlen);
 
                     if (newfd == -1) {
                         perror("accept");
                     } else {
-                        FD_SET(newfd, &master); // add to master set
+                        FD_SET(newfd, &socketList); // add to socketList set
                         if (newfd > fdmax) {    // keep track of the max
                             fdmax = newfd;
                         }
@@ -58,14 +99,14 @@ void	WebServer::serverLoop()
                             perror("recv");
                         }
                         close(i); // bye!
-                        FD_CLR(i, &master); // remove from master set
+                        FD_CLR(i, &socketList); // remove from socketList set
                     } else {
                         // we got some data from a client
-                        for(j = 0; j <= fdmax; j++) {
+                        for(int j = 0; j <= fdmax; j++) {
                             // send to everyone!
-                            if (FD_ISSET(j, &master)) {
+                            if (FD_ISSET(j, &socketList)) {
                                 // except the listener and ourselves
-                                if (j != listener && j != i) {
+                                if (!FD_ISSET(j, &portsList) && j != i) {
                                     if (send(j, buf, nbytes, 0) == -1) {
                                         perror("send");
                                     }
@@ -81,14 +122,17 @@ void	WebServer::serverLoop()
 
 Server&	WebServer::getServer(const int fd)
 {
-	for (serversVector::iterator it = seversList.begin(); it != serversList.end(); ++it)
-	{
+	(void)fd;
+	/* for (serverVector::iterator it = seversList.begin(); it != serversList.end(); ++it) */
+	/* { */
 
-	}
+	/* } */
+	return (*serversList[0]);
 }
 
 WebServer& WebServer::operator=(const WebServer& toAssign)
 {
+	(void)toAssign;
 	return *this;
 }
 

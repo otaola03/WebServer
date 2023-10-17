@@ -22,14 +22,14 @@ class Port
 	private:
 		int				sockfd;
 		int				port;
-		Port();
 
 	public:
+		Port();
 		Port(const int port);
 		Port(const Port& toCopy);
 		~Port();
 
-		int	getSockfd();
+		int	getSockFd();
 
 		void	activatePort();
 		int		acceptConnection();
