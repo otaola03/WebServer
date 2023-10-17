@@ -2,6 +2,9 @@
 
 #define TEMPLATES_H
 
+#include <vector>
+#include <map>
+
 typedef std::vector<int> intVector;
 typedef std::vector<Port> portsVector;
 typedef std::vector<Location> locationVector;
