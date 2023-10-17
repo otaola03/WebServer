@@ -1,4 +1,5 @@
 #include "WebServer.hpp"
+#include "HttpRequest.hpp"
 
 WebServer::WebServer()
 {
@@ -70,7 +71,6 @@ void	WebServer::serverLoop()
 		{
             if (FD_ISSET(i, &read_fds)) //Get a connection
 			{
-				std::cout << "ENTRA\n";
                 if (FD_ISSET(i, &portsList)) //New Connection
 				{
                     addrlen = sizeof remoteaddr;
@@ -94,8 +94,7 @@ void	WebServer::serverLoop()
 				
 				else // Connection fron an actual client
 				{
-					std::cout << "------> RCV\n";
-                    if ((nbytes = recv(i, buf, sizeof buf, 0)) <= 0)
+                    if ((nbytes = recv(i, buf, sizeof buf, 0)) <= 0) // Hazlo en un bucle
 					{
                         // got error or connection closed by client
                         if (nbytes == 0)
@@ -109,18 +108,22 @@ void	WebServer::serverLoop()
 					else // Data recived
 					{
 						buf[nbytes] = '\0';
-						std::cout << buf << "\n";
+						std::string str(buf);
+						HttpRequest request(str);
+						/* std::cout << buf << "\n"; */
+
+						request.printRequest();
+
 						if (send(i, msg, sizeof(msg), 0) == -1)
-						{
 							perror("send");
-						}
                     }
-                } // END handle data from client
-            } // END got new incoming connection
-    	} // END looping through file descriptors
-	} // END for(;;)--and you thought it would never end!
-	std::cout << "------------------------------------------------\n";
+                }
+            }
+    	}
+	}
 }
+
+// ---------------->>> Haz una clase connection con los metodos send y recv. La clase Port y la clase Client heredan de esta
 
 Server&	WebServer::getServer(const int fd)
 {
