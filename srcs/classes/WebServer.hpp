@@ -3,6 +3,7 @@
 # define WEBSERVER_HPP
 
 #include "Server.hpp"
+#include "HttpRequest.hpp"
 
 typedef std::vector<Server*> serverVector;
 typedef std::map<int, Port*> intPortMap;
@@ -22,6 +23,11 @@ class WebServer
 		void	serverLoop();
 		Server&	getServer(const int fd);
 		Port&	getPort(const int fd);
+		std::string	getIndex(std::string path);
+		std::string getImg(std::string path);
+		std::string	get404();
+		bool	fileFinder(const std::string& path);
+		std::string	getMessage(HttpRequest& parser);
 
 		WebServer& operator=(const WebServer& toAssign);
 };

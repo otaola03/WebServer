@@ -9,6 +9,13 @@
 
 #include <algorithm>
 #include <exception>
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <filesystem>
+#include <stdio.h>
+#include <dirent.h>
 
 
 class Server

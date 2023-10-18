@@ -25,7 +25,9 @@ class HttpRequest
 		HttpRequest(const HttpRequest& toCopy);
 		~HttpRequest();
 
-		void	printRequest();
+		void		printRequest();
+		int			getType();
+		std::string	getPath();
 
 		HttpRequest& operator=(const HttpRequest& toCopy);
 };

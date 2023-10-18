@@ -24,6 +24,7 @@ void	HttpRequest::saveRequest(const std::string& toProcess)
 
 	size_t p2 = request.find(' ', p + 1);
 	path = request.substr(p + 1, p2 - p);
+	path = path.erase(path.size() - 1);
 }
 
 
@@ -83,3 +84,12 @@ HttpRequest& HttpRequest::operator=(const HttpRequest& toAssign)
 	return *this;
 }
 
+int		HttpRequest::getType()
+{
+	return type;
+}
+
+std::string	HttpRequest::getPath()
+{
+	return path;
+}
