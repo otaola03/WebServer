@@ -53,7 +53,7 @@ void	WebServer::serverLoop()
 	int nbytes;
 	socklen_t addrlen;
 	int fdmax = serversList[0]->fdMax;
-	char msg[] = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!";
+	char msg[] = "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: 21\n\n<h1>Hello world!</h1>";
 
 
 	std::cout << "----> " << fdmax << "\n";
@@ -70,7 +70,6 @@ void	WebServer::serverLoop()
 		{
             if (FD_ISSET(i, &read_fds)) //Get a connection
 			{
-				std::cout << "ENTRA\n";
                 if (FD_ISSET(i, &portsList)) //New Connection
 				{
                     addrlen = sizeof remoteaddr;
