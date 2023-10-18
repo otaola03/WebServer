@@ -75,6 +75,7 @@ void	WebServer::serverLoop()
 				{
                     addrlen = sizeof remoteaddr;
                     newfd = accept(i, (struct sockaddr *)&remoteaddr, &addrlen);
+					// Creat a client object --> client(newfd, *server)
 
                     if (newfd == -1)
                         perror("accept");
@@ -107,6 +108,7 @@ void	WebServer::serverLoop()
 
 					else // Data recived
 					{
+						// Here i must to know to which server the client belongs
 						buf[nbytes] = '\0';
 						std::string str(buf);
 						HttpRequest request(str);
@@ -125,15 +127,6 @@ void	WebServer::serverLoop()
 
 // ---------------->>> Haz una clase connection con los metodos send y recv. La clase Port y la clase Client heredan de esta
 
-Server&	WebServer::getServer(const int fd)
-{
-	(void)fd;
-	/* for (serverVector::iterator it = seversList.begin(); it != serversList.end(); ++it) */
-	/* { */
-
-	/* } */
-	return (*serversList[0]);
-}
 
 WebServer& WebServer::operator=(const WebServer& toAssign)
 {

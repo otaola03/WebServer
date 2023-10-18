@@ -20,8 +20,6 @@ class WebServer
 		~WebServer();
 
 		void	serverLoop();
-		Server&	getServer(const int fd);
-		Port&	getPort(const int fd);
 
 		WebServer& operator=(const WebServer& toAssign);
 };

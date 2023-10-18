@@ -14,28 +14,24 @@
 #include <string>
 #include <iostream>
 #include <sstream>
+ 
+#include "Connection.hpp"
 
 #define BACKLOG 5
 
-class Port
+class Port : public Connection
 {
 	private:
-		int				sockfd;
-		int				port;
+		int	port;
 
 	public:
-		Port();
 		Port(const int port);
 		Port(const Port& toCopy);
 		~Port();
 
-		int	getSockFd();
 
 		void	activatePort();
 		int		acceptConnection();
-		void	recvData(void* buf);
-		void	sendData(const void* buf);
-		void	closePort();
 
 		Port& operator=(const Port& toAssign);
 };

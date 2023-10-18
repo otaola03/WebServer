@@ -39,8 +39,6 @@ static int	getListenFd(struct addrinfo *portInfo)
 	return sockfd;
 }
 
-Port::Port() {}
-
 //Pon el constructo vacio privado y haz uno que requeora un puerto como int
 Port::Port(const int port) : port(port)
 {
@@ -77,8 +75,6 @@ Port::~Port()
 	std::cout << "Port closed\n";
 	close(sockfd);
 }
-
-int	Port::getSockFd() {return sockfd;}
 
 void	Port::activatePort()
 {
@@ -117,8 +113,6 @@ int	Port::acceptConnection()
 	   printClientInfo(their_addr);
    return (new_fd);
 }
-
-void	Port::closePort() {close(sockfd);}
 
 Port& Port::operator=(const Port& toAssign)
 {

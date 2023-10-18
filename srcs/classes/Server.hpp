@@ -16,7 +16,7 @@ class Server
 	private:
 		std::string name;
 		std::string root;
-		intPortMap	fdPortsList;	//map(fd, Port)
+		intPortMap	fdPortsList;	//map(fd, Port*)
 		intCharMap errorPages;
 		locationVector locations;
 
