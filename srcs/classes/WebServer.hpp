@@ -7,7 +7,6 @@
 
 typedef std::vector<Server*> serverVector;
 typedef std::map<int, Port*> intPortMap;
-typedef std::map<int, Connection*> intConnectionMap;
 
 class WebServer
 {

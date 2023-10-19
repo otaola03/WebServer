@@ -37,6 +37,12 @@ void	Server::addPortsToSet(fd_set& portsFdSet)
 		FD_SET(it->first, &portsFdSet);
 }
 
+void	Server::addPortsToConnectionsList(intConnectionMap& connectionsList)
+{
+	for (intPortMap::iterator it = fdPortsList.begin(); it != fdPortsList.end(); ++it)
+		connectionsList[it->first] = it->second;
+}
+
 void	Server::addClient(int clientFd, Client* client) {fdClientsList[clientFd] = client;}
 
 bool	Server::containsThisPort(int portFd)

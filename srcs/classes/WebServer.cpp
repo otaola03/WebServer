@@ -37,6 +37,7 @@ WebServer::WebServer()
 	FD_ZERO(&portsList);
 
 	server->addPortsToSet(portsList);
+	server->addPortsToConnectionsList(connectionsList);
 
 	socketList = portsList;
 	serversList.push_back(server);
