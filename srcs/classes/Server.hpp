@@ -4,6 +4,7 @@
 
 #include "Port.hpp"
 #include "Location.hpp"
+#include "Client.hpp"
 
 #include "../../includes/templates.h"
 
@@ -14,11 +15,12 @@
 class Server
 {
 	private:
-		std::string name;
-		std::string root;
-		intPortMap	fdPortsList;	//map(fd, Port*)
-		intCharMap errorPages;
-		locationVector locations;
+		std::string 	name;
+		std::string 	root;
+		intPortMap		fdPortsList;	//map(fd, Port*)
+		intClientMap	fdClientsList;	//map(fd, Client*)
+		intCharMap		errorPages;
+		locationVector	locations;
 
 		Server();
 
@@ -37,9 +39,10 @@ class Server
 		Server(const Server& toCopy);
 		~Server();
 
-		Port&	getPort(const int fd);
-
 		void	addPortsToSet(fd_set& portsList);
+		void	addClient(int clientFd, Client* client);
+		bool	containsThisPort(int portFd);
+		bool	containsThisClient(int clientFd);
 
 		Server& operator=(const Server& toAssign);
 };

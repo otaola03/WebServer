@@ -15,14 +15,22 @@ Client::~Client()
 	closeSockFd();
 }
 
-void	Client::recvData()
+std::string	Client::recvData()
 {
 	int numbytes;
-	if ((numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)) == -1)
+	char buf[1024];
+	std::string recvData;
+
+	if ((numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)) != 0)
 	{
- 		perror("recv");
- 		exit(1);
+		if (numbytes == -1)
+		{
+ 			perror("recv");
+ 			exit(1);
+		}
+		recvData += buf;
 	}
+	return recvData;
 }
 
 Client& Client::operator=(const Client& toAssign)

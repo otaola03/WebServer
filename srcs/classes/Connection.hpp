@@ -18,7 +18,7 @@ class Connection
 		virtual ~Connection() = 0;
 
 		int		getSockFd();
-		void	setOpen(bool open);
+		/* void	setOpen(bool open); */
 
 		void	closeSockFd();
 };

@@ -8,7 +8,7 @@ Connection::~Connection() {}
 
 int	Connection::getSockFd() {return(sockfd);}
 
-void	Connection::setOpen(bool _open) {open = _open;}
+/* void	Connection::setOpen(bool _open) {open = _open;} */
 
 void	Connection::closeSockFd()
 {

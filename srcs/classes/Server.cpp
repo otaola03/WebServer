@@ -31,18 +31,24 @@ Server::~Server()
 {
 }
 
-Port&	Server::getPort(const int fd)
-{
-	intPortMap::iterator it = fdPortsList.find(fd);
-	if (it == fdPortsList.end())
-		throw std::exception();
-	return *(it->second);
-}
-
 void	Server::addPortsToSet(fd_set& portsFdSet)
 {
 	for (intPortMap::iterator it = fdPortsList.begin(); it != fdPortsList.end(); ++it)
 		FD_SET(it->first, &portsFdSet);
+}
+
+void	Server::addClient(int clientFd, Client* client) {fdClientsList[clientFd] = client;}
+
+bool	Server::containsThisPort(int portFd)
+{
+	intPortMap::iterator it = fdPortsList.find(portFd);
+	return (it != fdPortsList.end());
+}
+
+bool	Server::containsThisClient(int clientFd)
+{
+	intClientMap::iterator it = fdClientsList.find(clientFd);
+	return (it != fdClientsList.end());
 }
 
 Server& Server::operator=(const Server& toAssign)

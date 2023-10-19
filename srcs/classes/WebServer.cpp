@@ -1,6 +1,22 @@
 #include "WebServer.hpp"
 #include "HttpRequest.hpp"
 
+Server*	WebServer::getServerFromPort(int portFd)
+{
+	for (serverVector::iterator it = serversList.begin(); it != serversList.end(); ++it)
+		if ((*it)->containsThisPort(portFd))
+			return (std::cout << "LOCOOOOO\n", *it);
+	return NULL;
+}
+
+Server*	WebServer::getServerFromClient(int clientFd)
+{
+	for (serverVector::iterator it = serversList.begin(); it != serversList.end(); ++it)
+		if ((*it)->containsThisClient(clientFd))
+			return (*it);
+	return NULL;
+}
+
 WebServer::WebServer()
 {
 	intVector	ports;
@@ -75,6 +91,7 @@ void	WebServer::serverLoop()
 				{
                     addrlen = sizeof remoteaddr;
                     newfd = accept(i, (struct sockaddr *)&remoteaddr, &addrlen);
+					getServerFromPort(i);
 					// Creat a client object --> client(newfd, *server)
 
                     if (newfd == -1)
@@ -125,7 +142,6 @@ void	WebServer::serverLoop()
 	}
 }
 
-// ---------------->>> Haz una clase connection con los metodos send y recv. La clase Port y la clase Client heredan de esta
 
 
 WebServer& WebServer::operator=(const WebServer& toAssign)
