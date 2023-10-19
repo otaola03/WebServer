@@ -1,4 +1,5 @@
 #include "./includes/webserver.h"
+// #include "srcs/classes/Server.hpp"
 
 
 /* int main() */
@@ -31,8 +32,10 @@
 /*     return 0; */
 /* } */
 
-int main()
+int main(int argc, char **argv)
 {
+	(void)argc;
+	(void)argv;
 	WebServer	webserver;
 
 	webserver.serverLoop();

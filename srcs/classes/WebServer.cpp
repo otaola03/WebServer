@@ -34,104 +34,6 @@ WebServer::~WebServer()
 {
 }
 
-bool WebServer::fileFinder(const std::string& path)
-{
-	DIR *dir;
-	struct dirent *entry;
-	dir = opendir("./resources/images");
-	if (dir) {
-		while ((entry = readdir(dir)) != NULL) {
-			if (entry->d_name == path){
-				closedir(dir);
-				return (true);
-			}
-		}
-		closedir(dir);
-	}
-	dir = opendir("./resources/html");
-	if (dir) {
-		while ((entry = readdir(dir)) != NULL) {
-			if (entry->d_name == path){
-				closedir(dir);
-				return (true);
-			}
-		}
-		closedir(dir);
-	}
-	return (false);
-}
-
-std::string WebServer::getImg(std::string path)
-{
-	std::string msg = "HTTP/1.1 200 OK";
-	msg.append("\nContent-Type: image/png");
-	msg.append("\nContent-Length: ");
-	std::string html_name = "./resources/images/" + path;
-	std::ifstream file(html_name.c_str());
-	if (file.is_open()) {
-		std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-		msg.append(std::to_string(content.length()));
-		msg.append("\n\n");
-		msg.append(content);
-		file.close();
-	} else {
-		std::cerr << "Fatal" << std::endl;
-	}
-	return msg;
-}
-
-std::string WebServer::getIndex(std::string path){
-	std::string msg = "HTTP/1.1 200 OK";
-	msg.append("\nContent-Type: text/html");
-	msg.append("\nContent-Length: ");
-	std::string html_name = "./resources/html/" + path;
-	std::ifstream file(html_name.c_str());
-	if (file.is_open()) {
-		std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-		msg.append(std::to_string(content.length()));
-		msg.append("\n\n");
-		msg.append(content);
-		file.close();
-	} else {
-		std::cerr << "Fatal" << std::endl;
-	}
-	return msg;
-}
-
-std::string WebServer::get404()
-{
-	std::string msg = "HTTP/1.1 404 Not Found";
-	msg.append("\nContent-Type: text/html");
-	msg.append("\nContent-Length: ");
-	std::string html_name = "./resources/html/404.html";
-	std::ifstream file(html_name.c_str());
-	if (file.is_open()) {
-		std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-		msg.append(std::to_string(content.length()));
-		msg.append("\n\n");
-		msg.append(content);
-		file.close();
-	} else {
-		std::cerr << "Fatal" << std::endl;
-	}
-	return msg;
-}
-
-std::string WebServer::getMessage(HttpRequest& parser)
-{
-	if (parser.getType() == GET){
-		if (parser.getPath() == "/" == true)
-			return (getIndex("index.html"));
-		else if (fileFinder(parser.getPath().substr(1)) && parser.getPath().find(".html") != std::string::npos)
-			return (getIndex(parser.getPath()));
-		else if (fileFinder(parser.getPath().substr(1)) && parser.getPath().find(".png") != std::string::npos)
-			return (getImg(parser.getPath()));
-		else
-			return (get404());
-	}
-	return "";
-}
-
 static void *get_in_addr(struct sockaddr *sa)
 {
 	if (sa->sa_family == AF_INET) {
@@ -153,8 +55,6 @@ void	WebServer::serverLoop()
 	int fdmax = serversList[0]->fdMax;
 	//char msg[] = "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: 21\n\n<h1>Hello world!</h1>";
 	// std::string mesj = "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: 21\n\n<h1>Hello world!</h1>";
-
-
 	std::cout << "----> " << fdmax << "\n";
 	// main loop
 	while (1) 
@@ -189,7 +89,6 @@ void	WebServer::serverLoop()
 							newfd);
 					}
 				}
-				
 				else // Connection fron an actual client
 				{
 					std::cout << "------> RCV\n";
@@ -203,17 +102,17 @@ void	WebServer::serverLoop()
 						close(i); // bye!
 						FD_CLR(i, &socketList); // remove from socketList set
 					}
-
 					else // Data recived
 					{
 						buf[nbytes] = '\0';
 						std::cout << buf << "\n";
 						HttpRequest parser(buf);
-						std::string mesj = getMessage(parser);
-						if (send(i, mesj.c_str(), mesj.size(), 0) == -1)
-						{
+						std::string mesj = serversList[0]->getMessage(parser);
+						mesj = serversList[0]->cgiHandler("redirect.py", NULL);
+						if (send(i, mesj.c_str(), mesj.length(), 0) == -1)
 							perror("send");
-						}
+						close(i);
+						FD_CLR(i, &socketList);
 					}
 				} // END handle data from client
 			} // END got new incoming connection

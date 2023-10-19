@@ -2,8 +2,14 @@
 
 # define SERVER_HPP
 
+#define C200 "HTTP/1.1 200 OK"
+#define C404 "HTTP/1.1 404 Not Found"
+#define C405 "HTTP/1.1 405 Method Not Allowed"
+
+
 #include "Port.hpp"
 #include "Location.hpp"
+#include "HttpRequest.hpp"
 
 #include "../../includes/templates.h"
 
@@ -16,7 +22,14 @@
 #include <filesystem>
 #include <stdio.h>
 #include <dirent.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <map>
+#include <vector>
+#include <cstdlib>
 
+extern char** environ;
 
 class Server
 {
@@ -45,6 +58,13 @@ class Server
 		~Server();
 
 		Port&	getPort(const int fd);
+
+		std::string	getIndex(std::string code, std::string path);
+		std::string getImg(std::string path);
+		std::string	getMessage(HttpRequest& parser);
+		std::string cgiHandler(std::string script, char **av);
+		bool	isMethodAllowed(HttpRequest& parser, Location& location);
+		bool	fileFinder(const std::string& path);
 
 		void	addPortsToSet(fd_set& portsList);
 
