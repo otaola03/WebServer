@@ -52,24 +52,15 @@ WebServer::~WebServer()
 {
 }
 
-static void *get_in_addr(struct sockaddr *sa)
-{
-    if (sa->sa_family == AF_INET) {
-        return &(((struct sockaddr_in*)sa)->sin_addr);
-    }
-
-    return &(((struct sockaddr_in6*)sa)->sin6_addr);
-}
-
 void	WebServer::serverLoop()
 {
 	fd_set	read_fds;
-	char remoteIP[INET6_ADDRSTRLEN];
+	/* char remoteIP[INET6_ADDRSTRLEN]; */
 	char buf[100000];
 	int newfd;
-	struct sockaddr_storage remoteaddr;
+	/* struct sockaddr_storage remoteaddr; */
 	int nbytes;
-	socklen_t addrlen;
+	/* socklen_t addrlen; */
 	int fdmax = serversList[0]->fdMax;
 	char msg[] = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!";
 
@@ -90,25 +81,18 @@ void	WebServer::serverLoop()
 			{
                 if (FD_ISSET(i, &portsList)) //New Connection
 				{
-                    addrlen = sizeof remoteaddr;
-                    newfd = accept(i, (struct sockaddr *)&remoteaddr, &addrlen);
-					getServerFromPort(i);
-					// Creat a client object --> client(newfd, *server)
+					newfd = dynamic_cast<Port*>(connectionsList[i])->acceptConnection();
 
                     if (newfd == -1)
-                        perror("accept");
-                    else
-					{
-                        FD_SET(newfd, &socketList); // add to socketList set
-                        if (newfd > fdmax)    // keep track of the max
-                            fdmax = newfd;
-                        printf("selectserver: new connection from %s on "
-                            "socket %d\n",
-                            inet_ntop(remoteaddr.ss_family,
-                                get_in_addr((struct sockaddr*)&remoteaddr),
-                                remoteIP, INET6_ADDRSTRLEN),
-                            newfd);
-                    }
+						continue;
+                    if (newfd > fdmax)    // keep track of the max
+                        fdmax = newfd;
+                    FD_SET(newfd, &socketList); // add to socketList set
+
+					Client* newClient = new Client(newfd);	//HAz estas tres cosas en una unica funcion
+					getServerFromPort(i)->addClient(newfd, newClient);
+					connectionsList[newfd] = newClient;
+
                 }
 				
 				else // Connection fron an actual client
