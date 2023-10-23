@@ -2,6 +2,7 @@
 
 # define CONNECTION_HPP
 
+# include "../../includes/colors.h"
 # include <iostream>
 # include <unistd.h>
 

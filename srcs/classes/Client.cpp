@@ -21,15 +21,18 @@ std::string	Client::recvData()
 	char buf[1024];
 	std::string recvData;
 
-	if ((numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)) != 0)
+	if ((numbytes = recv(sockfd, buf, sizeof(buf), 0)) <= 0)
 	{
+		if (numbytes == 0)
+			std::cout << RED << "selectserver: socket "<< sockfd << " hung up\n" << WHITE;
 		if (numbytes == -1)
 		{
  			perror("recv");
  			exit(1);
 		}
-		recvData += buf;
 	}
+	buf[numbytes] = '\0';
+	recvData += buf;
 	return recvData;
 }
 

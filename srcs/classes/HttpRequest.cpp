@@ -72,9 +72,10 @@ HttpRequest::~HttpRequest()
 
 void	HttpRequest::printRequest()
 {
-	for (std::vector< std::pair<std::string, std::string> >::iterator it = headers.begin(); \
-		it != headers.end(); ++it)
-		std::cout << (*it).first << ": " << (*it).second << "\n";
+	std::cout << type << " " << path << "\n";
+	/* for (std::vector< std::pair<std::string, std::string> >::iterator it = headers.begin(); \ */
+	/* 	it != headers.end(); ++it) */
+	/* 	std::cout << (*it).first << ": " << (*it).second << "\n"; */
 }
 
 HttpRequest& HttpRequest::operator=(const HttpRequest& toAssign)
