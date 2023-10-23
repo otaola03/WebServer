@@ -5,7 +5,7 @@ Server*	WebServer::getServerFromPort(int portFd)
 {
 	for (serverVector::iterator it = serversList.begin(); it != serversList.end(); ++it)
 		if ((*it)->containsThisPort(portFd))
-			return (std::cout << "LOCOOOOO\n", *it);
+			return (*it);
 	return NULL;
 }
 
@@ -20,7 +20,7 @@ Server*	WebServer::getServerFromClient(int clientFd)
 WebServer::WebServer()
 {
 	intVector	ports;
-	ports.push_back(85);
+	ports.push_back(95);
 	ports.push_back(105);
 
 	intCharMap	errorPages;
@@ -56,10 +56,10 @@ void	WebServer::serverLoop()
 {
 	fd_set	read_fds;
 	/* char remoteIP[INET6_ADDRSTRLEN]; */
-	char buf[100000];
+	/* char buf[100000]; */
+	/* int nbytes; */
 	int newfd;
 	/* struct sockaddr_storage remoteaddr; */
-	int nbytes;
 	/* socklen_t addrlen; */
 	int fdmax = serversList[0]->fdMax;
 	char msg[] = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!";
@@ -67,10 +67,14 @@ void	WebServer::serverLoop()
 
 	std::cout << "----> " << fdmax << "\n";
 	// main loop
+	struct timeval timeout;
+    timeout.tv_sec = 1;  
+	timeout.tv_usec = 0;
+	int x = 0;
     while (1) 
 	{
         read_fds = socketList; // copy it
-        if (select(fdmax + 1, &read_fds, NULL, NULL, NULL) == -1) {
+        if (select(fdmax + 1, &read_fds, NULL, NULL, &timeout) == -1) {
             perror("select");
             exit(4);
         }
@@ -97,27 +101,21 @@ void	WebServer::serverLoop()
 				
 				else // Connection fron an actual client
 				{
-                    if ((nbytes = recv(i, buf, sizeof buf, 0)) <= 0) // Hazlo en un bucle
+					std::string data = dynamic_cast<Client*>(connectionsList[i])->recvData();
+					/* std::string data; */
+					if (data.empty())
 					{
-                        // got error or connection closed by client
-                        if (nbytes == 0)
-                            printf("selectserver: socket %d hung up\n", i);
-						else
-                            perror("recv");
+						std::cout << "close " << x++ << "\n";
                         close(i); // bye!
+						dynamic_cast<Client*>(connectionsList[i])->closeSockFd();
                         FD_CLR(i, &socketList); // remove from socketList set
                     }
 
 					else // Data recived
 					{
-						// Here i must to know to which server the client belongs
-						buf[nbytes] = '\0';
-						std::string str(buf);
-						HttpRequest request(str);
-						/* std::cout << buf << "\n"; */
-
+						std::cout << data << "\n";
+						HttpRequest request(data);
 						request.printRequest();
-
 						if (send(i, msg, sizeof(msg), 0) == -1)
 							perror("send");
                     }
