@@ -20,8 +20,8 @@ Server*	WebServer::getServerFromClient(int clientFd)
 WebServer::WebServer()
 {
 	intVector	ports;
-	ports.push_back(95);
-	ports.push_back(105);
+	ports.push_back(8080);
+	ports.push_back(1234);
 
 	intCharMap	errorPages;
 	errorPages[404] = "/404.html";
@@ -118,6 +118,8 @@ void	WebServer::serverLoop()
 						request.printRequest();
 						if (send(i, msg, sizeof(msg), 0) == -1)
 							perror("send");
+						close(i);
+                        FD_CLR(i, &socketList); // remove from socketList set
                     }
                 }
             }
