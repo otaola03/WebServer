@@ -70,7 +70,6 @@ void	WebServer::serverLoop()
 	struct timeval timeout;
     timeout.tv_sec = 1;  
 	timeout.tv_usec = 0;
-	int x = 0;
     while (1) 
 	{
         read_fds = socketList; // copy it
@@ -105,17 +104,16 @@ void	WebServer::serverLoop()
 					/* std::string data; */
 					if (data.empty())
 					{
-						std::cout << "close " << x++ << "\n";
-                        close(i); // bye!
+                        /* close(i); // bye! */
 						dynamic_cast<Client*>(connectionsList[i])->closeSockFd();
                         FD_CLR(i, &socketList); // remove from socketList set
                     }
 
 					else // Data recived
 					{
-						std::cout << data << "\n";
-						HttpRequest request(data);
-						request.printRequest();
+						/* std::cout << data << "\n"; */
+						/* HttpRequest request(data); */
+						/* request.printRequest(); */
 						if (send(i, msg, sizeof(msg), 0) == -1)
 							perror("send");
 						close(i);
