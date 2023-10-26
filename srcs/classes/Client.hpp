@@ -15,7 +15,7 @@
 
 #include "Connection.hpp"
 
-#define MAXDATASIZE 100
+#define MAXDATASIZE 1024
 
 class Client : public Connection
 {

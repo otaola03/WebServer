@@ -17,22 +17,26 @@ Client::~Client()
 
 std::string	Client::recvData()
 {
-	int numbytes;
-	char buf[1024];
+	char buf[MAXDATASIZE];
 	std::string recvData;
+	int numbytes = MAXDATASIZE;
 
-	if ((numbytes = recv(sockfd, buf, sizeof(buf), 0)) <= 0)
+	while (numbytes == MAXDATASIZE)
 	{
-		if (numbytes == 0)
-			std::cout << RED << "selectserver: socket "<< sockfd << " hung up\n" << WHITE;
-		if (numbytes == -1)
+		if ((numbytes = recv(sockfd, buf, sizeof(buf), 0)) <= 0)
 		{
- 			perror("recv");
- 			exit(1);
+			if (numbytes == 0)
+				std::cout << RED << "selectserver: socket "<< sockfd << " hung up\n" << WHITE;
+			if (numbytes == -1)
+			{
+ 				perror("recv");
+ 				exit(1);
+			}
 		}
+		buf[numbytes] = '\0';
+		recvData += buf;
 	}
-	buf[numbytes] = '\0';
-	recvData += buf;
+	std::cout << recvData << "\n\n";
 	return recvData;
 }
 
@@ -41,4 +45,5 @@ Client& Client::operator=(const Client& toAssign)
 	(void)toAssign;
 	return *this;
 }
+
 
