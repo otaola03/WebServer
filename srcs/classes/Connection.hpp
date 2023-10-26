@@ -5,6 +5,7 @@
 # include "../../includes/colors.h"
 # include <iostream>
 # include <unistd.h>
+#include <fcntl.h>
 
 
 class Connection
@@ -20,6 +21,7 @@ class Connection
 
 		int		getSockFd();
 		/* void	setOpen(bool open); */
+		void	setSocketNonBlocking(int sockfd);
 
 		void	closeSockFd();
 };
