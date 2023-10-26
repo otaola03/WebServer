@@ -59,10 +59,12 @@ class Server
 
 		Port&	getPort(const int fd);
 
+		std::string postImage(std::string path, std::string body);
 		std::string	getIndex(std::string code, std::string path);
 		std::string getImg(std::string path);
+		std::string getPython(std::string path);
 		std::string	getMessage(HttpRequest& parser);
-		std::string cgiHandler(std::string script, char **av);
+		std::string pythonCgiHandler(std::string script, char **av);
 		bool	isMethodAllowed(HttpRequest& parser, Location& location);
 		bool	fileFinder(const std::string& path);
 

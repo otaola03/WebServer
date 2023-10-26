@@ -14,6 +14,7 @@
 #include <string>
 #include <iostream>
 #include <sstream>
+#include <curl/curl.h>
 
 #define BACKLOG 5
 

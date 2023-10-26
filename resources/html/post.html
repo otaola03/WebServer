@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Formulario de Carga de Imágenes</title>
+    <script>
+        async function postImage(){
+            try{
+                fileInput = document.getElementById("imageInput");
+                if (!(fileInput.files.length > 0))
+                    return ;
+                file = fileInput.files[0];
+                //console.log(file);
+                const reader = new FileReader();
+                // Define an event handler for when the file is loaded.
+                reader.onload = function(event) {
+                    // Access the raw image data as a data URL.
+                    const rawImageData = event.target.result;
+                    console.log("Raw Image Data: " + rawImageData);
+                    
+                    // Now, you can send the rawImageData in the request if needed.
+                    // Create a fetch request to send the image data to the server.
+                    const formData = new FormData();
+                    formData.append("image", file);
+                    //res = await fetch("http://localhost:105/", {
+                    //    method: "POST",
+                    //    headers: {
+                    //        "filename": file.name,
+                    //        "Content-Type": file.type,
+                    //        "Content-Lenght": file.size,
+                    //    
+                    //    },
+                    //    body: file.body,
+                    //});
+                    console.log("Response is : " + res);
+                };
+            }catch(error){
+                console.log("Error is : " + error);
+            }
+        }
+    </script>
+</head>
+<body>
+    <h2 style="font-family: sans-serif; display: flex; justify-content: center;">Post Images to server</h2>
+    <div style="display:flex; justify-content: center; padding-top: 20px; background-color:burlywood; padding-bottom: 20px; border-radius: 20px">
+        <input type="file" id="imageInput" accept="image/*" value="Subir Imagen">
+        <button onclick="{postImage()}">Boton Jokin</button>
+    </div>
+</body>
+</html>

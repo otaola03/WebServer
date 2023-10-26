@@ -27,6 +27,48 @@ void	HttpRequest::saveRequest(const std::string& toProcess)
 	path = path.erase(path.size() - 1);
 }
 
+void	HttpRequest::saveBody(char* toProcess)
+{
+	std::string contentLength;
+	contentLength = std::strstr(toProcess, "content-length: ") ? std::strstr(toProcess, "content-length: ") : std::strstr(toProcess, "Content-Length: ");
+	if (contentLength.empty())
+		return ;
+	int length = std::atoi(contentLength.c_str() + 16);
+	const char* body_t = std::strstr(toProcess, "\r\n\r\n") + 4;
+	body = std::string(body_t, length);
+	std::string temp = headers["Content-Type"].substr(0, headers["Content-Type"].find(";"));
+	if (temp == "multipart/form-data"){
+		body = body.substr(body.find("\r\n\r\n") + 4);
+	}
+}
+
+void	HttpRequest::printBody()
+{
+	if (body.empty()){
+		std::cerr << "No body to print\n";
+		return ;
+	}
+	for (std::string::iterator it = body.begin(); it != body.end(); ++it){
+		if (*it == '\n')
+			std::cout << "\\n";
+		else if (*it == '\r')
+			std::cout << "\\r";
+		else
+			std::cout << *it;
+	}
+}
+
+std::string	HttpRequest::getBody()
+{
+	return body;
+}
+
+void	HttpRequest::printHeaders()
+{
+	for (std::map<std::string, std::string>::iterator it = headers.begin(); \
+		it != headers.end(); ++it)
+		std::cout << (*it).first << ": " << (*it).second << "\n";
+}
 
 static void	splitRequest(std::vector<std::string>& lines, const std::string& toProcess)
 {
@@ -49,17 +91,20 @@ void	HttpRequest::saveHeaders(const std::string& toProccess)
 		size_t p = it->find(':');
 		if (p == std::string::npos)
 			continue;
-		std::pair<std::string, std::string> auxPair = std::make_pair(\
-			it->substr(0, p), it->substr(p + 2));
-		headers.push_back(auxPair);
+		// std::pair<std::string, std::string> auxPair = std::make_pair(\
+		// 	it->substr(0, p), it->substr(p + 2));
+		headers[it->substr(0, p)] = it->substr(p + 2);
+		// headers.push_back(auxPair);
 	}
 }
 
 
-HttpRequest::HttpRequest(const std::string& toProcess)
+HttpRequest::HttpRequest(char* toProcess)
 {
-	saveRequest(toProcess);
-	saveHeaders(toProcess);
+	saveRequest(std::string(toProcess));
+	saveHeaders(std::string(toProcess));
+	if (type == POST)
+		saveBody(toProcess);
 }
 
 HttpRequest::HttpRequest(const HttpRequest& toCopy)
@@ -73,7 +118,7 @@ HttpRequest::~HttpRequest()
 
 void	HttpRequest::printRequest()
 {
-	for (std::vector< std::pair<std::string, std::string> >::iterator it = headers.begin(); \
+	for (std::map<std::string, std::string>::iterator it = headers.begin(); \
 		it != headers.end(); ++it)
 		std::cout << (*it).first << ": " << (*it).second << "\n";
 }

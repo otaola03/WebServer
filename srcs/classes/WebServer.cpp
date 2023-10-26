@@ -47,7 +47,7 @@ void	WebServer::serverLoop()
 {
 	fd_set	read_fds;
 	char remoteIP[INET6_ADDRSTRLEN];
-	char buf[100000];
+	char buf[10000000];
 	int newfd;
 	struct sockaddr_storage remoteaddr;
 	int nbytes;
@@ -104,11 +104,21 @@ void	WebServer::serverLoop()
 					}
 					else // Data recived
 					{
+						std::cerr << "NBYTES = " << nbytes << "\n";
 						buf[nbytes] = '\0';
+						//std::ofstream archivoSalida("temp");
+						//archivoSalida << buf;
+						//archivoSalida.close();
 						std::cout << buf << "\n";
 						HttpRequest parser(buf);
+						// std::cout << "HEADERS = [" << std::endl;
+						// parser.printHeaders();
+						// std::cout << "]" << std::endl;
+						// std::cout << "BODY = [";
+						// parser.printBody();
+						// std::cout << "]" << std::endl;
 						std::string mesj = serversList[0]->getMessage(parser);
-						mesj = serversList[0]->cgiHandler("redirect.py", NULL);
+						//mesj = serversList[0]->pythonCgiHandler("redirect.py", NULL);
 						if (send(i, mesj.c_str(), mesj.length(), 0) == -1)
 							perror("send");
 						close(i);
