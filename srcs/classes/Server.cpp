@@ -43,6 +43,21 @@ void	Server::addPortsToConnectionsList(intConnectionMap& connectionsList)
 		connectionsList[it->first] = it->second;
 }
 
+//------------------------------------------------------------------------------------------
+void	Server::addPortsToPortsList(intPortMap& portsList)
+{
+	for (intPortMap::iterator it = fdPortsList.begin(); it != fdPortsList.end(); ++it)
+		portsList[it->first] = it->second;
+}
+
+void	Server::addPortsToClientsList(intClientMap& clientsList)
+{
+	for (intClientMap::iterator it = fdClientsList.begin(); it != fdClientsList.end(); ++it)
+		clientsList[it->first] = it->second;
+}
+//------------------------------------------------------------------------------------------
+
+
 void	Server::addClient(int clientFd, Client* client) {fdClientsList[clientFd] = client;}
 
 bool	Server::containsThisPort(int portFd)

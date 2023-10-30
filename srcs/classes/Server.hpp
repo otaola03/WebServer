@@ -10,6 +10,8 @@
 
 #include <algorithm>
 #include <exception>
+typedef std::map<int, Client*> intClientMap;
+typedef std::map<int, Port*> intPortMap;
 
 
 class Server
@@ -44,6 +46,8 @@ class Server
 		void	addClient(int clientFd, Client* client);
 		bool	containsThisPort(int portFd);
 		bool	containsThisClient(int clientFd);
+		void	addPortsToPortsList(intPortMap& portsList);
+		void	addPortsToClientsList(intClientMap& clientsList);
 
 		Server& operator=(const Server& toAssign);
 };

@@ -19,9 +19,9 @@ Server*	WebServer::getServerFromClient(int clientFd)
 
 WebServer::WebServer()
 {
-	intVector	ports;
-	ports.push_back(8080);
-	ports.push_back(1234);
+	intVector	portsNum;
+	portsNum.push_back(8080);
+	portsNum.push_back(1234);
 
 	intCharMap	errorPages;
 	errorPages[404] = "/404.html";
@@ -30,7 +30,7 @@ WebServer::WebServer()
 	locationVector	locations;
 	locations.push_back(location);
 
-	Server *server = new Server("server1", "/", ports, errorPages, locations);
+	Server *server = new Server("server1", "/", portsNum, errorPages, locations);
 	std::cout << "fdMax: " << server->fdMax << "\n";
 
 	FD_ZERO(&socketList);
@@ -38,6 +38,7 @@ WebServer::WebServer()
 
 	server->addPortsToSet(portsList);
 	server->addPortsToConnectionsList(connectionsList);
+	server->addPortsToPortsList(ports);
 
 	socketList = portsList;
 	serversList.push_back(server);
@@ -70,6 +71,7 @@ void	WebServer::serverLoop()
 	struct timeval timeout;
     timeout.tv_sec = 1;  
 	timeout.tv_usec = 0;
+	//fcntl(sockfd, ...) solo al los puertos
     while (1) 
 	{
         read_fds = socketList; // copy it
@@ -84,7 +86,8 @@ void	WebServer::serverLoop()
 			{
                 if (FD_ISSET(i, &portsList)) //New Connection
 				{
-					newfd = dynamic_cast<Port*>(connectionsList[i])->acceptConnection();
+					/* newfd = dynamic_cast<Port*>(connectionsList[i])->acceptConnection(); */
+					newfd = ports[i]->acceptConnection();
 
                     if (newfd == -1)
 						continue;
@@ -94,18 +97,20 @@ void	WebServer::serverLoop()
 
 					Client* newClient = new Client(newfd);	//HAz estas tres cosas en una unica funcion
 					getServerFromPort(i)->addClient(newfd, newClient);
-					connectionsList[newfd] = newClient;
-
+					/* connectionsList[newfd] = newClient; */
+					clients[newfd] = newClient;
                 }
 				
 				else // Connection fron an actual client
 				{
-					std::string data = dynamic_cast<Client*>(connectionsList[i])->recvData();
+					/* std::string data = dynamic_cast<Client*>(connectionsList[i])->recvData(); */
+					std::string data = clients[i]->recvData();
 					/* std::string data; */
 					if (data.empty())
 					{
                         /* close(i); // bye! */
-						dynamic_cast<Client*>(connectionsList[i])->closeSockFd();
+						/* dynamic_cast<Client*>(connectionsList[i])->closeSockFd(); */
+						clients[i]->closeSockFd();
                         FD_CLR(i, &socketList); // remove from socketList set
                     }
 

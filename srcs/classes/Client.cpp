@@ -2,6 +2,7 @@
 
 Client::Client(int sockfd) : Connection(sockfd)
 {
+	setSocketNonBlocking(sockfd);
 }
 
 Client::Client(const Client& toCopy)
@@ -32,11 +33,13 @@ std::string	Client::recvData()
  				perror("recv");
  				exit(1);
 			}
+			if (numbytes == EWOULDBLOCK)
+				return (std::cout << "HHHHHHHHHHHHHHHHHHHHHHHHHHHHH\n\n\n", "");
 		}
 		buf[numbytes] = '\0';
 		recvData += buf;
 	}
-	std::cout << recvData << "\n\n";
+	/* std::cout << recvData << "\n\n"; */
 	return recvData;
 }
 

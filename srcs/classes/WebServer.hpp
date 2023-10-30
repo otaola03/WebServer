@@ -7,6 +7,7 @@
 
 typedef std::vector<Server*> serverVector;
 typedef std::map<int, Port*> intPortMap;
+typedef std::map<int, Client*> intClientMap;
 
 class WebServer
 {
@@ -15,6 +16,9 @@ class WebServer
 		fd_set	socketList;
 		serverVector	serversList;
 		intConnectionMap	connectionsList;
+		intPortMap			ports;
+		intClientMap		clients;
+
 
 		Server*	getServerFromPort(int portFd);
 		Server*	getServerFromClient(int clientFd);

@@ -39,6 +39,7 @@ static int	getListenFd(struct addrinfo *portInfo)
 	return sockfd;
 }
 
+
 //Pon el constructo vacio privado y haz uno que requeora un puerto como int
 Port::Port(const int port) : port(port)
 {
@@ -62,6 +63,7 @@ Port::Port(const int port) : port(port)
 	}
 
 	sockfd = getListenFd(portInfo);
+	setSocketNonBlocking(sockfd);
 	freeaddrinfo(portInfo);
 }
 
