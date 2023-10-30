@@ -143,6 +143,7 @@ std::string Server::getIndex(std::string code, std::string path){
 std::string Server::postImage(std::string path, std::string body){
 
 	(void)path;
+	std::string body_content = body.substr(body.find("\r\n\r\n") + 4);
 	std::string msg = "HTTP/1.1 200 OK";
 	DIR *dir;
 	int i = 0;
@@ -155,13 +156,13 @@ std::string Server::postImage(std::string path, std::string body){
 			}
 		}
 		std::ofstream imageFile("./bin/" + std::to_string(i) + ".png", std::ios::binary);
-		imageFile.write(body.c_str(), body.length());
+		imageFile.write(body_content.c_str(), body_content.length());
 		imageFile.close();
 		closedir(dir);
 	}
 	msg.append("\nContent-Type: text/html");
 	msg.append("\nContent-Length: ");
-	std::string html_name = "./resources/html/index.html";
+	std::string html_name = "./resources/html/post.html";
 	std::ifstream file(html_name.c_str());
 	if (file.is_open()) {
 		std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
@@ -196,12 +197,10 @@ std::string Server::getMessage(HttpRequest& parser)
 	else if (parser.getType() == POST){
 		// if (this->locations[0].isPOST() == false)
 		// 	return (getIndex(C405, "405.html"));
-			if (parser.getPath() == "/" == true){
-				std::ofstream file ("tempFile");
-				file << parser.getBody();
-				// std::cerr << "BODY = [" << parser.getBody() << "]\n";
-				return (postImage(parser.getPath(), parser.getBody()));
-			}
+			std::ofstream file ("tempFile");
+			file << parser.getBody();
+			// std::cerr << "BODY = [" << parser.getBody() << "]\n";
+			return (postImage(parser.getPath(), parser.getBody()));
 		// else{
 		// }
 	}
