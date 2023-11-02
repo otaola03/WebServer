@@ -143,7 +143,10 @@ std::string Server::getIndex(std::string code, std::string path){
 std::string Server::postImage(std::string path, std::string body){
 
 	(void)path;
-	std::string body_content = body.substr(body.find("\r\n\r\n") + 4);
+	std::string body_content = body;
+	std::cout << "BODY = [" << body[0] << "]\n";
+	if (body[1] == '-')
+		body_content = body.substr(body.find("\r\n\r\n") + 4);
 	std::string msg = "HTTP/1.1 200 OK";
 	DIR *dir;
 	int i = 0;

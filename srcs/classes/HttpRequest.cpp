@@ -1,8 +1,8 @@
 #include "HttpRequest.hpp"
 
-HttpRequest::HttpRequest()
-{
-}
+// HttpRequest::HttpRequest()
+// {
+// }
 
 static	RequestType whatTypeIs(std::string type)
 {
@@ -27,19 +27,18 @@ void	HttpRequest::saveRequest(const std::string& toProcess)
 	path = path.erase(path.size() - 1);
 }
 
-void	HttpRequest::saveBody(char* toProcess)
+void	HttpRequest::saveBody(const char* toProcess)
 {
 	std::string contentLength;
 	contentLength = std::strstr(toProcess, "content-length: ") ? std::strstr(toProcess, "content-length: ") : std::strstr(toProcess, "Content-Length: ");
 	if (contentLength.empty())
 		return ;
 	int length = std::atoi(contentLength.c_str() + 16);
-	const char* body_t = std::strstr(toProcess, "\r\n\r\n") + 4;
+	const char* body_t = std::strstr(toProcess, "\r\n\r\n");
 	body = std::string(body_t, length);
-	std::string temp = headers["Content-Type"].substr(0, headers["Content-Type"].find(";"));
-	if (temp == "multipart/form-data"){
-		body = body.substr(body.find("\r\n\r\n") + 4);
-	}
+	body = body.substr(body.find("\r\n\r\n") + 4);
+	size_t lastLine = body.find_last_of("\n");
+	body = body.substr(0, lastLine);
 }
 
 void	HttpRequest::printBody()
@@ -99,7 +98,7 @@ void	HttpRequest::saveHeaders(const std::string& toProccess)
 }
 
 
-HttpRequest::HttpRequest(char* toProcess)
+HttpRequest::HttpRequest(const char* toProcess)
 {
 	saveRequest(std::string(toProcess));
 	saveHeaders(std::string(toProcess));

@@ -17,13 +17,12 @@ class HttpRequest
 		std::string	path;
 		std::string	body;
 
-		HttpRequest();
 		void	saveRequest(const std::string& toProcess);
 		void	saveHeaders(const std::string& toProcess);
-		void	saveBody(char* toProcess);
+		void	saveBody(const char* toProcess);
 
 	public:
-		HttpRequest(char* toProcess);
+		HttpRequest(const char* toProcess);
 		HttpRequest(const HttpRequest& toCopy);
 		~HttpRequest();
 

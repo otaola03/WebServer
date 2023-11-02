@@ -43,14 +43,40 @@ static void *get_in_addr(struct sockaddr *sa)
 	return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 
+static std::string	recvData(int sockfd)
+{
+	char buf[1025];
+	std::string recvData;
+	int numbytes = 1024;
+	int i = 0;
+
+	while (numbytes == 1024)
+	{
+		if ((numbytes = recv(sockfd, buf, sizeof(buf) - 1, 0)) <= 0)
+		{
+			if (numbytes == 0)
+				std::cout << "selectserver: socket "<< sockfd << " hung up\n";
+			if (numbytes == -1)
+			{
+ 				perror("recv");
+ 				exit(1);
+			}
+			if (numbytes == EWOULDBLOCK)
+				return (std::cout << "HHHHHHHHHHHHHHHHHHHHHHHHHHHHH\n\n\n", "");
+		}
+		std::string vaca(buf, numbytes);
+		i += numbytes;
+		recvData += vaca;
+	}
+	return recvData;
+}
+
 void	WebServer::serverLoop()
 {
 	fd_set	read_fds;
 	char remoteIP[INET6_ADDRSTRLEN];
-	char buf[10000000];
 	int newfd;
 	struct sockaddr_storage remoteaddr;
-	int nbytes;
 	socklen_t addrlen;
 	int fdmax = serversList[0]->fdMax;
 	//char msg[] = "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: 21\n\n<h1>Hello world!</h1>";
@@ -91,39 +117,29 @@ void	WebServer::serverLoop()
 				}
 				else // Connection fron an actual client
 				{
-					std::cout << "------> RCV\n";
-					if ((nbytes = recv(i, buf, sizeof buf, 0)) <= 0)
+					/* std::string data = dynamic_cast<Client*>(connectionsList[i])->recvData(); */
+					std::string data = recvData(i);
+					/* std::string data; */
+					if (data.empty())
 					{
-						// got error or connection closed by client
-						if (nbytes == 0)
-							printf("selectserver: socket %d hung up\n", i);
-						else
-							perror("recv");
-						close(i); // bye!
-						FD_CLR(i, &socketList); // remove from socketList set
-					}
+                        /* close(i); // bye! */
+						/* dynamic_cast<Client*>(connectionsList[i])->closeSockFd(); */
+						close(i);
+                        FD_CLR(i, &socketList); // remove from socketList set
+                    }
+
 					else // Data recived
 					{
-						std::cerr << "NBYTES = " << nbytes << "\n";
-						buf[nbytes] = '\0';
-						//std::ofstream archivoSalida("temp");
-						//archivoSalida << buf;
-						//archivoSalida.close();
-						std::cout << buf << "\n";
-						HttpRequest parser(buf);
-						// std::cout << "HEADERS = [" << std::endl;
-						// parser.printHeaders();
-						// std::cout << "]" << std::endl;
-						// std::cout << "BODY = [";
-						// parser.printBody();
-						// std::cout << "]" << std::endl;
-						std::string mesj = serversList[0]->getMessage(parser);
-						//mesj = serversList[0]->pythonCgiHandler("redirect.py", NULL);
-						if (send(i, mesj.c_str(), mesj.length(), 0) == -1)
+						/* std::cout << data << "\n"; */
+						/* HttpRequest request(data); */
+						/* request.printRequest(); */
+                        HttpRequest parser(data.c_str());
+                        std::string msg = serversList[0]->getMessage(parser);
+						if (send(i, msg.c_str(), msg.length(), 0) == -1)
 							perror("send");
 						close(i);
-						FD_CLR(i, &socketList);
-					}
+                        FD_CLR(i, &socketList); // remove from socketList set
+                    }
 				} // END handle data from client
 			} // END got new incoming connection
 		} // END looping through file descriptors
