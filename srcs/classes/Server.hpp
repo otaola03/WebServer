@@ -63,10 +63,12 @@ class Server
 		std::string	getIndex(std::string code, std::string path);
 		std::string getImg(std::string path);
 		std::string getPython(std::string path);
+		std::string getPhp(std::string path);
 		std::string	getMessage(HttpRequest& parser);
 		std::string pythonCgiHandler(std::string script, char **av);
+		std::string phpCgiHandler(std::string script, char **av);
 		bool	isMethodAllowed(HttpRequest& parser, Location& location);
-		bool	fileFinder(const std::string& path);
+		bool	fileFinder(const std::string& path, std::string& founDir);
 
 		void	addPortsToSet(fd_set& portsList);
 
