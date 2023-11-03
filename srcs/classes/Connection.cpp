@@ -8,6 +8,8 @@ Connection::~Connection() {}
 
 int	Connection::getSockFd() {return(sockfd);}
 
+struct kevent&	Connection::getEvSet() {return(evSet);}
+
 /* void	Connection::setOpen(bool _open) {open = _open;} */
 
 void	Connection::closeSockFd()
@@ -27,4 +29,9 @@ void	Connection::setSocketNonBlocking(int sockfd)
 		perror("fcntl");
 		exit(-1);
 	}
+}
+
+void	Connection::ev_set()
+{
+	EV_SET(&evSet, sockfd, EVFILT_READ, EV_ADD, 0, 0, NULL);
 }

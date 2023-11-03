@@ -41,13 +41,17 @@ class Server
 		Server(const Server& toCopy);
 		~Server();
 
-		void	addPortsToSet(fd_set& portsList);
-		void	addPortsToConnectionsList(intConnectionMap& connectionsList);
+		/* void	addPortsToSet(fd_set& portsList); */
+		/* void	addPortsToConnectionsList(intConnectionMap& connectionsList); */
 		void	addClient(int clientFd, Client* client);
+
 		bool	containsThisPort(int portFd);
 		bool	containsThisClient(int clientFd);
+
 		void	addPortsToPortsList(intPortMap& portsList);
 		void	addPortsToClientsList(intClientMap& clientsList);
+
+		void	addPortsToKq(int kq);
 
 		Server& operator=(const Server& toAssign);
 };

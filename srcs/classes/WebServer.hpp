@@ -5,6 +5,8 @@
 #include "Server.hpp"
 #include "Connection.hpp"
 
+#define MAX_EVENTS 32
+
 typedef std::vector<Server*> serverVector;
 typedef std::map<int, Port*> intPortMap;
 typedef std::map<int, Client*> intClientMap;
@@ -12,10 +14,11 @@ typedef std::map<int, Client*> intClientMap;
 class WebServer
 {
 	private:
-		fd_set	portsList;
-		fd_set	socketList;
+		int kq;
+		/* fd_set	portsList; */
+		/* fd_set	socketList; */
 		serverVector	serversList;
-		intConnectionMap	connectionsList;
+		/* intConnectionMap	connectionsList; */
 		intPortMap			ports;
 		intClientMap		clients;
 
@@ -29,6 +32,7 @@ class WebServer
 		~WebServer();
 
 		void	serverLoop();
+		bool	isAPort(int fd);
 
 		WebServer& operator=(const WebServer& toAssign);
 };

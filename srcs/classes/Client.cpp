@@ -3,6 +3,7 @@
 Client::Client(int sockfd) : Connection(sockfd)
 {
 	setSocketNonBlocking(sockfd);
+	ev_set();
 }
 
 Client::Client(const Client& toCopy)

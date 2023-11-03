@@ -33,14 +33,10 @@ WebServer::WebServer()
 	Server *server = new Server("server1", "/", portsNum, errorPages, locations);
 	std::cout << "fdMax: " << server->fdMax << "\n";
 
-	FD_ZERO(&socketList);
-	FD_ZERO(&portsList);
-
-	server->addPortsToSet(portsList);
-	server->addPortsToConnectionsList(connectionsList);
 	server->addPortsToPortsList(ports);
+	kq = kqueue();
+	server->addPortsToKq(kq);
 
-	socketList = portsList;
 	serversList.push_back(server);
 }
 
@@ -53,80 +49,54 @@ WebServer::~WebServer()
 {
 }
 
+bool	WebServer::isAPort(int fd)
+{
+	intPortMap::iterator it = ports.find(fd);
+	return (it != ports.end());
+}
+
 void	WebServer::serverLoop()
 {
-	fd_set	read_fds;
-	/* char remoteIP[INET6_ADDRSTRLEN]; */
-	/* char buf[100000]; */
-	/* int nbytes; */
-	int newfd;
-	/* struct sockaddr_storage remoteaddr; */
-	/* socklen_t addrlen; */
-	int fdmax = serversList[0]->fdMax;
 	char msg[] = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!";
+	struct kevent evList[MAX_EVENTS];
+	struct kevent evSet;
+	int numEvents;
+	int newfd;
 
-
-	std::cout << "----> " << fdmax << "\n";
-	// main loop
-	struct timeval timeout;
-    timeout.tv_sec = 1;  
-	timeout.tv_usec = 0;
-	//fcntl(sockfd, ...) solo al los puertos
     while (1) 
 	{
-        read_fds = socketList; // copy it
-        if (select(fdmax + 1, &read_fds, NULL, NULL, &timeout) == -1) {
-            perror("select");
-            exit(4);
-        }
-
-        for(int i = 0; i <= fdmax; i++)
+		numEvents = kevent(kq, NULL, 0, evList, MAX_EVENTS, NULL);
+		for (int i = 0; i < numEvents; i++)
 		{
-            if (FD_ISSET(i, &read_fds)) //Get a connection
+			if (isAPort(evList[i].ident))
 			{
-                if (FD_ISSET(i, &portsList)) //New Connection
-				{
-					/* newfd = dynamic_cast<Port*>(connectionsList[i])->acceptConnection(); */
-					newfd = ports[i]->acceptConnection();
-
-                    if (newfd == -1)
-						continue;
-                    if (newfd > fdmax)    // keep track of the max
-                        fdmax = newfd;
-                    FD_SET(newfd, &socketList); // add to socketList set
-
-					Client* newClient = new Client(newfd);	//HAz estas tres cosas en una unica funcion
-					getServerFromPort(i)->addClient(newfd, newClient);
-					/* connectionsList[newfd] = newClient; */
-					clients[newfd] = newClient;
-                }
-				
-				else // Connection fron an actual client
-				{
-					/* std::string data = dynamic_cast<Client*>(connectionsList[i])->recvData(); */
-					std::string data = clients[i]->recvData();
-					/* std::string data; */
-					if (data.empty())
-					{
-                        /* close(i); // bye! */
-						/* dynamic_cast<Client*>(connectionsList[i])->closeSockFd(); */
-						clients[i]->closeSockFd();
-                        FD_CLR(i, &socketList); // remove from socketList set
-                    }
-
-					else // Data recived
-					{
-						/* std::cout << data << "\n"; */
-						/* HttpRequest request(data); */
-						/* request.printRequest(); */
-						if (send(i, msg, sizeof(msg), 0) == -1)
-							perror("send");
-						close(i);
-                        FD_CLR(i, &socketList); // remove from socketList set
-                    }
-                }
-            }
-    	}
+				/* std::cout << GREEN << "New connection\n" << WHITE; */
+				newfd = ports[evList[i].ident]->acceptConnection();
+				if (newfd == -1)
+					continue;
+				Client* newClient = new Client(newfd);
+				getServerFromPort(evList[i].ident)->addClient(newfd, newClient);
+				clients[newfd] = newClient;
+				EV_SET(&evSet, newfd, EVFILT_READ, EV_ADD, 0, 0, NULL);
+                kevent(kq, &evSet, 1, NULL, 0, NULL);
+			}
+			else if (evList[i].flags & EV_EOF)
+			{
+				/* std::cout << RED << "disconnect\n" << WHITE; */
+				int fd = evList[i].ident;
+				std::cout << "Disconnected: " << fd << "\n";
+                EV_SET(&evSet, fd, EVFILT_READ, EV_DELETE, 0, 0, NULL);
+                kevent(kq, &evSet, 1, NULL, 0, NULL);
+				close(fd);
+			}
+			else if (evList[i].filter == EVFILT_READ)
+			{
+				/* std::cout << CYAN << "recive data\n" << WHITE; */
+				if (send(evList[i].ident, msg, sizeof(msg), 0) == -1)
+					perror("send");
+				close(evList[i].ident);
+			}
+		}
 	}
 }
 
