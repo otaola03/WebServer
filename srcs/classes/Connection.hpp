@@ -31,6 +31,7 @@ class Connection
 
 		void	ev_set();
 		void	closeSockFd();
+		void	closeSockFd(int kq);
 };
 
 #endif

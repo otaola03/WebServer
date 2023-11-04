@@ -13,8 +13,7 @@ Client::Client(const Client& toCopy)
 
 Client::~Client()
 {
-	std::cout << "Client " << sockfd << "closed" << "\n";
-	closeSockFd();
+	/* closeSockFd(); */
 }
 
 std::string	Client::recvData()

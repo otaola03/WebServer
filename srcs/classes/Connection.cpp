@@ -18,6 +18,15 @@ void	Connection::closeSockFd()
 		close(sockfd);
 }
 
+void	Connection::closeSockFd(int kq)
+{
+	struct kevent	auxEvSet;
+
+	EV_SET(&auxEvSet, sockfd, EVFILT_READ, EV_DELETE, 0, 0, NULL);
+	kevent(kq, &auxEvSet, 1, NULL, 0, NULL);
+	close(sockfd);
+}
+
 void	Connection::setSocketNonBlocking(int sockfd)
 {
 	int flags;

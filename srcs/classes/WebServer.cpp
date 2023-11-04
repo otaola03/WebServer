@@ -55,46 +55,49 @@ bool	WebServer::isAPort(int fd)
 	return (it != ports.end());
 }
 
+void	WebServer::acceptNewClient(int fd)
+{
+	int newfd = ports[fd]->acceptConnection();;
+	if (newfd == -1)
+		return ;
+	Client* newClient = new Client(newfd);
+	getServerFromPort(fd)->addClient(newfd, newClient);
+	clients[newfd] = newClient;
+	kevent(kq, &newClient->getEvSet(), 1, NULL, 0, NULL);
+}
+
 void	WebServer::serverLoop()
 {
 	char msg[] = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!";
 	struct kevent evList[MAX_EVENTS];
-	struct kevent evSet;
 	int numEvents;
-	int newfd;
+	int	fd;
 
     while (1) 
 	{
 		numEvents = kevent(kq, NULL, 0, evList, MAX_EVENTS, NULL);
 		for (int i = 0; i < numEvents; i++)
 		{
-			if (isAPort(evList[i].ident))
-			{
-				/* std::cout << GREEN << "New connection\n" << WHITE; */
-				newfd = ports[evList[i].ident]->acceptConnection();
-				if (newfd == -1)
-					continue;
-				Client* newClient = new Client(newfd);
-				getServerFromPort(evList[i].ident)->addClient(newfd, newClient);
-				clients[newfd] = newClient;
-				EV_SET(&evSet, newfd, EVFILT_READ, EV_ADD, 0, 0, NULL);
-                kevent(kq, &evSet, 1, NULL, 0, NULL);
-			}
+			fd = evList[i].ident;
+
+			// Accept new client from one port
+			if (isAPort(fd))
+				acceptNewClient(fd);
+
+			// Client disconnected
 			else if (evList[i].flags & EV_EOF)
 			{
-				/* std::cout << RED << "disconnect\n" << WHITE; */
-				int fd = evList[i].ident;
-				std::cout << "Disconnected: " << fd << "\n";
-                EV_SET(&evSet, fd, EVFILT_READ, EV_DELETE, 0, 0, NULL);
-                kevent(kq, &evSet, 1, NULL, 0, NULL);
-				close(fd);
+				clients[fd]->closeSockFd(kq);
+				delete clients[fd];
 			}
+
+			// Recive data from client
 			else if (evList[i].filter == EVFILT_READ)
 			{
-				/* std::cout << CYAN << "recive data\n" << WHITE; */
 				if (send(evList[i].ident, msg, sizeof(msg), 0) == -1)
 					perror("send");
-				close(evList[i].ident);
+				clients[fd]->closeSockFd(kq);
+				delete clients[fd];
 			}
 		}
 	}
