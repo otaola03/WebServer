@@ -3,6 +3,7 @@
 # define SERVER_HPP
 
 #define C200 "HTTP/1.1 200 OK"
+#define C204 "HTTP/1.1 204 No Content"
 #define C404 "HTTP/1.1 404 Not Found"
 #define C405 "HTTP/1.1 405 Method Not Allowed"
 

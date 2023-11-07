@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Subir Fotos con POST</title>
+  <title>Poster</title>
 </head>
 <body>
-  <h1>Subir una foto</h1>
+  <h1>Upload a photo</h1>
   <form id="upload-form" enctype="multipart/form-data">
     <input type="file" id="file-input" name="file" accept="image/*">
     <button type="button" id="upload-button">Subir</button>
@@ -20,20 +20,21 @@
     uploadButton.addEventListener('click', () => {
       const formData = new FormData();
       formData.append('file', fileInput.files[0]);
+      uploadFile(formData);
 
-      fetch('', {
-        method: 'POST',
-        body: formData
-      })
-        .then(response => response.json())
-        .then(data => {
-          uploadStatus.innerHTML = `La foto se ha subido con éxito. Nombre del archivo: ${data.fileName}`;
+      async function uploadFile(formData) {
+        const res = await fetch('', {
+          method: 'POST',
+          body: formData
         })
-        .catch(error => {
-          uploadStatus.innerHTML = 'Hubo un error al subir la foto.';
-          console.error(error);
-        });
-    });
-  </script>
+        console.log("res =", res);
+        if (res.status === 201) {
+          uploadStatus.innerHTML = 'File uploaded successfully';
+        } else {
+          uploadStatus.innerHTML = 'Something went wrong';
+        }
+      }
+      });
+    </script>
 </body>
 </html>

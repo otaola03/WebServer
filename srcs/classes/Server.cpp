@@ -121,10 +121,10 @@ std::string Server::postImage(std::string path, std::string body){
 
 	(void)path;
 	std::string body_content = body;
-	std::cout << "BODY = [" << body[0] << "]\n";
+	// std::cout << "BODY = [" << body[0] << "]\n";
 	if (body[1] == '-')
 		body_content = body.substr(body.find("\r\n\r\n") + 4);
-	std::string msg = "HTTP/1.1 200 OK";
+	std::string msg = "HTTP/1.1 201 Created\nLocation: /resources/bin/";
 	DIR *dir;
 	int i = 0;
 	struct dirent *entry;
@@ -172,23 +172,23 @@ std::string Server::getMessage(HttpRequest& parser)
 			else if (fileFinder(parser.getPath().substr(1), founDir) && parser.getPath().find(".py") != std::string::npos)
 				return (getPython(founDir));
 			else if (fileFinder(parser.getPath().substr(1), founDir) && parser.getPath().find(".php") != std::string::npos)
-			{
-				std::cout << "FOUND " << founDir << std::endl;
 				return (getPhp(founDir));
-			}
 			else
-				return (getIndex(C404, "404.html"));
+				return (getIndex(C404, "./resources/html/404.html"));
 		// }
 	}
 	else if (parser.getType() == POST){
 		// if (this->locations[0].isPOST() == false)
 		// 	return (getIndex(C405, "405.html"));
-			std::ofstream file ("tempFile");
-			file << parser.getBody();
-			// std::cerr << "BODY = [" << parser.getBody() << "]\n";
-			return (postImage(parser.getPath(), parser.getBody()));
 		// else{
+			return (postImage(parser.getPath(), parser.getBody()));
 		// }
+	}
+	else if (parser.getType() == DELETE){
+		if (fileFinder(parser.getPath().substr(1), founDir) && parser.getPath().find(".png") != std::string::npos){
+			std::remove(founDir.c_str());
+			return (getIndex(C204, "./resources/html/index.html"));
+		}
 	}
 	return "";
 }

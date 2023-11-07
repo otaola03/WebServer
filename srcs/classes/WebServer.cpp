@@ -135,6 +135,7 @@ void	WebServer::serverLoop()
 						/* request.printRequest(); */
                         HttpRequest parser(data.c_str());
                         std::string msg = serversList[0]->getMessage(parser);
+						// std::cout << "msg: " << msg << "\n";
 						if (send(i, msg.c_str(), msg.length(), 0) == -1)
 							perror("send");
 						close(i);
