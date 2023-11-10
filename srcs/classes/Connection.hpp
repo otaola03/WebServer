@@ -32,6 +32,11 @@ class Connection
 		void	ev_set();
 		void	closeSockFd();
 		void	closeSockFd(int kq);
+
+		void	add_event(int kq, int event);
+		void	delete_event(int kq, int event);
+		void	enable_event(int kq, int event);
+		void	disable_event(int kq, int event);
 };
 
 #endif

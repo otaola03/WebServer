@@ -63,8 +63,8 @@ Port::Port(const int port) : port(port)
 	}
 
 	sockfd = getListenFd(portInfo);
-	setSocketNonBlocking(sockfd);
 	ev_set();
+	setSocketNonBlocking(sockfd);
 	freeaddrinfo(portInfo);
 }
 
@@ -110,7 +110,7 @@ int	Port::acceptConnection()
 
    sin_size = sizeof their_addr;
    new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &sin_size);
-   if (new_fd == -1)
+   if (new_fd == -1 || new_fd == 0)
        perror("accept");
    if (new_fd != -1)
 	   printClientInfo(their_addr);

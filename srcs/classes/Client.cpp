@@ -3,7 +3,8 @@
 Client::Client(int sockfd) : Connection(sockfd)
 {
 	setSocketNonBlocking(sockfd);
-	ev_set();
+	/* ev_set(); */
+	/* add_event(kq, EVFILT_WRITE); */
 }
 
 Client::Client(const Client& toCopy)
@@ -43,10 +44,36 @@ std::string	Client::recvData()
 	return recvData;
 }
 
+/* void	Client::enableWrite(int kq) */
+/* { */
+/* 	EV_SET(&evSet, sockfd, EVFILT_WRITE, EV_ADD, 0, 0, NULL); */
+/* 	kevent(kq, &evSet, 1, NULL, 0, NULL); */
+
+/* 	/1* std::cout << "sockfd" << getSockFd() << "\n"; *1/ */
+/* 	/1* EV_SET(&writeEv, sockfd, EVFILT_WRITE, EV_ADD, 0, 0, NULL); *1/ */
+/* 	/1* kevent(kq, &writeEv, 1, NULL, 0, NULL); *1/ */
+/* } */
+
+/* void	Client::disableWrite(int kq) */
+/* { */
+/* 	EV_SET(&evSet, sockfd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL); */
+/* 	kevent(kq, &evSet, 1, NULL, 0, NULL); */
+
+/* 	/1* EV_SET(&writeEv, sockfd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL); *1/ */
+/* 	/1* kevent(kq, &writeEv, 1, NULL, 0, NULL); *1/ */
+/* } */
+
+/* void	Client::disableWrite(int kq) */
+/* { */
+/* 	EV_SET(&evSet, sockfd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL); */
+/* 	kevent(kq, &evSet, 1, NULL, 0, NULL); */
+
+/* 	/1* EV_SET(&writeEv, sockfd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL); *1/ */
+/* 	/1* kevent(kq, &writeEv, 1, NULL, 0, NULL); *1/ */
+/* } */
+
 Client& Client::operator=(const Client& toAssign)
 {
 	(void)toAssign;
 	return *this;
 }
-
-
