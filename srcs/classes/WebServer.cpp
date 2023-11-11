@@ -55,22 +55,23 @@ bool	WebServer::isAPort(int fd)
 	return (it != ports.end());
 }
 
-void	WebServer::acceptNewClient(int fd)
+bool	WebServer::acceptNewClient(int fd)
 {
 	int newfd = ports[fd]->acceptConnection();;
 	if (newfd == -1)
-		return ;
+		return false;
 	Client* newClient = new Client(newfd);
 	getServerFromPort(fd)->addClient(newfd, newClient);
 	clients[newfd] = newClient;
 	kevent(kq, &newClient->getEvSet(), 1, NULL, 0, NULL);
 	newClient->add_event(kq, EVFILT_READ);
 	newClient->add_event(kq, EVFILT_WRITE);
+	return (true);
 }
 
 void	WebServer::serverLoop()
 {
-	char msg[] = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!";
+	char msg[] = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 12\r\nConnection close\r\n\r\nHello world!";
 	struct kevent evList[MAX_EVENTS];
 	int numEvents;
 	/* struct kevent auxEvSet; */
@@ -82,10 +83,8 @@ void	WebServer::serverLoop()
 
     while (1) 
 	{
-		std::cout << "Before\n";
 		memset(evList, 0, sizeof(evList));
 		numEvents = kevent(kq, NULL, 0, evList, 1, NULL);
-		std::cout << "After\n";
 		for (int i = 0; i < numEvents; i++)
 		{
 			fd = evList[i].ident;
@@ -93,55 +92,30 @@ void	WebServer::serverLoop()
 			// NEW CLIENT
 			if (isAPort(fd))
 			{
-				/* int newfd = ports[fd]->acceptConnection();; */
-				/* if (newfd == -1 || newfd < 0) */
-				/* 	return ; */
-
-				/* int yes; */
-				/* if (setsockopt(newfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) */
-				/* { */
-				/* 	perror("setsockopt"); */
-				/* 	exit(1); */
-				/* } */
-				/* fcntl(newfd, F_SETFL, O_NONBLOCK); */
-				/* EV_SET(&auxEvSet, newfd, EVFILT_READ, EV_ADD, 0, 0, NULL); */
-                /* kevent(kq, &auxEvSet, 1, NULL, 0, NULL); */
-				acceptNewClient(fd);
+				if (!acceptNewClient(fd))
+				{
+					clients[fd]->delete_event(kq, EVFILT_READ);
+					clients[fd]->delete_event(kq, EVFILT_WRITE);
+					close(fd);
+					delete clients[fd];
+				}
 			}
 
 			// DISCONNECT
 			else if (evList[i].flags & EV_EOF)
 			{
-				clients[fd]->closeSockFd(kq);
+				/* clients[fd]->closeSockFd(kq); */
+				
+				clients[fd]->delete_event(kq, EVFILT_READ);
+				clients[fd]->delete_event(kq, EVFILT_WRITE);
+				close(fd);
 				delete clients[fd];
-
-				/* EV_SET(&auxEvSet, fd, EVFILT_READ, EV_DELETE, 0, 0, NULL); */
-                /* kevent(kq, &auxEvSet, 1, NULL, 0, NULL); */
-				/* close(fd); */
 			}
 
 			// RECIVE DATA
 			else if (evList[i].filter == EVFILT_READ)
 			{
-				/* std::cout << "RECIVE\n"; */
-				/* int numbytes; */
-				/* char buf[1000]; */
-				/* if ((numbytes = recv(fd, buf, sizeof(buf), 0)) <= 0) */
-				/* { */
-				/* 	if (numbytes == 0) */
-				/* 		std::cout << RED << "selectserver: socket "<< fd << " hung up\n" << WHITE; */
-				/* 	if (numbytes == -1) */
-				/* 	{ */
- 						/* perror("recv"); */
- 						/* exit(1); */
-				/* 	} */
-				/* 	if (numbytes == EWOULDBLOCK) */
-				/* 		std::cout << "HHHHHHHHHHHHHHHHHHHHHHHHHHHHH\n\n\n"; */
-				/* } */
-				/* EV_SET(&evList[i], fd, EVFILT_WRITE, EV_ENABLE, 0, 0, NULL); */
-				/* kevent(kq, &evList[i], 1, NULL, 0, NULL); */
 				clients[fd]->recvData();
-				/* clients[fd]->enableWrite(kq); */
 				clients[fd]->enable_event(kq, EVFILT_WRITE);
 			}
 			else if (evList[i].filter == EVFILT_WRITE)
@@ -149,18 +123,11 @@ void	WebServer::serverLoop()
 				/* std::cout << "WRITEEEEE\n"; */
 				if (send(fd, msg, sizeof(msg), 0) == -1)
 					perror("send");
-				/* EV_SET(&evList[i], fd, EVFILT_WRITE, EV_ENABLE, 0, 0, NULL); */
-				/* kevent(kq, &evList[i], 1, NULL, 0, NULL); */
-
-				/* EV_SET(&auxEvSet, fd, EVFILT_READ, EV_DELETE, 0, 0, NULL); */
-                /* kevent(kq, &auxEvSet, 1, NULL, 0, NULL); */
-				/* close(fd); */
-
-				/* clients[fd]->disableWrite(kq); */
-				/* clients[fd]->delete_event(kq, EVFILT_WRITE); */
-				/* clients[fd]->delete_event(kq, EVFILT_READ); */
 				clients[fd]->disable_event(kq, EVFILT_WRITE);
-				clients[fd]->closeSockFd(kq);
+				/* clients[fd]->closeSockFd(kq); */
+				clients[fd]->delete_event(kq, EVFILT_READ);
+				clients[fd]->delete_event(kq, EVFILT_WRITE);
+				close(fd);
 				delete clients[fd];
 			}
 		}
