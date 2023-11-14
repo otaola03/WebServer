@@ -31,11 +31,35 @@
 /*     return 0; */
 /* } */
 
-int main()
+int run(const string &path)
 {
-	WebServer	webserver;
-	webserver.serverLoop();
+	cout << " vamos a intentar correrlo con archivo de configuración " << '"' << path << '"' << endl;
+	try
+	{
+		Config	config(path);
 
-	/* Port	port1(80); */
-	/* Port	port2(85); */
+		WebServer	werbserver(config);
+		// werbserver.run();
+	}
+	catch(const std::exception& e)
+	{
+		std::cerr << '\n' << "Error:\n" << e.what() << '\n';
+		return (EXIT_FAILURE);
+	}
+	return (EXIT_SUCCESS);
+}
+
+int main(int argc, char const *argv[])
+{
+	cout << " has introducido " << argc << " argumentos en " << argv[0] << endl;
+	if (argc > 2)
+	{
+		cerr << "❌Error: demasiados argumentos de entrada, espero uno o niguno" << endl;
+		return(EXIT_FAILURE);
+	}
+	if (argc == 2)
+		return(run(argv[1]));
+	cout << " vamos a usar el path por defecto " << '"' << defaultPath << '"' << endl;
+
+	return(run(defaultPath));
 }

@@ -2,6 +2,7 @@
 
 # define WEBSERVER_HPP
 
+#include "Config.hpp"
 #include "Server.hpp"
 
 typedef std::vector<Server*> serverVector;
@@ -17,6 +18,8 @@ class WebServer
 	public:
 		WebServer();
 		WebServer(const WebServer& toCopy);
+		WebServer(const Config& config);
+
 		~WebServer();
 
 		void	serverLoop();

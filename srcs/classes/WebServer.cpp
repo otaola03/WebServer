@@ -30,6 +30,20 @@ WebServer::WebServer(const WebServer& toCopy)
 	(void)toCopy;
 }
 
+WebServer::WebServer(const Config& config)
+{
+    size_t  i = 0;
+
+    // FD_ZERO(&socketList);
+	// FD_ZERO(&portsList);
+    while (i < config.getServerNum())
+    {
+        serversList.push_back(new Server(config.getName(i), config.getRoot(i), config.getPorts(i), config.getErrorPages(i), config.getLocations(i)));
+        // serversList[i]->addPortsToSet(portsList);
+    }
+	// socketList = portsList;
+}
+
 WebServer::~WebServer()
 {
 }
