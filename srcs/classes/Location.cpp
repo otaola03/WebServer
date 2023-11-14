@@ -35,3 +35,18 @@ Location& Location::operator=(const Location& toAssign)
 	(void)toAssign;
 	return *this;
 }
+
+bool	Location::isGET() const
+{
+	return GET;
+}
+
+bool	Location::isPOST() const
+{
+	return POST;
+}
+
+bool	Location::isDELETE() const
+{
+	return DELETE;
+}

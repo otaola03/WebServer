@@ -86,7 +86,7 @@ void	WebServer::deleteClient(int fd)
 
 void	WebServer::serverLoop()
 {
-	char msg[] = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 12\r\nConnection close\r\n\r\nHello world!";
+	//char msg[] = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 12\r\nConnection close\r\n\r\nHello world!";
 	struct kevent evList[MAX_EVENTS];
 	int numEvents;
 	int	fd;
@@ -96,28 +96,34 @@ void	WebServer::serverLoop()
 	{
 		memset(evList, 0, sizeof(evList));
 		numEvents = kevent(kq, NULL, 0, evList, 1, NULL);
+		std::cerr << "kq: " << kq << "\n";
 		for (int i = 0; i < numEvents; i++)
 		{
 			fd = evList[i].ident;
 
+			// DISCONNECT
+			if (evList[i].flags & EV_EOF){
+				std::cerr << "DISCONNECT\n";
+				deleteClient(fd);
+			}
+
 			// NEW CLIENT
-			if (isAPort(fd))
+			else if (isAPort(fd))
 			{
 				if (!acceptNewClient(fd))
 				{
+					std::cerr << "acceptNewClient error\n";
 					close(fd);
 					delete clients[fd];
 				}
 			}
 
-			// DISCONNECT
-			else if (evList[i].flags & EV_EOF)
-				deleteClient(fd);
-
 			// RECIVE DATA
 			else if (evList[i].filter == EVFILT_READ)
 			{
 				data = clients[fd]->recvData();
+				std::ofstream file("FOCAAA");
+				file << data << std::endl;
 				if (data == "")
 					deleteClient(fd);
 				else
@@ -128,7 +134,10 @@ void	WebServer::serverLoop()
 			else if (evList[i].filter == EVFILT_WRITE)
 			{
 				/* std::cout << "WRITEEEEE\n"; */
-				if (send(fd, msg, sizeof(msg), 0) == -1)
+				HttpRequest parser(data.c_str());
+				std::string msg = getServerFromClient(fd)->getMessage(parser);
+				// std::cerr << "msg: " << msg << "\n";
+				if (send(fd, msg.c_str(), msg.length(), 0) == -1)
 					perror("send");
 				clients[fd]->disable_event(kq, EVFILT_WRITE);
 				deleteClient(fd);
@@ -144,4 +153,3 @@ WebServer& WebServer::operator=(const WebServer& toAssign)
 	(void)toAssign;
 	return *this;
 }
-
