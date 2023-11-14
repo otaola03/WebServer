@@ -33,10 +33,10 @@ class Connection
 		void	closeSockFd();
 		void	closeSockFd(int kq);
 
-		void	add_event(int kq, int event);
-		void	delete_event(int kq, int event);
-		void	enable_event(int kq, int event);
-		void	disable_event(int kq, int event);
+		bool	add_event(int kq, int event);
+		bool	delete_event(int kq, int event);
+		bool	enable_event(int kq, int event);
+		bool	disable_event(int kq, int event);
 };
 
 #endif

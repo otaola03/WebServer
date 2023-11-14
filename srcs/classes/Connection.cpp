@@ -45,26 +45,34 @@ void	Connection::ev_set()
 	EV_SET(&evSet, sockfd, EVFILT_READ, EV_ADD, 0, 0, NULL);
 }
 
-void	Connection::add_event(int kq, int event)
+bool	Connection::add_event(int kq, int event)
 {
 	EV_SET(&evSet, sockfd, event, EV_ADD, 0, 0, NULL);
-	kevent(kq, &evSet, 1, NULL, 0, NULL);
+	if (kevent(kq, &evSet, 1, NULL, 0, NULL) == -1)
+		return(false);
+	return (true);
 }
 
-void	Connection::delete_event(int kq, int event)
+bool	Connection::delete_event(int kq, int event)
 {
 	EV_SET(&evSet, sockfd, event, EV_DELETE, 0, 0, NULL);
-	kevent(kq, &evSet, 1, NULL, 0, NULL);
+	if (kevent(kq, &evSet, 1, NULL, 0, NULL))
+		return(false);
+	return (true);
 }
 
-void	Connection::enable_event(int kq, int event)
+bool	Connection::enable_event(int kq, int event)
 {
 	EV_SET(&evSet, sockfd, event, EV_ENABLE, 0, 0, NULL);
-	kevent(kq, &evSet, 1, NULL, 0, NULL);
+	if (kevent(kq, &evSet, 1, NULL, 0, NULL))
+		return(false);
+	return (true);
 }
 
-void	Connection::disable_event(int kq, int event)
+bool	Connection::disable_event(int kq, int event)
 {
 	EV_SET(&evSet, sockfd, event, EV_DISABLE, 0, 0, NULL);
-	kevent(kq, &evSet, 1, NULL, 0, NULL);
+	if (kevent(kq, &evSet, 1, NULL, 0, NULL))
+		return(false);
+	return (true);
 }
