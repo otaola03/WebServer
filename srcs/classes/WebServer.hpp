@@ -2,8 +2,8 @@
 
 # define WEBSERVER_HPP
 
-#include "Config.hpp"
 #include "Server.hpp"
+#include "Config.hpp"
 
 typedef std::vector<Server*> serverVector;
 typedef std::map<int, Port*> intPortMap;
@@ -11,15 +11,15 @@ typedef std::map<int, Port*> intPortMap;
 class WebServer
 {
 	private:
-		fd_set	portsList;
-		fd_set	socketList;
+		fd_set			portsList;
+		fd_set			socketList;
 		serverVector	serversList;
 
-	public:
 		WebServer();
+
+	public:
 		WebServer(const WebServer& toCopy);
 		WebServer(const Config& config);
-
 		~WebServer();
 
 		void	serverLoop();

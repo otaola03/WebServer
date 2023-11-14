@@ -1,34 +1,29 @@
 #include "WebServer.hpp"
 
-WebServer::WebServer()
-{
-	intVector	ports;
-	ports.push_back(85);
-	ports.push_back(105);
+// WebServer::WebServer()
+// {
+// 	intVector	ports;
+// 	ports.push_back(85);
+// 	ports.push_back(105);
 
-	intCharMap	errorPages;
-	errorPages[404] = "/404.html";
+// 	intCharMap	errorPages;
+// 	errorPages[404] = "/404.html";
 
-	Location	location;
-	locationVector	locations;
-	locations.push_back(location);
+// 	Location	location;
+// 	locationVector	locations;
+// 	locations.push_back(location);
 
-	Server *server = new Server("server1", "/", ports, errorPages, locations);
-	std::cout << "fdMax: " << server->fdMax << "\n";
+// 	Server *server = new Server("server1", "/", ports, errorPages, locations);
+// 	std::cout << "fdMax: " << server->fdMax << "\n";
 
-	FD_ZERO(&socketList);
-	FD_ZERO(&portsList);
+// 	FD_ZERO(&socketList);
+// 	FD_ZERO(&portsList);
 
-	server->addPortsToSet(portsList);
+// 	server->addPortsToSet(portsList);
 
-	socketList = portsList;
-	serversList.push_back(server);
-}
-
-WebServer::WebServer(const WebServer& toCopy)
-{
-	(void)toCopy;
-}
+// 	socketList = portsList;
+// 	serversList.push_back(server);
+// }
 
 WebServer::WebServer(const Config& config)
 {
@@ -42,6 +37,12 @@ WebServer::WebServer(const Config& config)
         // serversList[i]->addPortsToSet(portsList);
     }
 	// socketList = portsList;
+}
+
+
+WebServer::WebServer(const WebServer& toCopy)
+{
+	(void)toCopy;
 }
 
 WebServer::~WebServer()
