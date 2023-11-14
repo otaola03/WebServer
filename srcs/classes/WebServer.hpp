@@ -34,6 +34,7 @@ class WebServer
 		void	serverLoop();
 		bool	isAPort(int fd);
 		bool	acceptNewClient(int fd);
+		void	deleteClient(int fd);
 
 		WebServer& operator=(const WebServer& toAssign);
 };

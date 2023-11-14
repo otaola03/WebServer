@@ -60,15 +60,28 @@ bool	WebServer::acceptNewClient(int fd)
 	int newfd = ports[fd]->acceptConnection();;
 	if (newfd == -1)
 		return false;
+
 	Client* newClient = new Client(newfd);
+
 	getServerFromPort(fd)->addClient(newfd, newClient);
 	clients[newfd] = newClient;
+
 	kevent(kq, &newClient->getEvSet(), 1, NULL, 0, NULL);
+
 	if (!newClient->add_event(kq, EVFILT_READ))
 		return (false);
 	if (!newClient->add_event(kq, EVFILT_WRITE))
 		return (newClient->delete_event(kq, EVFILT_READ), false);
+
 	return (true);
+}
+
+void	WebServer::deleteClient(int fd)
+{
+	clients[fd]->delete_event(kq, EVFILT_READ);
+	clients[fd]->delete_event(kq, EVFILT_WRITE);
+	close(fd);
+	delete clients[fd];
 }
 
 void	WebServer::serverLoop()
@@ -76,12 +89,8 @@ void	WebServer::serverLoop()
 	char msg[] = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 12\r\nConnection close\r\n\r\nHello world!";
 	struct kevent evList[MAX_EVENTS];
 	int numEvents;
-	/* struct kevent auxEvSet; */
 	int	fd;
-
-	struct timeval timeout;
-    timeout.tv_sec = 5;
-    timeout.tv_usec = 0;
+	std::string data;
 
     while (1) 
 	{
@@ -96,8 +105,6 @@ void	WebServer::serverLoop()
 			{
 				if (!acceptNewClient(fd))
 				{
-					/* clients[fd]->delete_event(kq, EVFILT_READ); */
-					/* clients[fd]->delete_event(kq, EVFILT_WRITE); */
 					close(fd);
 					delete clients[fd];
 				}
@@ -105,39 +112,26 @@ void	WebServer::serverLoop()
 
 			// DISCONNECT
 			else if (evList[i].flags & EV_EOF)
-			{
-				/* clients[fd]->closeSockFd(kq); */
-				
-				clients[fd]->delete_event(kq, EVFILT_READ);
-				clients[fd]->delete_event(kq, EVFILT_WRITE);
-				close(fd);
-				delete clients[fd];
-			}
+				deleteClient(fd);
 
 			// RECIVE DATA
 			else if (evList[i].filter == EVFILT_READ)
 			{
-				std::string data = clients[fd]->recvData();
+				data = clients[fd]->recvData();
 				if (data == "")
-				{
-					clients[fd]->delete_event(kq, EVFILT_READ);
-					clients[fd]->delete_event(kq, EVFILT_WRITE);
-					close(fd);
-				}
+					deleteClient(fd);
 				else
 					clients[fd]->enable_event(kq, EVFILT_WRITE);
 			}
+
+			// SEND
 			else if (evList[i].filter == EVFILT_WRITE)
 			{
 				/* std::cout << "WRITEEEEE\n"; */
 				if (send(fd, msg, sizeof(msg), 0) == -1)
 					perror("send");
 				clients[fd]->disable_event(kq, EVFILT_WRITE);
-				/* clients[fd]->closeSockFd(kq); */
-				clients[fd]->delete_event(kq, EVFILT_READ);
-				clients[fd]->delete_event(kq, EVFILT_WRITE);
-				close(fd);
-				delete clients[fd];
+				deleteClient(fd);
 			}
 		}
 	}
