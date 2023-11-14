@@ -63,6 +63,7 @@ class Server
 		std::string postImage(std::string path, std::string body);
 		std::string	getIndex(std::string code, std::string path);
 		std::string getImg(std::string path);
+		std::string getIco(std::string path);
 		std::string getPython(std::string path);
 		std::string getPhp(std::string path);
 		std::string	getMessage(HttpRequest& parser);

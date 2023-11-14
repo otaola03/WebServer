@@ -51,6 +51,25 @@ Server& Server::operator=(const Server& toAssign)
 	return *this;
 }
 
+std::string Server::getIco(std::string path)
+{
+	std::string msg = "HTTP/1.1 200 OK";
+	msg.append("\nContent-Type: image/x-icon");
+	msg.append("\nContent-Length: ");
+	std::string html_name = path;
+	std::ifstream file(html_name.c_str());
+	if (file.is_open()) {
+		std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+		msg.append(std::to_string(content.length()));
+		msg.append("\n\n");
+		msg.append(content);
+		file.close();
+	} else {
+		std::cerr << "Fatal" << std::endl;
+	}
+	return msg;
+}
+
 std::string Server::getImg(std::string path)
 {
 	std::string msg = "HTTP/1.1 200 OK";
@@ -112,7 +131,7 @@ std::string Server::getIndex(std::string code, std::string path){
 		msg.append(content);
 		file.close();
 	} else {
-		std::cerr << "Fatal" << std::endl;
+		std::cerr << "Index Fatal" << std::endl;
 	}
 	return msg;
 }
@@ -161,7 +180,7 @@ std::string Server::getMessage(HttpRequest& parser)
 	std::string founDir;
 	if (parser.getType() == GET){
 		// if (this->locations[0].isGET() == false)
-		// 	return (getIndex(C405, "405.html"));
+		// 	return (getIndex(C405, "./resources/html/405.html"));
 		// else{
 			if (parser.getPath() == "/")
 				return (getIndex(C200, "./resources/html/index.html"));
@@ -173,6 +192,8 @@ std::string Server::getMessage(HttpRequest& parser)
 				return (getPython(founDir));
 			else if (fileFinder(parser.getPath().substr(1), founDir) && parser.getPath().find(".php") != std::string::npos)
 				return (getPhp(founDir));
+			else if (fileFinder(parser.getPath().substr(1), founDir) && parser.getPath().find(".ico") != std::string::npos)
+				return (getIco(founDir));
 			else
 				return (getIndex(C404, "./resources/html/404.html"));
 		// }
