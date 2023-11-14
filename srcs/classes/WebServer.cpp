@@ -64,8 +64,10 @@ bool	WebServer::acceptNewClient(int fd)
 	getServerFromPort(fd)->addClient(newfd, newClient);
 	clients[newfd] = newClient;
 	kevent(kq, &newClient->getEvSet(), 1, NULL, 0, NULL);
-	newClient->add_event(kq, EVFILT_READ);
-	newClient->add_event(kq, EVFILT_WRITE);
+	if (!newClient->add_event(kq, EVFILT_READ))
+		return (false);
+	if (!newClient->add_event(kq, EVFILT_WRITE))
+		return (newClient->delete_event(kq, EVFILT_READ), false);
 	return (true);
 }
 
@@ -94,8 +96,8 @@ void	WebServer::serverLoop()
 			{
 				if (!acceptNewClient(fd))
 				{
-					clients[fd]->delete_event(kq, EVFILT_READ);
-					clients[fd]->delete_event(kq, EVFILT_WRITE);
+					/* clients[fd]->delete_event(kq, EVFILT_READ); */
+					/* clients[fd]->delete_event(kq, EVFILT_WRITE); */
 					close(fd);
 					delete clients[fd];
 				}
@@ -115,8 +117,15 @@ void	WebServer::serverLoop()
 			// RECIVE DATA
 			else if (evList[i].filter == EVFILT_READ)
 			{
-				clients[fd]->recvData();
-				clients[fd]->enable_event(kq, EVFILT_WRITE);
+				std::string data = clients[fd]->recvData();
+				if (data == "")
+				{
+					clients[fd]->delete_event(kq, EVFILT_READ);
+					clients[fd]->delete_event(kq, EVFILT_WRITE);
+					close(fd);
+				}
+				else
+					clients[fd]->enable_event(kq, EVFILT_WRITE);
 			}
 			else if (evList[i].filter == EVFILT_WRITE)
 			{
