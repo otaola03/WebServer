@@ -1,29 +1,44 @@
 #include "WebServer.hpp"
 
-WebServer::WebServer()
+// WebServer::WebServer()
+// {
+// 	intVector	ports;
+// 	ports.push_back(85);
+// 	ports.push_back(105);
+
+// 	intCharMap	errorPages;
+// 	errorPages[404] = "/404.html";
+
+// 	Location	location;
+// 	locationVector	locations;
+// 	locations.push_back(location);
+
+// 	Server *server = new Server("server1", "/", ports, errorPages, locations);
+// 	std::cout << "fdMax: " << server->fdMax << "\n";
+
+// 	FD_ZERO(&socketList);
+// 	FD_ZERO(&portsList);
+
+// 	server->addPortsToSet(portsList);
+
+// 	socketList = portsList;
+// 	serversList.push_back(server);
+// }
+
+WebServer::WebServer(const Config& config)
 {
-	intVector	ports;
-	ports.push_back(85);
-	ports.push_back(105);
+    size_t  i = 0;
 
-	intCharMap	errorPages;
-	errorPages[404] = "/404.html";
-
-	Location	location;
-	locationVector	locations;
-	locations.push_back(location);
-
-	Server *server = new Server("server1", "/", ports, errorPages, locations);
-	std::cout << "fdMax: " << server->fdMax << "\n";
-
-	FD_ZERO(&socketList);
-	FD_ZERO(&portsList);
-
-	server->addPortsToSet(portsList);
-
-	socketList = portsList;
-	serversList.push_back(server);
+    // FD_ZERO(&socketList);
+	// FD_ZERO(&portsList);
+    while (i < config.getServerNum())
+    {
+        serversList.push_back(new Server(config.getName(i), config.getRoot(i), config.getPorts(i), config.getErrorPages(i), config.getLocations(i)));
+        // serversList[i]->addPortsToSet(portsList);
+    }
+	// socketList = portsList;
 }
+
 
 WebServer::WebServer(const WebServer& toCopy)
 {
