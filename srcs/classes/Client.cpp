@@ -77,6 +77,8 @@ Client::~Client()
 
 std::string	Client::recvData()
 {
+	std::cout << "🐲petas aqui?\n";
+
 	char buf[1025];
 	std::string recvData;
 	int numbytes = 1024;

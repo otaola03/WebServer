@@ -12,9 +12,11 @@ Server::Server(\
 	const locationVector& locations\
 ) : name(name), root(root), errorPages(errorPages), locations(locations)
 {
+	std::cerr << "construimos " << name << "\n";
 	for (int i = 0; i != (int)ports.size(); i++)
 	{
 		std::cerr << "Creating port " << ports[i] << "\n";
+		std::cerr << "Creating port " << i << " " << ports[i] << "\n";
 		Port *port = new Port(ports[i]);
 		fdMax = port->getSockFd();
 		port->activatePort();
