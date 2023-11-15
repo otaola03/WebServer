@@ -64,7 +64,7 @@ Port::Port(const int port) : port(port)
 
 	sockfd = getListenFd(portInfo);
 	ev_set();
-	setSocketNonBlocking(sockfd);
+	/* setSocketNonBlocking(sockfd); */
 	freeaddrinfo(portInfo);
 }
 

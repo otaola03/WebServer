@@ -17,7 +17,7 @@
  
 #include "Connection.hpp"
 
-#define BACKLOG 5
+#define BACKLOG 25
 
 class Port : public Connection
 {
