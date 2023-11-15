@@ -10,6 +10,7 @@
 
 #include "Port.hpp"
 #include "Location.hpp"
+#include "Client.hpp"
 #include "HttpRequest.hpp"
 
 #include "../../includes/templates.h"
@@ -30,16 +31,20 @@
 #include <vector>
 #include <cstdlib>
 
+typedef std::map<int, Client*> intClientMap;
+typedef std::map<int, Port*> intPortMap;
+
 extern char** environ;
 
 class Server
 {
 	private:
-		std::string name;
-		std::string root;
-		intPortMap	fdPortsList;	//map(fd, Port)
-		intCharMap errorPages;
-		locationVector locations;
+		std::string 	name;
+		std::string 	root;
+		intPortMap		fdPortsList;	//map(fd, Port*)
+		intClientMap	fdClientsList;	//map(fd, Client*)
+		intCharMap		errorPages;
+		locationVector	locations;
 
 		Server();
 
@@ -58,7 +63,17 @@ class Server
 		Server(const Server& toCopy);
 		~Server();
 
-		Port&	getPort(const int fd);
+		/* void	addPortsToSet(fd_set& portsList); */
+		/* void	addPortsToConnectionsList(intConnectionMap& connectionsList); */
+		void	addClient(int clientFd, Client* client);
+
+		bool	containsThisPort(int portFd);
+		bool	containsThisClient(int clientFd);
+
+		void	addPortsToPortsList(intPortMap& portsList);
+		void	addPortsToClientsList(intClientMap& clientsList);
+
+		void	addPortsToKq(int kq);
 
 		std::string postImage(std::string path, std::string body);
 		std::string	getIndex(std::string code, std::string path);

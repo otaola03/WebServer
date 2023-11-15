@@ -32,14 +32,11 @@
 /*     return 0; */
 /* } */
 
-int main(int argc, char **argv)
+int main()
 {
-	(void)argc;
-	(void)argv;
 	WebServer	webserver;
 
 	webserver.serverLoop();
-
 	/* Port	port1(80); */
 	/* Port	port2(85); */
 }

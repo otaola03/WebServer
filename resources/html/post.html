@@ -26,7 +26,7 @@
         const res = await fetch('', {
           method: 'POST',
           body: formData
-        })
+        });
         console.log("res =", res);
         if (res.status === 201) {
           uploadStatus.innerHTML = 'File uploaded successfully';

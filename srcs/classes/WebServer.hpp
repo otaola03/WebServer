@@ -3,17 +3,28 @@
 # define WEBSERVER_HPP
 
 #include "Server.hpp"
-#include "HttpRequest.hpp"
+#include "Connection.hpp"
+
+#define MAX_EVENTS 32
 
 typedef std::vector<Server*> serverVector;
 typedef std::map<int, Port*> intPortMap;
+typedef std::map<int, Client*> intClientMap;
 
 class WebServer
 {
 	private:
-		fd_set			portsList;
-		fd_set			socketList;
+		int kq;
+		/* fd_set	portsList; */
+		/* fd_set	socketList; */
 		serverVector	serversList;
+		/* intConnectionMap	connectionsList; */
+		intPortMap			ports;
+		intClientMap		clients;
+
+
+		Server*	getServerFromPort(int portFd);
+		Server*	getServerFromClient(int clientFd);
 
 	public:
 		WebServer();
@@ -21,8 +32,9 @@ class WebServer
 		~WebServer();
 
 		void	serverLoop();
-		Server&	getServer(const int fd);
-		Port&	getPort(const int fd);
+		bool	isAPort(int fd);
+		bool	acceptNewClient(int fd);
+		void	deleteClient(int fd);
 
 		WebServer& operator=(const WebServer& toAssign);
 };

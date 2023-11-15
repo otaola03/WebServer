@@ -14,6 +14,7 @@ Server::Server(\
 {
 	for (int i = 0; i != (int)ports.size(); i++)
 	{
+		std::cerr << "Creating port " << ports[i] << "\n";
 		Port *port = new Port(ports[i]);
 		fdMax = port->getSockFd();
 		port->activatePort();
@@ -31,18 +32,54 @@ Server::~Server()
 {
 }
 
-Port&	Server::getPort(const int fd)
-{
-	intPortMap::iterator it = fdPortsList.find(fd);
-	if (it == fdPortsList.end())
-		throw std::exception();
-	return *(it->second);
-}
 
-void	Server::addPortsToSet(fd_set& portsFdSet)
+//------------------------------------------------------------------------------------------
+/* void	Server::addPortsToSet(fd_set& portsFdSet) */
+/* { */
+/* 	for (intPortMap::iterator it = fdPortsList.begin(); it != fdPortsList.end(); ++it) */
+/* 		FD_SET(it->first, &portsFdSet); */
+/* } */
+
+/* void	Server::addPortsToConnectionsList(intConnectionMap& connectionsList) */
+/* { */
+/* 	for (intPortMap::iterator it = fdPortsList.begin(); it != fdPortsList.end(); ++it) */
+/* 		connectionsList[it->first] = it->second; */
+/* } */
+//------------------------------------------------------------------------------------------
+
+
+
+//------------------------------------------------------------------------------------------
+void	Server::addPortsToPortsList(intPortMap& portsList)
 {
 	for (intPortMap::iterator it = fdPortsList.begin(); it != fdPortsList.end(); ++it)
-		FD_SET(it->first, &portsFdSet);
+		portsList[it->first] = it->second;
+}
+//------------------------------------------------------------------------------------------
+
+
+
+//------------------------------------------------------------------------------------------
+void	Server::addPortsToKq(int kq)
+{
+	for (intPortMap::iterator it = fdPortsList.begin(); it != fdPortsList.end(); ++it)
+		kevent(kq, &it->second->getEvSet(), 1, NULL, 0, NULL);
+}
+//------------------------------------------------------------------------------------------
+
+
+void	Server::addClient(int clientFd, Client* client) {fdClientsList[clientFd] = client;}
+
+bool	Server::containsThisPort(int portFd)
+{
+	intPortMap::iterator it = fdPortsList.find(portFd);
+	return (it != fdPortsList.end());
+}
+
+bool	Server::containsThisClient(int clientFd)
+{
+	intClientMap::iterator it = fdClientsList.find(clientFd);
+	return (it != fdClientsList.end());
 }
 
 Server& Server::operator=(const Server& toAssign)
@@ -139,6 +176,7 @@ std::string Server::getIndex(std::string code, std::string path){
 std::string Server::postImage(std::string path, std::string body){
 
 	(void)path;
+	std::cerr << "ELLA TIENE GATO PERO NORMAL\n";
 	std::string body_content = body;
 	// std::cout << "BODY = [" << body[0] << "]\n";
 	if (body[1] == '-')
