@@ -1,29 +1,44 @@
 #include "WebServer.hpp"
+#include "HttpRequest.hpp"
 
-// WebServer::WebServer()
-// {
-// 	intVector	ports;
-// 	ports.push_back(85);
-// 	ports.push_back(105);
+Server*	WebServer::getServerFromPort(int portFd)
+{
+	for (serverVector::iterator it = serversList.begin(); it != serversList.end(); ++it)
+		if ((*it)->containsThisPort(portFd))
+			return (*it);
+	return NULL;
+}
 
-// 	intCharMap	errorPages;
-// 	errorPages[404] = "/404.html";
+Server*	WebServer::getServerFromClient(int clientFd)
+{
+	for (serverVector::iterator it = serversList.begin(); it != serversList.end(); ++it)
+		if ((*it)->containsThisClient(clientFd))
+			return (*it);
+	return NULL;
+}
 
-// 	Location	location;
-// 	locationVector	locations;
-// 	locations.push_back(location);
+WebServer::WebServer()
+{
+	intVector	portsNum;
+	portsNum.push_back(8080);
+	portsNum.push_back(9090);
 
-// 	Server *server = new Server("server1", "/", ports, errorPages, locations);
-// 	std::cout << "fdMax: " << server->fdMax << "\n";
+	intCharMap	errorPages;
+	errorPages[404] = "/404.html";
 
-// 	FD_ZERO(&socketList);
-// 	FD_ZERO(&portsList);
+	Location	location;
+	locationVector	locations;
+	locations.push_back(location);
 
-// 	server->addPortsToSet(portsList);
+	Server *server = new Server("server1", "/", portsNum, errorPages, locations);
+	std::cout << "fdMax: " << server->fdMax << "\n";
 
-// 	socketList = portsList;
-// 	serversList.push_back(server);
-// }
+	server->addPortsToPortsList(ports);
+	kq = kqueue();
+	server->addPortsToKq(kq);
+
+	serversList.push_back(server);
+}
 
 WebServer::WebServer(const Config& config)
 {
@@ -39,7 +54,6 @@ WebServer::WebServer(const Config& config)
 	// socketList = portsList;
 }
 
-
 WebServer::WebServer(const WebServer& toCopy)
 {
 	(void)toCopy;
@@ -49,105 +63,107 @@ WebServer::~WebServer()
 {
 }
 
-static void *get_in_addr(struct sockaddr *sa)
+bool	WebServer::isAPort(int fd)
 {
-    if (sa->sa_family == AF_INET) {
-        return &(((struct sockaddr_in*)sa)->sin_addr);
-    }
+	intPortMap::iterator it = ports.find(fd);
+	return (it != ports.end());
+}
 
-    return &(((struct sockaddr_in6*)sa)->sin6_addr);
+bool	WebServer::acceptNewClient(int fd)
+{
+	int newfd = ports[fd]->acceptConnection();;
+	if (newfd == -1)
+		return false;
+
+	Client* newClient = new Client(newfd);
+
+	getServerFromPort(fd)->addClient(newfd, newClient);
+	clients[newfd] = newClient;
+
+	kevent(kq, &newClient->getEvSet(), 1, NULL, 0, NULL);
+
+	if (!newClient->add_event(kq, EVFILT_READ))
+		return (false);
+	if (!newClient->add_event(kq, EVFILT_WRITE))
+		return (newClient->delete_event(kq, EVFILT_READ), false);
+
+	return (true);
+}
+
+void	WebServer::deleteClient(int fd)
+{
+	clients[fd]->delete_event(kq, EVFILT_READ);
+	clients[fd]->delete_event(kq, EVFILT_WRITE);
+	close(fd);
+	delete clients[fd];
 }
 
 void	WebServer::serverLoop()
 {
-	fd_set	read_fds;
-	char remoteIP[INET6_ADDRSTRLEN];
-	char buf[256];
-	int newfd;
-	struct sockaddr_storage remoteaddr;
-	int nbytes;
-	socklen_t addrlen;
-	int fdmax = serversList[0]->fdMax;
+	//char msg[] = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 12\r\nConnection close\r\n\r\nHello world!";
+	struct kevent evList[MAX_EVENTS];
+	int numEvents;
+	int	fd;
+	std::string data;
 
-	std::cout << "----> " << fdmax << "\n";
-	// main loop
     while (1) 
 	{
-        read_fds = socketList; // copy it
-        if (select(fdmax + 1, &read_fds, NULL, NULL, NULL) == -1) {
-            perror("select");
-            exit(4);
-        }
+		memset(evList, 0, sizeof(evList));
+		numEvents = kevent(kq, NULL, 0, evList, 1, NULL);
+		std::cerr << "kq: " << kq << "\n";
+		for (int i = 0; i < numEvents; i++)
+		{
+			fd = evList[i].ident;
 
-        // run through the existing connections looking for data to read
-        for(int i = 0; i <= fdmax; i++) {
-            if (FD_ISSET(i, &read_fds)) { // we got one!!
-                if (FD_ISSET(i, &portsList)) {
-                    // handle new connections
-                    addrlen = sizeof remoteaddr;
-                    newfd = accept(i,
-                        (struct sockaddr *)&remoteaddr,
-                        &addrlen);
+			// DISCONNECT
+			if (evList[i].flags & EV_EOF){
+				std::cerr << "DISCONNECT\n";
+				deleteClient(fd);
+			}
 
-                    if (newfd == -1) {
-                        perror("accept");
-                    } else {
-                        FD_SET(newfd, &socketList); // add to socketList set
-                        if (newfd > fdmax) {    // keep track of the max
-                            fdmax = newfd;
-                        }
-                        printf("selectserver: new connection from %s on "
-                            "socket %d\n",
-                            inet_ntop(remoteaddr.ss_family,
-                                get_in_addr((struct sockaddr*)&remoteaddr),
-                                remoteIP, INET6_ADDRSTRLEN),
-                            newfd);
-                    }
-                } else {
-                    // handle data from a client
-                    if ((nbytes = recv(i, buf, sizeof buf, 0)) <= 0) {
-                        // got error or connection closed by client
-                        if (nbytes == 0) {
-                            // connection closed
-                            printf("selectserver: socket %d hung up\n", i);
-                        } else {
-                            perror("recv");
-                        }
-                        close(i); // bye!
-                        FD_CLR(i, &socketList); // remove from socketList set
-                    } else {
-                        // we got some data from a client
-                        for(int j = 0; j <= fdmax; j++) {
-                            // send to everyone!
-                            if (FD_ISSET(j, &socketList)) {
-                                // except the listener and ourselves
-                                if (!FD_ISSET(j, &portsList) && j != i) {
-                                    if (send(j, buf, nbytes, 0) == -1) {
-                                        perror("send");
-                                    }
-                                }
-                            }
-                        }
-                    }
-                } // END handle data from client
-            } // END got new incoming connection
-    	} // END looping through file descriptors
-	} // END for(;;)--and you thought it would never end!
+			// NEW CLIENT
+			else if (isAPort(fd))
+			{
+				if (!acceptNewClient(fd))
+				{
+					std::cerr << "acceptNewClient error\n";
+					close(fd);
+					delete clients[fd];
+				}
+			}
+
+			// RECIVE DATA
+			else if (evList[i].filter == EVFILT_READ)
+			{
+				data = clients[fd]->recvData();
+				std::ofstream file("FOCAAA");
+				file << data << std::endl;
+				if (data == "")
+					deleteClient(fd);
+				else
+					clients[fd]->enable_event(kq, EVFILT_WRITE);
+			}
+
+			// SEND
+			else if (evList[i].filter == EVFILT_WRITE)
+			{
+				/* std::cout << "WRITEEEEE\n"; */
+				HttpRequest parser(data.c_str());
+				std::string msg = getServerFromClient(fd)->getMessage(parser);
+				// std::cerr << "msg: " << msg << "\n";
+				if (send(fd, msg.c_str(), msg.length(), 0) == -1)
+					perror("send");
+				clients[fd]->disable_event(kq, EVFILT_WRITE);
+				deleteClient(fd);
+			}
+		}
+	}
 }
 
-Server&	WebServer::getServer(const int fd)
-{
-	(void)fd;
-	/* for (serverVector::iterator it = seversList.begin(); it != serversList.end(); ++it) */
-	/* { */
 
-	/* } */
-	return (*serversList[0]);
-}
 
 WebServer& WebServer::operator=(const WebServer& toAssign)
 {
 	(void)toAssign;
 	return *this;
 }
-

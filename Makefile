@@ -1,3 +1,18 @@
+define ASCIIART
+ 
+          -~~~~-
+         |O __ O|
+      -__|_\__/_|__-
+      ---(__/\__)---
+        /||~--~||\\
+       / ||    || \\
+      |  `'    `'  |
+    _/ /\\__    __/\\ \_
+  ~~~~~    ~~~~    ~~~~~ 
+
+endef
+export ASCIIART
+
 NAME = webserver
 ORANGE = "\033[33m"
 WHITE = "\033[0;37m" 
@@ -5,11 +20,11 @@ WHITE = "\033[0;37m"
 CLASS = ./srcs/classes/
 
 CXX = c++ $(EFLAGS)
-CXXFLAGS = -std=c++98 -Wall -Werror -Wextra $(EFLAGS)
+CXXFLAGS = -std=c++98 -Wall -Werror -Wextra -fsanitize=address -g3 $(EFLAGS)
 RM = rm -rf
 SANI := -fsanitize=address -g3
 
-SRCS = main.cpp $(CLASS)Port.cpp $(CLASS)HttpRequest.cpp $(CLASS)Location.cpp $(CLASS)Server.cpp $(CLASS)WebServer.cpp
+SRCS = main.cpp $(CLASS)Connection.cpp $(CLASS)Port.cpp $(CLASS)Client.cpp $(CLASS)HttpRequest.cpp $(CLASS)Location.cpp $(CLASS)Server.cpp $(CLASS)WebServer.cpp $(CLASS)Server_utils.cpp $(CLASS)Config.cpp
 OBJS = $(SRCS:.cpp=.o)
 
 all: $(NAME)

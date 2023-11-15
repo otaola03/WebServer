@@ -39,7 +39,6 @@ static int	getListenFd(struct addrinfo *portInfo)
 	return sockfd;
 }
 
-Port::Port() {}
 
 //Pon el constructo vacio privado y haz uno que requeora un puerto como int
 Port::Port(const int port) : port(port)
@@ -64,6 +63,8 @@ Port::Port(const int port) : port(port)
 	}
 
 	sockfd = getListenFd(portInfo);
+	ev_set();
+	setSocketNonBlocking(sockfd);
 	freeaddrinfo(portInfo);
 }
 
@@ -77,8 +78,6 @@ Port::~Port()
 	std::cout << "Port closed\n";
 	close(sockfd);
 }
-
-int	Port::getSockFd() {return sockfd;}
 
 void	Port::activatePort()
 {
@@ -111,14 +110,12 @@ int	Port::acceptConnection()
 
    sin_size = sizeof their_addr;
    new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &sin_size);
-   if (new_fd == -1)
+   if (new_fd == -1 || new_fd == 0)
        perror("accept");
    if (new_fd != -1)
 	   printClientInfo(their_addr);
    return (new_fd);
 }
-
-void	Port::closePort() {close(sockfd);}
 
 Port& Port::operator=(const Port& toAssign)
 {
@@ -127,4 +124,3 @@ Port& Port::operator=(const Port& toAssign)
 	port = toAssign.port;
 	return *this;
 }
-

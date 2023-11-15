@@ -1,35 +1,51 @@
-#include "./includes/webserver.h"
+#include <iostream>
+using	std::cerr;
+using	std::cout;
+using	std::endl;
 
+#include <string>
+using	std::string;
 
-/* int main() */
-/* { */
-/* 	Port port(1090); */
-/* 	int	new_fd; */
+const string defaultPath = "config/default.yml";
 
-/* 	 while(1) {  // main accept() loop */
-/* 		std::cout << "Waiting to accept\n"; */
-/* 		port.activatePort(); */
-/* 		new_fd = port.acceptConnection(); */
-		
-/* 		char buf[1000]; */
-/* 		int numbytes; */
-/* 		if ((numbytes = recv(new_fd, buf, 1000-1, 0)) == -1) */
-/* 		{ */
-/*         	perror("recv"); */
-/*         	exit(1); */
-/*     	} */
-/* 		buf[numbytes] = '\0'; */
-/* 		/1* std::cout << buf << "\n\n"; *1/ */
+#include "./srcs/classes/Config.hpp"
+#include "./srcs/classes/WebServer.hpp"
 
-/* 		std::string str(buf); */
-/* 		HttpRequest	request(str); */
+// void testConfig() {
+//     Config config(defaultPath);
 
-/*         close(new_fd);  // parent doesn't need this */
-/* 		break; */
-/*     } */
+//     size_t numServers = config.getServerNum();
 
-/*     return 0; */
-/* } */
+//     for (size_t i = 0; i < numServers; i++) {
+//         std::cout << "Server " << i << ":\n";
+//         std::cout << "Name: " << config.getName(i) << "\n";
+//         std::cout << "Root: " << config.getRoot(i) << "\n";
+//         std::cout << "Ports: ";
+//         intVector ports = config.getPorts(i);
+//         for (size_t j = 0; j < ports.size(); j++) {
+//             int port = ports[j];
+//             std::cout << port << " ";
+//         }
+//         std::cout << "\n";
+
+//         intCharMap errorPages = config.getErrorPages(i);
+//         std::cout << "Error Pages:\n";
+//         intCharMap::const_iterator it;
+//         for (it = errorPages.begin(); it != errorPages.end(); ++it) {
+//             std::cout << "HTTP Status: " << it->first << ", File: " << it->second << "\n";
+//         }
+
+//         locationVector locations = config.getLocations(i);
+//         std::cout << "Locations:\n";
+//         for (size_t k = 0; k < locations.size(); k++) {
+//             const Location& location = locations[k];
+//             std::cout << "Path: " << location.getPath() << "\n";
+//             // Agrega más información sobre la ubicación si es necesario
+//         }
+
+//         std::cout << "--------------------------------\n";
+//     }
+// }
 
 int run(const string &path)
 {
