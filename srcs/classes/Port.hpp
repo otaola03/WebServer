@@ -14,8 +14,8 @@
 #include <string>
 #include <iostream>
 #include <sstream>
- 
 #include "Connection.hpp"
+#include <curl/curl.h>
 
 #define BACKLOG 5
 
@@ -35,6 +35,7 @@ class Port : public Connection
 
 		Port& operator=(const Port& toAssign);
 };
+
 
 
 #endif

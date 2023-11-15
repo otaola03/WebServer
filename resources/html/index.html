@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Imagen en el Centro</title>
+        <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <img src="image.png" alt="Imagen en el Centro"> 
+    <h2>Formulario POST</h2>
+    <form method="post" enctype="multipart/form-data">
+        <label for="imagen">Selecciona una imagen:</label>
+        <input type="file" name="imagen" id="imagen" required><br><br>
+        <input type="submit" value="Cargar Imagen">
+    </form>
+</body>
+</html>

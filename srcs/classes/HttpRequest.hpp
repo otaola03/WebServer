@@ -5,27 +5,33 @@
 # include<iostream>
 # include<vector>
 # include<sstream>
+# include<map>
 
 enum RequestType {GET, POST, DELETE, UNDEFINED};
 
 class HttpRequest
 {
 	private:
-		std::vector< std::pair<std::string, std::string> >	headers;
+		std::map<std::string, std::string> headers;
 		RequestType	type;
 		std::string	path;
-		// Crea un campo paara el body
+		std::string	body;
 
-		HttpRequest();
 		void	saveRequest(const std::string& toProcess);
 		void	saveHeaders(const std::string& toProcess);
+		void	saveBody(const char* toProcess);
 
 	public:
-		HttpRequest(const std::string& toProcess);
+		HttpRequest(const char* toProcess);
 		HttpRequest(const HttpRequest& toCopy);
 		~HttpRequest();
 
-		void	printRequest();
+		void		printRequest();
+		void		printHeaders();
+		void		printBody();
+		int			getType();
+		std::string	getPath();
+		std::string	getBody();
 
 		HttpRequest& operator=(const HttpRequest& toCopy);
 };

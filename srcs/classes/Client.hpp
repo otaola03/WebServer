@@ -20,13 +20,16 @@
 class Client : public Connection
 {
 	private:
+		struct kevent writeEv;
 	public:
 		Client(int sockfd);
 		Client(const Client& toCopy);
 		~Client();
 
-		std::string	recvData();
+		 std::string	recvData();
 		void		sendData(const void* buf);
+		/* void		enableWrite(int kq); */
+		/* void		disableWrite(int kq); */
 
 		Client& operator=(const Client& toCopy);
 };

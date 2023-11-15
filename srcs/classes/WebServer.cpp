@@ -21,7 +21,7 @@ WebServer::WebServer()
 {
 	intVector	portsNum;
 	portsNum.push_back(8080);
-	portsNum.push_back(1234);
+	portsNum.push_back(9090);
 
 	intCharMap	errorPages;
 	errorPages[404] = "/404.html";
@@ -33,14 +33,10 @@ WebServer::WebServer()
 	Server *server = new Server("server1", "/", portsNum, errorPages, locations);
 	std::cout << "fdMax: " << server->fdMax << "\n";
 
-	FD_ZERO(&socketList);
-	FD_ZERO(&portsList);
-
-	server->addPortsToSet(portsList);
-	server->addPortsToConnectionsList(connectionsList);
 	server->addPortsToPortsList(ports);
+	kq = kqueue();
+	server->addPortsToKq(kq);
 
-	socketList = portsList;
 	serversList.push_back(server);
 }
 
@@ -53,80 +49,100 @@ WebServer::~WebServer()
 {
 }
 
+bool	WebServer::isAPort(int fd)
+{
+	intPortMap::iterator it = ports.find(fd);
+	return (it != ports.end());
+}
+
+bool	WebServer::acceptNewClient(int fd)
+{
+	int newfd = ports[fd]->acceptConnection();;
+	if (newfd == -1)
+		return false;
+
+	Client* newClient = new Client(newfd);
+
+	getServerFromPort(fd)->addClient(newfd, newClient);
+	clients[newfd] = newClient;
+
+	kevent(kq, &newClient->getEvSet(), 1, NULL, 0, NULL);
+
+	if (!newClient->add_event(kq, EVFILT_READ))
+		return (false);
+	if (!newClient->add_event(kq, EVFILT_WRITE))
+		return (newClient->delete_event(kq, EVFILT_READ), false);
+
+	return (true);
+}
+
+void	WebServer::deleteClient(int fd)
+{
+	clients[fd]->delete_event(kq, EVFILT_READ);
+	clients[fd]->delete_event(kq, EVFILT_WRITE);
+	close(fd);
+	delete clients[fd];
+}
+
 void	WebServer::serverLoop()
 {
-	fd_set	read_fds;
-	/* char remoteIP[INET6_ADDRSTRLEN]; */
-	/* char buf[100000]; */
-	/* int nbytes; */
-	int newfd;
-	/* struct sockaddr_storage remoteaddr; */
-	/* socklen_t addrlen; */
-	int fdmax = serversList[0]->fdMax;
-	char msg[] = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!";
+	//char msg[] = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 12\r\nConnection close\r\n\r\nHello world!";
+	struct kevent evList[MAX_EVENTS];
+	int numEvents;
+	int	fd;
+	std::string data;
 
-
-	std::cout << "----> " << fdmax << "\n";
-	// main loop
-	struct timeval timeout;
-    timeout.tv_sec = 1;  
-	timeout.tv_usec = 0;
-	//fcntl(sockfd, ...) solo al los puertos
     while (1) 
 	{
-        read_fds = socketList; // copy it
-        if (select(fdmax + 1, &read_fds, NULL, NULL, &timeout) == -1) {
-            perror("select");
-            exit(4);
-        }
-
-        for(int i = 0; i <= fdmax; i++)
+		memset(evList, 0, sizeof(evList));
+		numEvents = kevent(kq, NULL, 0, evList, 1, NULL);
+		std::cerr << "kq: " << kq << "\n";
+		for (int i = 0; i < numEvents; i++)
 		{
-            if (FD_ISSET(i, &read_fds)) //Get a connection
+			fd = evList[i].ident;
+
+			// DISCONNECT
+			if (evList[i].flags & EV_EOF){
+				std::cerr << "DISCONNECT\n";
+				deleteClient(fd);
+			}
+
+			// NEW CLIENT
+			else if (isAPort(fd))
 			{
-                if (FD_ISSET(i, &portsList)) //New Connection
+				if (!acceptNewClient(fd))
 				{
-					/* newfd = dynamic_cast<Port*>(connectionsList[i])->acceptConnection(); */
-					newfd = ports[i]->acceptConnection();
+					std::cerr << "acceptNewClient error\n";
+					close(fd);
+					delete clients[fd];
+				}
+			}
 
-                    if (newfd == -1)
-						continue;
-                    if (newfd > fdmax)    // keep track of the max
-                        fdmax = newfd;
-                    FD_SET(newfd, &socketList); // add to socketList set
+			// RECIVE DATA
+			else if (evList[i].filter == EVFILT_READ)
+			{
+				data = clients[fd]->recvData();
+				std::ofstream file("FOCAAA");
+				file << data << std::endl;
+				if (data == "")
+					deleteClient(fd);
+				else
+					clients[fd]->enable_event(kq, EVFILT_WRITE);
+			}
 
-					Client* newClient = new Client(newfd);	//HAz estas tres cosas en una unica funcion
-					getServerFromPort(i)->addClient(newfd, newClient);
-					/* connectionsList[newfd] = newClient; */
-					clients[newfd] = newClient;
-                }
-				
-				else // Connection fron an actual client
-				{
-					/* std::string data = dynamic_cast<Client*>(connectionsList[i])->recvData(); */
-					std::string data = clients[i]->recvData();
-					/* std::string data; */
-					if (data.empty())
-					{
-                        /* close(i); // bye! */
-						/* dynamic_cast<Client*>(connectionsList[i])->closeSockFd(); */
-						clients[i]->closeSockFd();
-                        FD_CLR(i, &socketList); // remove from socketList set
-                    }
-
-					else // Data recived
-					{
-						/* std::cout << data << "\n"; */
-						/* HttpRequest request(data); */
-						/* request.printRequest(); */
-						if (send(i, msg, sizeof(msg), 0) == -1)
-							perror("send");
-						close(i);
-                        FD_CLR(i, &socketList); // remove from socketList set
-                    }
-                }
-            }
-    	}
+			// SEND
+			else if (evList[i].filter == EVFILT_WRITE)
+			{
+				/* std::cout << "WRITEEEEE\n"; */
+				HttpRequest parser(data.c_str());
+				std::string msg = getServerFromClient(fd)->getMessage(parser);
+				// std::cerr << "msg: " << msg << "\n";
+				if (send(fd, msg.c_str(), msg.length(), 0) == -1)
+					perror("send");
+				clients[fd]->disable_event(kq, EVFILT_WRITE);
+				deleteClient(fd);
+			}
+		}
 	}
 }
 
@@ -137,4 +153,3 @@ WebServer& WebServer::operator=(const WebServer& toAssign)
 	(void)toAssign;
 	return *this;
 }
-

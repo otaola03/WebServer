@@ -31,6 +31,9 @@ class Location
 		);
 		/* Location(const Location& toCopy); */
 		~Location();
+		bool		isGET() const;
+		bool		isPOST() const;
+		bool		isDELETE() const;
 
 		Location& operator=(const Location& toCopy);
 };
