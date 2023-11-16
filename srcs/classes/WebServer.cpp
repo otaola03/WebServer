@@ -21,25 +21,25 @@ Server*	WebServer::getServerFromClient(int clientFd)
 
 WebServer::WebServer()
 {
-	/* intVector	portsNum; */
-	/* portsNum.push_back(8080); */
-	/* portsNum.push_back(9090); */
+	intVector	portsNum;
+	portsNum.push_back(8080);
+	portsNum.push_back(9090);
 
-	/* intCharMap	errorPages; */
-	/* errorPages[404] = "/404.html"; */
+	intCharMap	errorPages;
+	errorPages[404] = "/404.html";
 
-	/* Location	location; */
-	/* locationVector	locations; */
-	/* locations.push_back(location); */
+	Location	location;
+	locationVector	locations;
+	locations.push_back(location);
 
-	/* Server *server = new Server("server1", "/", portsNum, errorPages, locations); */
-	/* std::cout << "fdMax: " << server->fdMax << "\n"; */
+	Server *server = new Server("server1", "/", portsNum, errorPages, locations);
+	std::cout << "fdMax: " << server->fdMax << "\n";
 
-	/* server->addPortsToPortsList(ports); */
+	server->addPortsToPortsList(ports);
 	kq = kqueue();
-	/* server->addPortsToKq(kq); */
+	server->addPortsToKq(kq);
 
-	/* serversList.push_back(server); */
+	serversList.push_back(server);
 }
 
 WebServer::WebServer(const WebServer& toCopy)
@@ -135,10 +135,9 @@ void	WebServer::serverLoop()
 	int	fd;
 	int j = 0;
 	std::string data;
-	Port port(8080);
-	port.activatePort();
-	fcntl(port.getSockFd(), F_SETFL, O_NONBLOCK);
-	manage_event(kq, port.getSockFd(), evSet, EVFILT_READ, EV_ADD);
+	/* Port port(8080); */
+	/* port.activatePort(); */
+	/* manage_event(kq, port.getSockFd(), evSet, EVFILT_READ, EV_ADD); */
 
     while (1) 
 	{
@@ -155,10 +154,12 @@ void	WebServer::serverLoop()
 				close(fd);
 
 			// NEW CLIENT
-			else if (fd == port.getSockFd())
+			/* else if (fd == port.getSockFd()) */
+			else if (isAPort(fd))
 			{
 				std::cout << "j: " << j++ << "\n";
-				if ((fd = port.acceptConnection()) == -1)
+				/* if ((fd = port.acceptConnection()) == -1) */
+				if ((fd = ports[fd]->acceptConnection()) == -1)
 				{
 					std::cout << "Error accpetin conexion\n";
 					close(fd);
