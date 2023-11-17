@@ -36,8 +36,14 @@ WebServer::WebServer()
 	std::cout << "fdMax: " << server->fdMax << "\n";
 
 	server->addPortsToPortsList(ports);
-	kq = kqueue();
-	server->addPortsToKq(kq);
+	/* kq = kqueue(); */
+	std::cout << kq.getKq() << "\n";
+
+	intPortMap& serverPorts = server->getPortsList();
+	for (intPortMap::iterator it = serverPorts.begin(); it != serverPorts.end(); ++it)
+		kq.addPort(it->first);
+
+	/* server->addPortsToKq(kq.getKq()); */
 
 	serversList.push_back(server);
 }
@@ -57,34 +63,34 @@ bool	WebServer::isAPort(int fd)
 	return (it != ports.end());
 }
 
-bool	WebServer::acceptNewClient(int fd)
-{
-	int newfd = ports[fd]->acceptConnection();;
-	if (newfd == -1)
-		return false;
+/* bool	WebServer::acceptNewClient(int fd) */
+/* { */
+/* 	int newfd = ports[fd]->acceptConnection();; */
+/* 	if (newfd == -1) */
+/* 		return false; */
 
-	Client* newClient = new Client(newfd);
+/* 	Client* newClient = new Client(newfd); */
 
-	getServerFromPort(fd)->addClient(newfd, newClient);
-	clients[newfd] = newClient;
+/* 	getServerFromPort(fd)->addClient(newfd, newClient); */
+/* 	clients[newfd] = newClient; */
 
-	kevent(kq, &newClient->getEvSet(), 1, NULL, 0, NULL);
+/* 	kevent(kq, &newClient->getEvSet(), 1, NULL, 0, NULL); */
 
-	if (!newClient->add_event(kq, EVFILT_READ))
-		return (false);
-	if (!newClient->add_event(kq, EVFILT_WRITE))
-		return (newClient->delete_event(kq, EVFILT_READ), false);
+/* 	if (!newClient->add_event(kq, EVFILT_READ)) */
+/* 		return (false); */
+/* 	if (!newClient->add_event(kq, EVFILT_WRITE)) */
+/* 		return (newClient->delete_event(kq, EVFILT_READ), false); */
 
-	return (true);
-}
+/* 	return (true); */
+/* } */
 
-void	WebServer::deleteClient(int fd)
-{
-	clients[fd]->delete_event(kq, EVFILT_READ);
-	clients[fd]->delete_event(kq, EVFILT_WRITE);
-	close(fd);
-	delete clients[fd];
-}
+/* void	WebServer::deleteClient(int fd) */
+/* { */
+/* 	clients[fd]->delete_event(kq, EVFILT_READ); */
+/* 	clients[fd]->delete_event(kq, EVFILT_WRITE); */
+/* 	close(fd); */
+/* 	delete clients[fd]; */
+/* } */
 
 static std::string	recvData(int sockfd)
 {
@@ -118,93 +124,72 @@ static std::string	recvData(int sockfd)
 	return recvData;
 }
 
-static bool manage_event(int kq, int fd, struct kevent& evSet, int type, int option)
-{
-	EV_SET(&evSet, fd, type, option, 0, 0, NULL);
-	if (kevent(kq, &evSet, 1, NULL, 0, NULL) == -1)
-		return false;
-	return true;
-}
+/* static bool manage_event(int kq, int fd, struct kevent& evSet, int type, int option) */
+/* { */
+/* 	EV_SET(&evSet, fd, type, option, 0, 0, NULL); */
+/* 	if (kevent(kq, &evSet, 1, NULL, 0, NULL) == -1) */
+/* 		return false; */
+/* 	return true; */
+/* } */
 
 void	WebServer::serverLoop()
 {
 	char msg[] = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 12\r\nConnection close\r\n\r\nHello world!";
-	struct kevent evList[MAX_EVENTS];
-	struct kevent evSet;
 	int numEvents;
 	int	fd;
-	int j = 0;
 	std::string data;
-	/* Port port(8080); */
-	/* port.activatePort(); */
-	/* manage_event(kq, port.getSockFd(), evSet, EVFILT_READ, EV_ADD); */
 
     while (1) 
 	{
 		/* memset(evList, 0, sizeof(evList)); */
 		std::cout << "before\n";
-		numEvents = kevent(kq, NULL, 0, evList, 1, NULL);
+		numEvents = kq.listenNewEvents();
 		std::cout << "after\n";
 		for (int i = 0; i < numEvents; i++)
 		{
-			fd = evList[i].ident;
+			/* fd = evList[i].ident; */
+			fd = kq.getEvSet(i).ident;
+			std::cout << fd;
 
 			// DISCONNECT
-			if (evList[i].flags & EV_EOF)
+			if (kq.getEvSet(i).flags & EV_EOF)
 				close(fd);
 
 			// NEW CLIENT
-			/* else if (fd == port.getSockFd()) */
 			else if (isAPort(fd))
 			{
-				std::cout << "j: " << j++ << "\n";
-				/* if ((fd = port.acceptConnection()) == -1) */
 				if ((fd = ports[fd]->acceptConnection()) == -1)
 				{
 					std::cout << "Error accpetin conexion\n";
 					close(fd);
 				}
 				else
-					std::cout << "new connecion\n";
-
-				fcntl(fd, F_SETFL, O_NONBLOCK);
-
-				if (!manage_event(kq, fd, evSet, EVFILT_READ, EV_ADD | EV_ENABLE))
-					close(fd);
-
-				if (!manage_event(kq, fd, evSet, EVFILT_WRITE, EV_ADD | EV_DISABLE))
-					close(fd);
+					if (!kq.manageNewConnection(fd))
+						close(fd);
 			}
 
 
 			// RECIVE DATA
-			else if (evList[i].filter == EVFILT_READ)
+			else if (kq.getEvSet(i).filter == EVFILT_READ)
 			{
 				/* std::cout << "recive data\n"; */
 				data = recvData(fd);
 				if (data == "")
 					close(fd);
-				if (!manage_event(kq, fd, evSet, EVFILT_WRITE, EV_ENABLE))
+				if (!kq.enableWrite(fd))
 					close(fd);
 				std::cout << data << "\n";
 
 			}
 
 			// SEND
-			else if (evList[i].filter == EVFILT_WRITE)
+			else if (kq.getEvSet(i).filter == EVFILT_WRITE)
 			{
 				/* std::cout << "send data\n"; */
 				if (send(fd, msg, sizeof(msg), 0) == -1)
 					close(fd);
 
-				if (!manage_event(kq, fd, evSet, EVFILT_WRITE, EV_DISABLE))
-					close(fd);
-
-				if (!manage_event(kq, fd, evSet, EVFILT_READ, EV_DELETE))
-					close(fd);
-
-				if (!manage_event(kq, fd, evSet, EVFILT_WRITE, EV_DELETE))
-					close(fd);
+				kq.manageEndedConnection(fd);
 				close(fd);
 			}
 		}

@@ -108,13 +108,14 @@ int	Port::acceptConnection()
 	socklen_t sin_size;
 	struct sockaddr_storage their_addr;
 
-   sin_size = sizeof their_addr;
-   new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &sin_size);
-   if (new_fd == -1 || new_fd == 0)
-       perror("accept");
-   if (new_fd != -1)
+	sin_size = sizeof their_addr;
+	new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &sin_size);
+	if (new_fd == -1 || new_fd == 0)
+		perror("accept");
+	else
 	   printClientInfo(their_addr);
-   return (new_fd);
+	fcntl(new_fd, F_SETFL, O_NONBLOCK);
+	return (new_fd);
 }
 
 Port& Port::operator=(const Port& toAssign)

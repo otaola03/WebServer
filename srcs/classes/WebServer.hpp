@@ -4,8 +4,8 @@
 
 #include "Server.hpp"
 #include "Connection.hpp"
+#include "Kqueue.hpp"
 
-#define MAX_EVENTS 32
 
 typedef std::vector<Server*> serverVector;
 typedef std::map<int, Port*> intPortMap;
@@ -14,7 +14,8 @@ typedef std::map<int, Client*> intClientMap;
 class WebServer
 {
 	private:
-		int kq;
+		/* int kq; */
+		Kqueue kq;
 		/* fd_set	portsList; */
 		/* fd_set	socketList; */
 		serverVector	serversList;
