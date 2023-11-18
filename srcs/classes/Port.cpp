@@ -56,7 +56,7 @@ Port::Port(const int port) : port(port)
 	// std::string stringPort = std::to_string(port);
 	ss << port;
 	std::string stringPort = ss.str();
-	if ((status = getaddrinfo(NULL, stringPort.c_str(), &templateAddr, &portInfo)) != 0)
+	if ((status = getaddrinfo("127.0.0.1", stringPort.c_str(), &templateAddr, &portInfo)) != 0)
 	{
     	fprintf(stderr, "getaddrinfo error: %s\n", gai_strerror(status));
     	exit(1);
@@ -98,7 +98,7 @@ static void *get_in_addr(struct sockaddr *sa)
 static void	printClientInfo(struct sockaddr_storage &their_addr)
 {
 	char s[INET6_ADDRSTRLEN];
-	inet_ntop(their_addr.ss_family, get_in_addr((struct sockaddr *)&their_addr), s, sizeof s);
+	inet_ntop(AF_INET, get_in_addr((struct sockaddr *)&their_addr), s, sizeof s);
 	std::cout << "port: got conection from " << s << "\n";
 }
 
