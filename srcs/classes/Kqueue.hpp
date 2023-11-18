@@ -28,7 +28,7 @@ class Kqueue
 		int getKq();
 
 		bool	addPort(int sockfd);
-		int	listenNewEvents();
+		int		listenNewEvents();
 
 		bool	manageNewConnection(int fd);
 		bool	enableWrite(int fd);

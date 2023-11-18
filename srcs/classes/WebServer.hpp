@@ -14,18 +14,11 @@ typedef std::map<int, Client*> intClientMap;
 class WebServer
 {
 	private:
-		/* int kq; */
 		Kqueue kq;
-		/* fd_set	portsList; */
-		/* fd_set	socketList; */
 		serverVector	serversList;
-		/* intConnectionMap	connectionsList; */
 		intPortMap			ports;
-		intClientMap		clients;
-
 
 		Server*	getServerFromPort(int portFd);
-		Server*	getServerFromClient(int clientFd);
 
 	public:
 		WebServer();

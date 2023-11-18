@@ -2,7 +2,6 @@
 
 Kqueue::Kqueue(): totalConnections(0)
 {
-	std::cout << "HOLAAAAAAAAAAAAA\n";
 	kq = kqueue();
 }
 
@@ -29,7 +28,6 @@ static bool manage_event(int kq, int fd, struct kevent& evSet, int type, int opt
 
 bool	Kqueue::addPort(int sockfd)
 {
-	std::cout << "Port; " << sockfd << "\n";
 	if (!manage_event(kq, sockfd, evSet, EVFILT_READ, EV_ADD | EV_ENABLE))
 		return false;
 	return true;
@@ -37,7 +35,8 @@ bool	Kqueue::addPort(int sockfd)
 
 int	Kqueue::listenNewEvents()
 {
-	return (kevent(kq, NULL, 0, evList, 1, NULL));
+	/* std::cout << "Listening...\n"; */
+	return (kevent(kq, NULL, 0, evList, 25, NULL));
 }
 
 bool	Kqueue::manageNewConnection(int fd)
@@ -47,8 +46,7 @@ bool	Kqueue::manageNewConnection(int fd)
 
 	if (!manage_event(kq, fd, evSet, EVFILT_WRITE, EV_ADD | EV_DISABLE))
 		return false;
-	std::cout << "Connection stablished trough scoket: " << fd << "\n";
-	std::cout << "Connections stablished: " << totalConnections << "\n";
+	totalConnections++;
 	return true;
 }
 

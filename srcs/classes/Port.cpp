@@ -95,11 +95,11 @@ static void *get_in_addr(struct sockaddr *sa)
     return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 
-static void	printClientInfo(struct sockaddr_storage &their_addr)
+static void	printClientInfo(struct sockaddr_storage &their_addr, int sockfd, int port)
 {
 	char s[INET6_ADDRSTRLEN];
 	inet_ntop(AF_INET, get_in_addr((struct sockaddr *)&their_addr), s, sizeof s);
-	std::cout << "port: got conection from " << s << "\n";
+	std::cout << "Connection from " << s << ":" << port << " throught socket " << sockfd << "\n";
 }
 
 int	Port::acceptConnection()
@@ -113,7 +113,7 @@ int	Port::acceptConnection()
 	if (new_fd == -1 || new_fd == 0)
 		perror("accept");
 	else
-	   printClientInfo(their_addr);
+	   printClientInfo(their_addr, new_fd, port);
 	fcntl(new_fd, F_SETFL, O_NONBLOCK);
 	return (new_fd);
 }

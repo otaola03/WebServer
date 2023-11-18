@@ -11,14 +11,6 @@ Server*	WebServer::getServerFromPort(int portFd)
 	return NULL;
 }
 
-Server*	WebServer::getServerFromClient(int clientFd)
-{
-	for (serverVector::iterator it = serversList.begin(); it != serversList.end(); ++it)
-		if ((*it)->containsThisClient(clientFd))
-			return (*it);
-	return NULL;
-}
-
 WebServer::WebServer()
 {
 	intVector	portsNum;
@@ -33,17 +25,13 @@ WebServer::WebServer()
 	locations.push_back(location);
 
 	Server *server = new Server("server1", "/", portsNum, errorPages, locations);
-	std::cout << "fdMax: " << server->fdMax << "\n";
-
-	server->addPortsToPortsList(ports);
-	/* kq = kqueue(); */
-	std::cout << kq.getKq() << "\n";
 
 	intPortMap& serverPorts = server->getPortsList();
 	for (intPortMap::iterator it = serverPorts.begin(); it != serverPorts.end(); ++it)
+	{
 		kq.addPort(it->first);
-
-	/* server->addPortsToKq(kq.getKq()); */
+		ports[it->first] = it->second;
+	}
 
 	serversList.push_back(server);
 }
@@ -62,35 +50,6 @@ bool	WebServer::isAPort(int fd)
 	intPortMap::iterator it = ports.find(fd);
 	return (it != ports.end());
 }
-
-/* bool	WebServer::acceptNewClient(int fd) */
-/* { */
-/* 	int newfd = ports[fd]->acceptConnection();; */
-/* 	if (newfd == -1) */
-/* 		return false; */
-
-/* 	Client* newClient = new Client(newfd); */
-
-/* 	getServerFromPort(fd)->addClient(newfd, newClient); */
-/* 	clients[newfd] = newClient; */
-
-/* 	kevent(kq, &newClient->getEvSet(), 1, NULL, 0, NULL); */
-
-/* 	if (!newClient->add_event(kq, EVFILT_READ)) */
-/* 		return (false); */
-/* 	if (!newClient->add_event(kq, EVFILT_WRITE)) */
-/* 		return (newClient->delete_event(kq, EVFILT_READ), false); */
-
-/* 	return (true); */
-/* } */
-
-/* void	WebServer::deleteClient(int fd) */
-/* { */
-/* 	clients[fd]->delete_event(kq, EVFILT_READ); */
-/* 	clients[fd]->delete_event(kq, EVFILT_WRITE); */
-/* 	close(fd); */
-/* 	delete clients[fd]; */
-/* } */
 
 static std::string	recvData(int sockfd)
 {
@@ -115,7 +74,7 @@ static std::string	recvData(int sockfd)
  				/* exit(1); */
 			}
 			if (numbytes == EWOULDBLOCK)
-				return (perror("recv blcok"), "X");
+				return (perror("recv blcok"), "");
 		}
 		buf[numbytes] = '\0';
 		recvData += buf;
@@ -141,15 +100,10 @@ void	WebServer::serverLoop()
 
     while (1) 
 	{
-		/* memset(evList, 0, sizeof(evList)); */
-		std::cout << "before\n";
 		numEvents = kq.listenNewEvents();
-		std::cout << "after\n";
 		for (int i = 0; i < numEvents; i++)
 		{
-			/* fd = evList[i].ident; */
 			fd = kq.getEvSet(i).ident;
-			std::cout << fd;
 
 			// DISCONNECT
 			if (kq.getEvSet(i).flags & EV_EOF)
@@ -159,33 +113,25 @@ void	WebServer::serverLoop()
 			else if (isAPort(fd))
 			{
 				if ((fd = ports[fd]->acceptConnection()) == -1)
-				{
-					std::cout << "Error accpetin conexion\n";
 					close(fd);
-				}
 				else
 					if (!kq.manageNewConnection(fd))
 						close(fd);
 			}
 
-
 			// RECIVE DATA
 			else if (kq.getEvSet(i).filter == EVFILT_READ)
 			{
-				/* std::cout << "recive data\n"; */
 				data = recvData(fd);
 				if (data == "")
 					close(fd);
 				if (!kq.enableWrite(fd))
 					close(fd);
-				std::cout << data << "\n";
-
 			}
 
 			// SEND
 			else if (kq.getEvSet(i).filter == EVFILT_WRITE)
 			{
-				/* std::cout << "send data\n"; */
 				if (send(fd, msg, sizeof(msg), 0) == -1)
 					close(fd);
 
