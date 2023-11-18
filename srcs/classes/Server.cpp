@@ -32,6 +32,8 @@ Server::~Server()
 {
 }
 
+intPortMap& Server::getPortsList() {return fdPortsList;}
+
 
 //------------------------------------------------------------------------------------------
 /* void	Server::addPortsToSet(fd_set& portsFdSet) */
@@ -60,11 +62,14 @@ void	Server::addPortsToPortsList(intPortMap& portsList)
 
 
 //------------------------------------------------------------------------------------------
-void	Server::addPortsToKq(int kq)
-{
-	for (intPortMap::iterator it = fdPortsList.begin(); it != fdPortsList.end(); ++it)
-		kevent(kq, &it->second->getEvSet(), 1, NULL, 0, NULL);
-}
+/* void	Server::addPortsToKq(int kq) */
+/* { */
+/* 	for (intPortMap::iterator it = fdPortsList.begin(); it != fdPortsList.end(); ++it) */
+/* 	{ */
+/* 		std::cout << "i\n"; */
+/* 		kevent(kq, &it->second->getEvSet(), 1, NULL, 0, NULL); */
+/* 	} */
+/* } */
 //------------------------------------------------------------------------------------------
 
 

@@ -42,7 +42,7 @@ void	Connection::setSocketNonBlocking(int sockfd)
 
 void	Connection::ev_set()
 {
-	EV_SET(&evSet, sockfd, EVFILT_READ, EV_ADD, 0, 0, NULL);
+	EV_SET(&evSet, sockfd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
 }
 
 bool	Connection::add_event(int kq, int event)

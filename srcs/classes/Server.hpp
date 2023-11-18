@@ -63,6 +63,7 @@ class Server
 		Server(const Server& toCopy);
 		~Server();
 
+		intPortMap& getPortsList();
 		/* void	addPortsToSet(fd_set& portsList); */
 		/* void	addPortsToConnectionsList(intConnectionMap& connectionsList); */
 		void	addClient(int clientFd, Client* client);
