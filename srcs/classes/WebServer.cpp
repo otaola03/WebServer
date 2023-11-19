@@ -51,40 +51,68 @@ bool	WebServer::isAPort(int fd)
 	return (it != ports.end());
 }
 
+/* static std::string	recvData(int sockfd) */
+/* { */
+/* 	char buf[1024]; */
+/* 	std::string recvData; */
+/* 	int numbytes = 1024 - 1; */
+
+/* 	/1* while (numbytes == 1024 - 1) *1/ */
+/* 	while (numbytes > 0) */
+/* 	{ */
+/* 		if ((numbytes = recv(sockfd, buf, sizeof(buf) - 1, 0)) <= 0) */
+/* 		{ */
+/* 			if (numbytes == 0) */
+/* 			{ */
+/* 				std::cout << RED << "selectserver: socket "<< sockfd << " hung up\n" << WHITE; */
+/* 				return ""; */
+/* 			} */
+/* 			else if (numbytes == -1) */
+/* 			{ */
+/*  				/1* perror("recv"); *1/ */
+/* 				/1* return ""; *1/ */
+/*  				/1* exit(1); *1/ */
+/* 			} */
+/* 			else if (numbytes == EWOULDBLOCK) */
+/* 				return (perror("recv blcok"), ""); */
+/* 		} */
+/* 		else */
+/* 		{ */
+/* 			buf[numbytes] = '\0'; */
+/* 			std::string stringBuf(buf); */
+/* 			recvData += buf; */
+/* 		} */
+/* 		/1* std::cout << "numbytes: " << numbytes << "\n"; *1/ */
+/* 	} */
+/* 	/1* std::cout << recvData << "\n\n"; *1/ */
+/* 	return recvData; */
+/* } */
+
 static std::string	recvData(int sockfd)
 {
-	char buf[1024];
+	char buf[1025];
 	std::string recvData;
-	int numbytes = 1024 - 1;
+	int numbytes = 1024;
+	int i = 0;
 
-	/* while (numbytes == 1024 - 1) */
-	while (numbytes > 0)
+	while (numbytes == 1024)
 	{
 		if ((numbytes = recv(sockfd, buf, sizeof(buf) - 1, 0)) <= 0)
 		{
 			if (numbytes == 0)
+				std::cout << "selectserver: socket "<< sockfd << " hung up\n";
+			if (numbytes == -1)
 			{
-				std::cout << RED << "selectserver: socket "<< sockfd << " hung up\n" << WHITE;
-				return "";
+ 				perror("recv");
+ 				exit(1);
 			}
-			else if (numbytes == -1)
-			{
- 				/* perror("recv"); */
-				/* return ""; */
- 				/* exit(1); */
-			}
-			else if (numbytes == EWOULDBLOCK)
-				return (perror("recv blcok"), "");
+			if (numbytes == EWOULDBLOCK)
+				return (std::cout << "HHHHHHHHHHHHHHHHHHHHHHHHHHHHH\n\n\n", "");
 		}
-		else
-		{
-			buf[numbytes] = '\0';
-			std::string stringBuf(buf);
-			recvData += buf;
-		}
-		/* std::cout << "numbytes: " << numbytes << "\n"; */
+		std::string vaca(buf, numbytes);
+		i += numbytes;
+		recvData += vaca;
 	}
-	/* std::cout << recvData << "\n\n"; */
 	return recvData;
 }
 
