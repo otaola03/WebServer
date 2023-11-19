@@ -69,7 +69,7 @@ static std::string	recvData(int sockfd)
 			}
 			else if (numbytes == -1)
 			{
- 				perror("recv");
+ 				/* perror("recv"); */
 				/* return ""; */
  				/* exit(1); */
 			}
@@ -77,10 +77,12 @@ static std::string	recvData(int sockfd)
 				return (perror("recv blcok"), "");
 		}
 		else
+		{
 			buf[numbytes] = '\0';
+			std::string stringBuf(buf);
+			recvData += buf;
+		}
 		/* std::cout << "numbytes: " << numbytes << "\n"; */
-		std::string stringBuf(buf);
-		recvData += buf;
 	}
 	/* std::cout << recvData << "\n\n"; */
 	return recvData;
@@ -137,13 +139,6 @@ void	WebServer::serverLoop()
 			// SEND
 			else if (kq.getEvSet(i).filter == EVFILT_WRITE)
 			{
-				/* std::cout << "-------------------------\n"; */
-				/* std::cout << data << "\n"; */
-				/* std::cout << "-------------------------\n"; */
-				/* HttpRequest parser(data.c_str()); */
-				/* std::cout << BLUE << "====================================\n" << WHITE; */
-				/* std::cout << data << "\n"; */
-				/* std::cout << BLUE << "====================================\n" << WHITE; */
 				HttpRequest parser(data);
 				std::string msg = server->getMessage(parser);
 				if (send(fd, msg.c_str(), msg.length(), 0) == -1)
