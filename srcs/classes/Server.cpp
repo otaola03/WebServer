@@ -186,12 +186,15 @@ std::string Server::postImage(std::string path, std::string body){
 	// std::cout << "BODY = [" << body[0] << "]\n";
 	if (body[1] == '-')
 		body_content = body.substr(body.find("\r\n\r\n") + 4);
+	std::cout << body_content << "\n";
 	std::string msg = "HTTP/1.1 201 Created\nLocation: /resources/bin/";
 	DIR *dir;
 	int i = 0;
 	struct dirent *entry;
+	std::cout << "PARAGUAYO\n";
 	dir = opendir("./resources/bin");
 	if (dir){
+		std::cout << "DNREOOOOOOO\n";
 		while ((entry = readdir(dir)) != NULL) {
 			if (entry->d_name == std::to_string(i) + ".png"){
 				i++;
@@ -201,6 +204,23 @@ std::string Server::postImage(std::string path, std::string body){
 		imageFile.write(body_content.c_str(), body_content.length());
 		imageFile.close();
 		closedir(dir);
+
+    	/* // Crear un vector de bytes a partir de la cadena binaria */
+    	/* std::vector<unsigned char> imageBytes(body.begin(), body.end()); */
+		/* /1* std::cout << BLUE << "====================================\n" << WHITE; *1/ */
+		/* /1* std::cout << body << "\n"; *1/ */
+		/* /1* std::cout << BLUE << "====================================\n" << WHITE; *1/ */
+
+    	/* // Escribir los datos en un archivo binario */
+    	/* std::ofstream outputFile("./resources/bin/imagen_recibida.png", std::ios::binary); */
+    	/* if (outputFile.is_open()) { */
+    	/*     outputFile.write(reinterpret_cast<const char*>(imageBytes.data()), imageBytes.size()); */
+    	/*     outputFile.close(); */
+    	/*     std::cout << "Imagen creada y guardada con éxito." << std::endl; */
+    	/* } else { */
+    	/*     std::cerr << "Error al abrir el archivo para escritura." << std::endl; */
+    	/* } */
+
 	}
 	msg.append("\nContent-Type: text/html");
 	msg.append("\nContent-Length: ");

@@ -4,7 +4,7 @@
 // {
 // }
 
-static	RequestType whatTypeIs(std::string type)
+static	RequestType whatTypeIs(const std::string& type)
 {
 	if (type == "GET")
 		return GET;
@@ -27,18 +27,34 @@ void	HttpRequest::saveRequest(const std::string& toProcess)
 	path = path.erase(path.size() - 1);
 }
 
-void	HttpRequest::saveBody(const char* toProcess)
+/* void	HttpRequest::saveBody(const char* toProcess) */
+/* { */
+/* 	std::string contentLength; */
+/* 	contentLength = std::strstr(toProcess, "content-length: ") ? std::strstr(toProcess, "content-length: ") : std::strstr(toProcess, "Content-Length: "); */
+/* 	if (contentLength.empty()) */
+/* 		return ; */
+/* 	int length = std::atoi(contentLength.c_str() + 16); */
+/* 	const char* body_t = std::strstr(toProcess, "\r\n\r\n"); */
+/* 	body = std::string(body_t, length); */
+/* 	body = body.substr(body.find("\r\n\r\n") + 4); */
+/* 	size_t lastLine = body.find_last_of("\n"); */
+/* 	body = body.substr(0, lastLine); */
+/* } */
+
+void	HttpRequest::saveBody(const std::string& toProcess)
 {
-	std::string contentLength;
-	contentLength = std::strstr(toProcess, "content-length: ") ? std::strstr(toProcess, "content-length: ") : std::strstr(toProcess, "Content-Length: ");
-	if (contentLength.empty())
-		return ;
-	int length = std::atoi(contentLength.c_str() + 16);
-	const char* body_t = std::strstr(toProcess, "\r\n\r\n");
-	body = std::string(body_t, length);
-	body = body.substr(body.find("\r\n\r\n") + 4);
-	size_t lastLine = body.find_last_of("\n");
-	body = body.substr(0, lastLine);
+	/* std::cout << toProcess << "\n"; */
+	/* std::string auxBody = toProcess.substr(toProcess.find("\r\n\r\n") + 4); */
+	/* std::cout << BLUE << "====================================\n" << WHITE; */
+	/* std::cout << auxBody << "\n"; */
+	/* std::cout << BLUE << "====================================\n" << WHITE; */
+
+	/* body = auxBody.substr(auxBody.find("\r\n\r\n")); */
+	/* std::cout << body.find("\r\n\r\n") << "\n"; */
+	body = toProcess.substr(toProcess.find("\r\n\r\n") + 4);
+	std::cout << RED << "====================================\n" << WHITE;
+	std::cout << toProcess << "\n";
+	std::cout << RED << "====================================\n" << WHITE;
 }
 
 void	HttpRequest::printBody()
@@ -98,10 +114,10 @@ void	HttpRequest::saveHeaders(const std::string& toProccess)
 }
 
 
-HttpRequest::HttpRequest(const char* toProcess)
+HttpRequest::HttpRequest(const std::string& toProcess)
 {
-	saveRequest(std::string(toProcess));
-	saveHeaders(std::string(toProcess));
+	saveRequest(toProcess);
+	saveHeaders(toProcess);
 	if (type == POST)
 		saveBody(toProcess);
 }

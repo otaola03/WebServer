@@ -55,28 +55,31 @@ static std::string	recvData(int sockfd)
 {
 	char buf[1024];
 	std::string recvData;
-	int numbytes = 1024;
+	int numbytes = 1024 - 1;
 
-	/* while (numbytes > 0) */
-	while (numbytes == MAXDATASIZE)
+	/* while (numbytes == 1024 - 1) */
+	while (numbytes > 0)
 	{
-		if ((numbytes = recv(sockfd, buf, sizeof(buf), 0)) <= 0)
+		if ((numbytes = recv(sockfd, buf, sizeof(buf) - 1, 0)) <= 0)
 		{
 			if (numbytes == 0)
 			{
 				std::cout << RED << "selectserver: socket "<< sockfd << " hung up\n" << WHITE;
 				return "";
 			}
-			if (numbytes == -1)
+			else if (numbytes == -1)
 			{
  				perror("recv");
-				return "";
+				/* return ""; */
  				/* exit(1); */
 			}
-			if (numbytes == EWOULDBLOCK)
+			else if (numbytes == EWOULDBLOCK)
 				return (perror("recv blcok"), "");
 		}
-		buf[numbytes] = '\0';
+		else
+			buf[numbytes] = '\0';
+		/* std::cout << "numbytes: " << numbytes << "\n"; */
+		std::string stringBuf(buf);
 		recvData += buf;
 	}
 	/* std::cout << recvData << "\n\n"; */
@@ -93,7 +96,7 @@ static std::string	recvData(int sockfd)
 
 void	WebServer::serverLoop()
 {
-	char msg[] = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 12\r\nConnection close\r\n\r\nHello world!";
+	/* char msg[] = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 12\r\nConnection close\r\n\r\nHello world!"; */
 	int numEvents;
 	int	fd;
 	std::string data;
@@ -124,7 +127,7 @@ void	WebServer::serverLoop()
 			// RECIVE DATA
 			else if (kq.getEvSet(i).filter == EVFILT_READ)
 			{
-				data = recvData(fd);
+				data += recvData(fd);
 				if (data == "")
 					close(fd);
 				if (!kq.enableWrite(fd))
@@ -134,13 +137,20 @@ void	WebServer::serverLoop()
 			// SEND
 			else if (kq.getEvSet(i).filter == EVFILT_WRITE)
 			{
-				/* std::cout << "WRITEEEEE\n"; */
-				HttpRequest parser(data.c_str());
+				/* std::cout << "-------------------------\n"; */
+				/* std::cout << data << "\n"; */
+				/* std::cout << "-------------------------\n"; */
+				/* HttpRequest parser(data.c_str()); */
+				/* std::cout << BLUE << "====================================\n" << WHITE; */
+				/* std::cout << data << "\n"; */
+				/* std::cout << BLUE << "====================================\n" << WHITE; */
+				HttpRequest parser(data);
 				std::string msg = server->getMessage(parser);
 				if (send(fd, msg.c_str(), msg.length(), 0) == -1)
 					perror("send");
 				kq.manageEndedConnection(fd);
 				close(fd);
+				data = "";
 			}
 		}
 	}

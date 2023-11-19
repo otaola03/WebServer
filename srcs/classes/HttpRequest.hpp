@@ -6,23 +6,24 @@
 # include<vector>
 # include<sstream>
 # include<map>
+# include "../../includes/colors.h"
 
 enum RequestType {GET, POST, DELETE, UNDEFINED};
 
 class HttpRequest
 {
 	private:
-		std::map<std::string, std::string> headers;
 		RequestType	type;
 		std::string	path;
+		std::map<std::string, std::string> headers;
 		std::string	body;
 
 		void	saveRequest(const std::string& toProcess);
 		void	saveHeaders(const std::string& toProcess);
-		void	saveBody(const char* toProcess);
+		void	saveBody(const std::string& toProcess);
 
 	public:
-		HttpRequest(const char* toProcess);
+		HttpRequest(const std::string& toProcess);
 		HttpRequest(const HttpRequest& toCopy);
 		~HttpRequest();
 
