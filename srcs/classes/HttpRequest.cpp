@@ -83,8 +83,12 @@ static void	splitRequest(std::vector<std::string>& lines, const std::string& toP
 	std::string	line;
 
 	while (std::getline(stream, line))
+	{
 		if (!line.empty())
 			lines.push_back(line);
+		if (line.find("\r\n\r\n"))
+			return ;
+	}
 }
 
 void	HttpRequest::saveHeaders(const std::string& toProccess)
