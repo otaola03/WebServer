@@ -55,11 +55,11 @@ bool	Server::containsThisPort(int portFd)
 	return (it != fdPortsList.end());
 }
 
-bool	Server::containsThisClient(int clientFd)
-{
-	intClientMap::iterator it = fdClientsList.find(clientFd);
-	return (it != fdClientsList.end());
-}
+/* bool	Server::containsThisClient(int clientFd) */
+/* { */
+/* 	intClientMap::iterator it = fdClientsList.find(clientFd); */
+/* 	return (it != fdClientsList.end()); */
+/* } */
 
 Server& Server::operator=(const Server& toAssign)
 {
