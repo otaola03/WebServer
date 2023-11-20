@@ -104,7 +104,7 @@ static std::string	recvData(int sockfd)
 			if (numbytes == -1)
 			{
  				perror("recv");
- 				exit(1);
+				return "";
 			}
 			if (numbytes == EWOULDBLOCK)
 				return (std::cout << "HHHHHHHHHHHHHHHHHHHHHHHHHHHHH\n\n\n", "");
@@ -114,6 +114,26 @@ static std::string	recvData(int sockfd)
 		recvData += vaca;
 	}
 	return recvData;
+}
+
+static bool	sendData(int sockfd, std::string msg)
+{
+	int numbytes;
+	int totalBitsSend = 0;
+	int	bitsToSend = msg.length();
+
+	while (totalBitsSend < bitsToSend)
+	{
+		numbytes = send(sockfd, msg.c_str(), msg.length(), 0);
+		if (numbytes == -1)
+ 			return (perror("recv"), false);
+		else
+		{
+			totalBitsSend += numbytes;
+			msg = msg.substr(numbytes, msg.length());
+		}
+	}
+	return true;
 }
 
 /* static bool manage_event(int kq, int fd, struct kevent& evSet, int type, int option) */
@@ -154,7 +174,7 @@ void	WebServer::serverLoop()
 						close(fd);
 			}
 
-			// RECIVE DATA
+			// RECIVE DATA ------- MIRA LO DEL MAXBODY SIZE
 			else if (kq.getEvSet(i).filter == EVFILT_READ)
 			{
 				data += recvData(fd);
@@ -171,8 +191,9 @@ void	WebServer::serverLoop()
 				/* std::string msg = server->getMessage(parser); */
 				HttpResponse response(parser);
 				std::string msg = response.getMsg();
-				if (send(fd, msg.c_str(), msg.length(), 0) == -1)
-					perror("send");
+				sendData(fd, msg);
+				/* if (send(fd, msg.c_str(), msg.length(), 0) == -1) */
+				/* 	perror("send"); */
 				kq.manageEndedConnection(fd);
 				close(fd);
 				data = "";

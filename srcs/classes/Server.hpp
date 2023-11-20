@@ -64,12 +64,12 @@ class Server
 		void	addClient(int clientFd, Client* client);
 
 		bool	containsThisPort(int portFd);
-		bool	containsThisClient(int clientFd);
+		/* bool	containsThisClient(int clientFd); */
 
 		void	addPortsToPortsList(intPortMap& portsList);
-		void	addPortsToClientsList(intClientMap& clientsList);
+		/* void	addPortsToClientsList(intClientMap& clientsList); */
 
-		void	addPortsToKq(int kq);
+		/* void	addPortsToKq(int kq); */
 
 		void	addPortsToSet(fd_set& portsList);
 
