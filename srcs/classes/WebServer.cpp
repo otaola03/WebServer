@@ -160,7 +160,7 @@ void	WebServer::serverLoop()
 				data += recvData(fd);
 				if (data == "")
 					close(fd);
-				if (!kq.enableWrite(fd))
+				else if(!kq.enableWrite(fd))
 					close(fd);
 			}
 
@@ -168,7 +168,9 @@ void	WebServer::serverLoop()
 			else if (kq.getEvSet(i).filter == EVFILT_WRITE)
 			{
 				HttpRequest parser(data);
-				std::string msg = server->getMessage(parser);
+				/* std::string msg = server->getMessage(parser); */
+				HttpResponse response(parser);
+				std::string msg = response.getMsg();
 				if (send(fd, msg.c_str(), msg.length(), 0) == -1)
 					perror("send");
 				kq.manageEndedConnection(fd);

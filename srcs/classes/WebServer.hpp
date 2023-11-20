@@ -5,6 +5,7 @@
 #include "Server.hpp"
 #include "Connection.hpp"
 #include "Kqueue.hpp"
+#include "HttpResponse.hpp"
 
 
 typedef std::vector<Server*> serverVector;

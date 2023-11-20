@@ -43,18 +43,10 @@ void	HttpRequest::saveRequest(const std::string& toProcess)
 
 void	HttpRequest::saveBody(const std::string& toProcess)
 {
-	/* std::cout << toProcess << "\n"; */
 	/* std::string auxBody = toProcess.substr(toProcess.find("\r\n\r\n") + 4); */
-	/* std::cout << BLUE << "====================================\n" << WHITE; */
-	/* std::cout << auxBody << "\n"; */
-	/* std::cout << BLUE << "====================================\n" << WHITE; */
 
 	/* body = auxBody.substr(auxBody.find("\r\n\r\n")); */
-	/* std::cout << body.find("\r\n\r\n") << "\n"; */
 	body = toProcess.substr(toProcess.find("\r\n\r\n") + 4);
-	std::cout << RED << "====================================\n" << WHITE;
-	std::cout << toProcess << "\n";
-	std::cout << RED << "====================================\n" << WHITE;
 }
 
 void	HttpRequest::printBody()
@@ -106,10 +98,7 @@ void	HttpRequest::saveHeaders(const std::string& toProccess)
 		size_t p = it->find(':');
 		if (p == std::string::npos)
 			continue;
-		// std::pair<std::string, std::string> auxPair = std::make_pair(\
-		// 	it->substr(0, p), it->substr(p + 2));
 		headers[it->substr(0, p)] = it->substr(p + 2);
-		// headers.push_back(auxPair);
 	}
 }
 
