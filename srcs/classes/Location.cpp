@@ -45,9 +45,26 @@ redirection(redirection),
 destination(destination),
 cgi_destinaation(cgi_destinaation)
 {
-
+	check();
 }
 
+bool isDirectory(const std::string& path) {
+    struct stat info;
+    if (stat(path.c_str(), &info) != 0)
+        return false;
+    return S_ISDIR(info.st_mode);
+}
+
+#include "iostream"
+void Location::check()
+{
+	if (index.empty() && !autoindex)
+		throw (std::runtime_error("Location has not index and autoindex is not on"));
+	if (!index.empty() && autoindex)
+		throw (std::runtime_error("Location has index and autoindex is on"));
+	if (!index.empty() && isDirectory(index))
+		throw (std::runtime_error("Location's index is not a directory"));
+}
 /* Location::Location(const Location& toCopy) */
 /* { */
 /* 	(void)toCopy; */

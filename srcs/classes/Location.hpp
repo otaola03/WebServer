@@ -4,6 +4,7 @@
 
 #include <iostream>
 
+#include <sys/stat.h>
 class Location
 {
 	private://mejor const
@@ -22,6 +23,8 @@ class Location
 
 		// Location();
 		bool	isAllowed(const std::string	&method);
+
+		void		check();
 
 
 	public:
