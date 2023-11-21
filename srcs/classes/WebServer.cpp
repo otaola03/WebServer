@@ -113,6 +113,10 @@ static std::string	recvData(int sockfd)
 		i += numbytes;
 		recvData += vaca;
 	}
+	std::cout << "Sockfd: " << sockfd << "\n";
+	std::cout << GREEN << "--------------	RECIVE DATA	----------------\n" << WHITE;
+	std::cout << recvData << "\n";
+	std::cout << GREEN << "----------------------------------------\n\n\n\n" << WHITE;
 	return recvData;
 }
 
@@ -136,13 +140,6 @@ static bool	sendData(int sockfd, std::string msg)
 	return true;
 }
 
-/* static bool manage_event(int kq, int fd, struct kevent& evSet, int type, int option) */
-/* { */
-/* 	EV_SET(&evSet, fd, type, option, 0, 0, NULL); */
-/* 	if (kevent(kq, &evSet, 1, NULL, 0, NULL) == -1) */
-/* 		return false; */
-/* 	return true; */
-/* } */
 
 void	WebServer::serverLoop()
 {
@@ -155,6 +152,7 @@ void	WebServer::serverLoop()
     while (1) 
 	{
 		numEvents = kq.listenNewEvents();
+		std::cout << RED << "numEvents: " << numEvents << "\n" << WHITE;
 		for (int i = 0; i < numEvents; i++)
 		{
 			fd = kq.getEvSet(i).ident;
@@ -166,19 +164,24 @@ void	WebServer::serverLoop()
 			// NEW CLIENT
 			else if (isAPort(fd))
 			{
+				std::cout << CYAN << "--------------	NEW CONNECTION	----------------\n" << WHITE;
 				server = getServerFromPort(fd);
 				if ((fd = ports[fd]->acceptConnection()) == -1)
 					close(fd);
 				else
 					if (!kq.manageNewConnection(fd))
 						close(fd);
+				std::cout << CYAN << "----------------------------------------\n\n\n\n" << WHITE;
 			}
 
 			// RECIVE DATA ------- MIRA LO DEL MAXBODY SIZE
 			else if (kq.getEvSet(i).filter == EVFILT_READ)
 			{
-				data += recvData(fd);
-				if (data == "")
+				/* data += recvData(fd); */
+				clientsData[fd] = recvData(fd);
+
+				/* if (data == "") */
+				if (clientsData[fd] == "")
 					close(fd);
 				else if(!kq.enableWrite(fd))
 					close(fd);
@@ -187,11 +190,21 @@ void	WebServer::serverLoop()
 			// SEND
 			else if (kq.getEvSet(i).filter == EVFILT_WRITE)
 			{
-				HttpRequest parser(data);
+				std::cout << "Sockfd: " << fd << "\n";
+				std::cout << BLUE << "--------------	SEND DATA	----------------\n" << WHITE;
+				/* std::cout << data << "\n"; */
+				std::cout << clientsData[fd] << "\n";
+				std::cout << BLUE << "----------------------------------------\n\n\n\n" << WHITE;
+
+				/* HttpRequest parser(data); */
+				HttpRequest parser(clientsData[fd]);
+
 				/* std::string msg = server->getMessage(parser); */
 				HttpResponse response(parser);
 				std::string msg = response.getMsg();
+
 				sendData(fd, msg);
+
 				/* if (send(fd, msg.c_str(), msg.length(), 0) == -1) */
 				/* 	perror("send"); */
 				kq.manageEndedConnection(fd);
@@ -199,6 +212,8 @@ void	WebServer::serverLoop()
 				data = "";
 			}
 		}
+		std::cout << PURPLE << "=============================================\n" << WHITE;
+		std::cout << PURPLE << "=============================================\n\n\n" << WHITE;
 	}
 }
 
