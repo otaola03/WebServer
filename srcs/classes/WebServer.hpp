@@ -11,6 +11,7 @@
 typedef std::vector<Server*> serverVector;
 typedef std::map<int, Port*> intPortMap;
 typedef std::map<int, Client*> intClientMap;
+typedef std::map<int, std::string> intStrMap;
 
 class WebServer
 {
@@ -18,6 +19,7 @@ class WebServer
 		Kqueue kq;
 		serverVector	serversList;
 		intPortMap			ports;
+		intStrMap			clientsData;
 
 		Server*	getServerFromPort(int portFd);
 

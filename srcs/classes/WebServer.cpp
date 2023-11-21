@@ -136,13 +136,6 @@ static bool	sendData(int sockfd, std::string msg)
 	return true;
 }
 
-/* static bool manage_event(int kq, int fd, struct kevent& evSet, int type, int option) */
-/* { */
-/* 	EV_SET(&evSet, fd, type, option, 0, 0, NULL); */
-/* 	if (kevent(kq, &evSet, 1, NULL, 0, NULL) == -1) */
-/* 		return false; */
-/* 	return true; */
-/* } */
 
 void	WebServer::serverLoop()
 {
@@ -177,8 +170,11 @@ void	WebServer::serverLoop()
 			// RECIVE DATA ------- MIRA LO DEL MAXBODY SIZE
 			else if (kq.getEvSet(i).filter == EVFILT_READ)
 			{
-				data += recvData(fd);
-				if (data == "")
+				/* data += recvData(fd); */
+				clientsData[fd] = recvData(fd);
+
+				/* if (data == "") */
+				if (clientsData[fd] == "")
 					close(fd);
 				else if(!kq.enableWrite(fd))
 					close(fd);
@@ -187,11 +183,13 @@ void	WebServer::serverLoop()
 			// SEND
 			else if (kq.getEvSet(i).filter == EVFILT_WRITE)
 			{
-				HttpRequest parser(data);
-				/* std::string msg = server->getMessage(parser); */
+				HttpRequest parser(clientsData[fd]);
+
 				HttpResponse response(parser);
 				std::string msg = response.getMsg();
+
 				sendData(fd, msg);
+
 				/* if (send(fd, msg.c_str(), msg.length(), 0) == -1) */
 				/* 	perror("send"); */
 				kq.manageEndedConnection(fd);
