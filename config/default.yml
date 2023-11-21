@@ -1,47 +1,57 @@
 server:
     - server_name: WebServer
       root: /public
-      listen: [80, 50]
+      listen: [8080]
       error_pages:
-          - "404": ./public/html/404.html
-          - "405": ./public/html/405.html
 
       locations:
-          - path: /login
+          - name: login
+            path: /login
             root: ./public/html
+            index: 
             allowed_methods: [GET, POST, DELETE]
             autoindex: on
             max_body_size: 15000
-            redirection: "google.com"
+            redirection: google.com
+            destination: 
+            cgi_destinaation: 
 
-          - path: /imgs
+          - name: Images
+            path: /imgs
             root: ./public/html
             index: index.html
             allowed_methods: [GET, POST, DELETE]
             autoindex: on
+            max_body_size: 
             redirection: "google.com"
             destination: ./images #direccion donde se guarda el POST
             cgi_destinaation: ./cgi-bin #direccion del cgi
 
-    - server_name: WebServer
-      listen: [80, 50]
+
+    - server_name: AJO 
+      root: /public
+      listen: [9090]
       error_pages:
-          - "404": ./public/html/404.html
-          - "405": ./public/html/405.html
 
       locations:
-          - path: /login
+          - name: login
+            path: /login
             root: ./public/html
+            index: 
             allowed_methods: [GET, POST, DELETE]
             autoindex: on
             max_body_size: 15000
-            redirection: "google.com"
+            redirection: google.com
+            destination: 
+            cgi_destinaation: 
 
-          - path: /imgs
+          - name: Images
+            path: /imgs
             root: ./public/html
             index: index.html
             allowed_methods: [GET, POST, DELETE]
             autoindex: on
+            max_body_size: 
             redirection: "google.com"
             destination: ./images #direccion donde se guarda el POST
             cgi_destinaation: ./cgi-bin #direccion del cgi

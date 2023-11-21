@@ -36,6 +36,27 @@ WebServer::WebServer()
 	serversList.push_back(server);
 }
 
+WebServer::WebServer(const Config& config)
+{
+    size_t  i = 0;
+
+    while (i < config.getServerNum())
+    {
+        serversList.push_back(new Server(config.getName(i), config.getRoot(i), config.getPorts(i), config.getErrorPages(i), config.getLocations(i)));
+        serversList[i]->addPortsToPortsList(ports);
+        /* serversList[i]->addPortsToKq(kq); */
+
+		intPortMap& serverPorts = serversList[i]->getPortsList();
+		for (intPortMap::iterator it = serverPorts.begin(); it != serverPorts.end(); ++it)
+		{
+			kq.addPort(it->first);
+			ports[it->first] = it->second;
+		}
+			i++;
+    	}
+	// socketList = portsList;
+}
+
 WebServer::WebServer(const WebServer& toCopy)
 {
 	(void)toCopy;

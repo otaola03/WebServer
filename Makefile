@@ -1,3 +1,18 @@
+define ASCIIART
+ 
+          -~~~~-
+         |O __ O|
+      -__|_\__/_|__-
+      ---(__/\__)---
+        /||~--~||\\
+       / ||    || \\
+      |  `'    `'  |
+    _/ /\\__    __/\\ \_
+  ~~~~~    ~~~~    ~~~~~ 
+
+endef
+export ASCIIART
+
 NAME = webserver
 ORANGE = "\033[33m"
 WHITE = "\033[0;37m" 
@@ -9,7 +24,7 @@ CXXFLAGS = -std=c++98 -Wall -Werror -Wextra -fsanitize=address -g3 $(EFLAGS)
 RM = rm -rf
 SANI := -fsanitize=address -g3
 
-SRCS = main.cpp $(CLASS)Connection.cpp $(CLASS)Port.cpp $(CLASS)Client.cpp $(CLASS)HttpRequest.cpp $(CLASS)HttpResponse.cpp $(CLASS)Location.cpp $(CLASS)Server.cpp $(CLASS)WebServer.cpp $(CLASS)Kqueue.cpp $(CLASS)Server_utils.cpp
+SRCS = main.cpp $(CLASS)Connection.cpp $(CLASS)Port.cpp $(CLASS)Client.cpp $(CLASS)HttpRequest.cpp $(CLASS)HttpResponse.cpp $(CLASS)Location.cpp $(CLASS)Server.cpp $(CLASS)WebServer.cpp $(CLASS)Kqueue.cpp $(CLASS)Server_utils.cpp $(CLASS)Config.cpp
 OBJS = $(SRCS:.cpp=.o)
 
 all: $(NAME)

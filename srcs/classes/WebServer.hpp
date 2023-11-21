@@ -4,6 +4,7 @@
 
 #include "Server.hpp"
 #include "Connection.hpp"
+#include "Config.hpp"
 #include "Kqueue.hpp"
 #include "HttpResponse.hpp"
 
@@ -23,9 +24,12 @@ class WebServer
 
 		Server*	getServerFromPort(int portFd);
 
-	public:
 		WebServer();
+
+
+	public:
 		WebServer(const WebServer& toCopy);
+		WebServer(const Config& config);
 		~WebServer();
 
 		void	serverLoop();

@@ -12,6 +12,7 @@ Server::Server(\
 	const locationVector& locations\
 ) : name(name), root(root), errorPages(errorPages), locations(locations)
 {
+	std::cerr << "construimos " << name << "\n";
 	for (int i = 0; i != (int)ports.size(); i++)
 	{
 		std::cerr << "Creating port " << ports[i] << "\n";
@@ -65,4 +66,11 @@ Server& Server::operator=(const Server& toAssign)
 {
 	(void)toAssign;
 	return *this;
+}
+
+std::ostream& Server::operator<<(std::ostream& os) const
+{
+	os << "Name: " << name << "\n";
+	os << "root: " << root << "\n";
+	return os;
 }

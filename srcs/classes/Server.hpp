@@ -30,6 +30,10 @@
 typedef std::map<int, Client*> intClientMap;
 typedef std::map<int, Port*> intPortMap;
 
+typedef std::map<int, Client*> intClientMap;
+typedef std::map<int, Port*> intPortMap;
+
+extern char** environ;
 
 class Server
 {
@@ -74,6 +78,7 @@ class Server
 		void	addPortsToSet(fd_set& portsList);
 
 		Server& operator=(const Server& toAssign);
+		std::ostream& operator<<(std::ostream& os) const;
 };
 
 #endif
