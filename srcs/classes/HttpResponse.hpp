@@ -40,7 +40,7 @@ class HttpResponse
 
 		std::string getMsg();
 
-		std::string postImage(std::string path, std::string body);
+		std::string postImage(std::string path, std::string body, std::map<std::string, std::string> headers);
 		std::string	getIndex(std::string code, std::string path);
 		std::string getImg(std::string path);
 		std::string getIco(std::string path);

@@ -68,7 +68,7 @@ std::string HttpResponse::getIco(std::string path)
 std::string HttpResponse::getImg(std::string path)
 {
 	std::string msg = "HTTP/1.1 200 OK";
-	msg.append("\nContent-Type: image/png");
+	msg.append("\nContent-Type: image/" + path.substr(path.find(".") + 1));
 	msg.append("\nContent-Length: ");
 	std::string html_name = path;
 	std::ifstream file(html_name.c_str());
@@ -131,49 +131,36 @@ std::string HttpResponse::getIndex(std::string code, std::string path){
 	return msg;
 }
 
-std::string HttpResponse::postImage(std::string path, std::string body){
+std::string HttpResponse::postImage(std::string path, std::string body, std::map<std::string, std::string> headers){
 
 	(void)path;
-	std::cerr << "ELLA TIENE GATO PERO NORMAL\n";
 	std::string body_content = body;
-	// std::cout << "BODY = [" << body[0] << "]\n";
-	if (body[1] == '-')
+	std::string contentType;
+	std::string fileName;
+	if (headers["Content-Type"] == "multipart/form-data"){
+		size_t i = body.find("\r\n");
+		std::string boundary = body.substr(i + 2, body.find("\r\n", i + 2) - i - 2);
+		contentType = body.substr(body.find("Content-Type: ") + 14, body.find("\r\n", body.find("Content-Type: ") + 14) - body.find("Content-Type: ") - 14);
+		fileName = body.substr(body.find("filename=\"") + 10, body.find("\"", body.find("filename=\"") + 10) - body.find("filename=\"") - 10);
 		body_content = body.substr(body.find("\r\n\r\n") + 4);
-	/* std::cout << body_content << "\n"; */
+	}
+	else{
+		fileName = "archivo";
+	}
 	std::string msg = "HTTP/1.1 201 Created\nLocation: /resources/bin/";
 	DIR *dir;
-	int i = 0;
 	struct dirent *entry;
-	std::cout << "PARAGUAYO\n";
 	dir = opendir("./resources/bin");
 	if (dir){
-		std::cout << "DNREOOOOOOO\n";
 		while ((entry = readdir(dir)) != NULL) {
-			if (entry->d_name == std::to_string(i) + ".png"){
-				i++;
+			if (entry->d_name == fileName){
+				fileName = + "copy_" + fileName;
 			}
 		}
-		std::ofstream imageFile("./resources/bin/" + std::to_string(i) + ".png", std::ios::binary);
+		std::ofstream imageFile("./resources/bin/" + fileName, std::ios::binary);
 		imageFile.write(body_content.c_str(), body_content.length());
 		imageFile.close();
 		closedir(dir);
-
-    	/* // Crear un vector de bytes a partir de la cadena binaria */
-    	/* std::vector<unsigned char> imageBytes(body.begin(), body.end()); */
-		/* /1* std::cout << BLUE << "====================================\n" << WHITE; *1/ */
-		/* /1* std::cout << body << "\n"; *1/ */
-		/* /1* std::cout << BLUE << "====================================\n" << WHITE; *1/ */
-
-    	/* // Escribir los datos en un archivo binario */
-    	/* std::ofstream outputFile("./resources/bin/imagen_recibida.png", std::ios::binary); */
-    	/* if (outputFile.is_open()) { */
-    	/*     outputFile.write(reinterpret_cast<const char*>(imageBytes.data()), imageBytes.size()); */
-    	/*     outputFile.close(); */
-    	/*     std::cout << "Imagen creada y guardada con éxito." << std::endl; */
-    	/* } else { */
-    	/*     std::cerr << "Error al abrir el archivo para escritura." << std::endl; */
-    	/* } */
-
 	}
 	msg.append("\nContent-Type: text/html");
 	msg.append("\nContent-Length: ");
@@ -202,7 +189,10 @@ std::string HttpResponse::getMessage(HttpRequest& parser)
 				return (getIndex(C200, "./resources/html/index.html"));
 			else if (fileFinder(parser.getPath().substr(1), founDir) && parser.getPath().find(".html") != std::string::npos)
 				return (getIndex(C200, founDir));
-			else if (fileFinder(parser.getPath().substr(1), founDir) && parser.getPath().find(".png") != std::string::npos)
+			else if ((fileFinder(parser.getPath().substr(1), founDir) && parser.getPath().find(".png") != std::string::npos) ||
+					(fileFinder(parser.getPath().substr(1), founDir) && parser.getPath().find(".jpg") != std::string::npos) ||
+					(fileFinder(parser.getPath().substr(1), founDir) && parser.getPath().find(".jpeg") != std::string::npos) ||
+					(fileFinder(parser.getPath().substr(1), founDir) && parser.getPath().find(".gif") != std::string::npos))
 				return (getImg(founDir));
 			else if (fileFinder(parser.getPath().substr(1), founDir) && parser.getPath().find(".py") != std::string::npos)
 				return (getPython(founDir));
@@ -218,7 +208,7 @@ std::string HttpResponse::getMessage(HttpRequest& parser)
 		// if (this->locations[0].isPOST() == false)
 		// 	return (getIndex(C405, "405.html"));
 		// else{
-			return (postImage(parser.getPath(), parser.getBody()));
+			return (postImage(parser.getPath(), parser.getBody(), parser.getHeaders()));
 		// }
 	}
 	else if (parser.getType() == DELETE){

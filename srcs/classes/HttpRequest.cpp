@@ -15,6 +15,11 @@ static	RequestType whatTypeIs(const std::string& type)
 	return UNDEFINED;
 }
 
+std::map<std::string, std::string> HttpRequest::getHeaders()
+{
+	return headers;
+}
+
 void	HttpRequest::saveRequest(const std::string& toProcess)
 {
 	std::string request = toProcess.substr(0, toProcess.find('\n'));
@@ -72,22 +77,27 @@ std::string	HttpRequest::getBody()
 
 void	HttpRequest::printHeaders()
 {
-	for (std::map<std::string, std::string>::iterator it = headers.begin(); \
-		it != headers.end(); ++it)
-		std::cout << (*it).first << ": " << (*it).second << "\n";
+	std::map<std::string, std::string>::iterator it;
+	for (it = headers.begin(); it != headers.end(); ++it) {
+		std::cout << "| " << it->first << ":" << it->second << std::endl;
+	}
 }
 
 static void	splitRequest(std::vector<std::string>& lines, const std::string& toProcess)
 {
 	std::istringstream stream(toProcess);
 	std::string	line;
+	size_t posicion = toProcess.find("\r\n\r\n");
 
-	while (std::getline(stream, line))
-	{
-		if (!line.empty())
-			lines.push_back(line);
-		if (line.find("\r\n\r\n"))
-			return ;
+	if (posicion != std::string::npos) {
+		std::string subcadena = toProcess.substr(0, posicion);
+		std::istringstream ss(subcadena);
+		std::string linea;
+		while (std::getline(ss, linea, '\n')) {
+			lines.push_back(linea);
+		}
+	} else {
+		lines.push_back(toProcess);
 	}
 }
 
@@ -96,13 +106,15 @@ void	HttpRequest::saveHeaders(const std::string& toProccess)
 	std::vector<std::string> lines;
 	splitRequest(lines, toProccess);
 
-
 	for (std::vector<std::string>::iterator it = lines.begin(); it != lines.end(); ++it)
 	{
 		size_t p = it->find(':');
 		if (p == std::string::npos)
 			continue;
-		headers[it->substr(0, p)] = it->substr(p + 2);
+		if (it->find("multipart/form-data") != std::string::npos)
+			headers[it->substr(0, p)] = "multipart/form-data";
+		else
+			headers[it->substr(0, p)] = it->substr(p + 1);
 	}
 }
 
@@ -128,7 +140,7 @@ void	HttpRequest::printRequest()
 {
 	for (std::map<std::string, std::string>::iterator it = headers.begin(); \
 		it != headers.end(); ++it)
-		std::cout << (*it).first << ": " << (*it).second << "\n";
+		std::cout << (*it).first << ":" << (*it).second << "\n";
 }
 
 HttpRequest& HttpRequest::operator=(const HttpRequest& toAssign)

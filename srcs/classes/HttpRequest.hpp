@@ -3,6 +3,7 @@
 # define HTTPREQUEST_HPP
 
 # include<iostream>
+# include<fstream>
 # include<vector>
 # include<sstream>
 # include<map>
@@ -33,6 +34,7 @@ class HttpRequest
 		int			getType();
 		std::string	getPath();
 		std::string	getBody();
+		std::map<std::string, std::string> getHeaders();
 
 		HttpRequest& operator=(const HttpRequest& toCopy);
 };
