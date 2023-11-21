@@ -113,10 +113,6 @@ static std::string	recvData(int sockfd)
 		i += numbytes;
 		recvData += vaca;
 	}
-	std::cout << "Sockfd: " << sockfd << "\n";
-	std::cout << GREEN << "--------------	RECIVE DATA	----------------\n" << WHITE;
-	std::cout << recvData << "\n";
-	std::cout << GREEN << "----------------------------------------\n\n\n\n" << WHITE;
 	return recvData;
 }
 
@@ -152,7 +148,6 @@ void	WebServer::serverLoop()
     while (1) 
 	{
 		numEvents = kq.listenNewEvents();
-		std::cout << RED << "numEvents: " << numEvents << "\n" << WHITE;
 		for (int i = 0; i < numEvents; i++)
 		{
 			fd = kq.getEvSet(i).ident;
@@ -164,14 +159,12 @@ void	WebServer::serverLoop()
 			// NEW CLIENT
 			else if (isAPort(fd))
 			{
-				std::cout << CYAN << "--------------	NEW CONNECTION	----------------\n" << WHITE;
 				server = getServerFromPort(fd);
 				if ((fd = ports[fd]->acceptConnection()) == -1)
 					close(fd);
 				else
 					if (!kq.manageNewConnection(fd))
 						close(fd);
-				std::cout << CYAN << "----------------------------------------\n\n\n\n" << WHITE;
 			}
 
 			// RECIVE DATA ------- MIRA LO DEL MAXBODY SIZE
@@ -190,16 +183,8 @@ void	WebServer::serverLoop()
 			// SEND
 			else if (kq.getEvSet(i).filter == EVFILT_WRITE)
 			{
-				std::cout << "Sockfd: " << fd << "\n";
-				std::cout << BLUE << "--------------	SEND DATA	----------------\n" << WHITE;
-				/* std::cout << data << "\n"; */
-				std::cout << clientsData[fd] << "\n";
-				std::cout << BLUE << "----------------------------------------\n\n\n\n" << WHITE;
-
-				/* HttpRequest parser(data); */
 				HttpRequest parser(clientsData[fd]);
 
-				/* std::string msg = server->getMessage(parser); */
 				HttpResponse response(parser);
 				std::string msg = response.getMsg();
 
@@ -212,8 +197,6 @@ void	WebServer::serverLoop()
 				data = "";
 			}
 		}
-		std::cout << PURPLE << "=============================================\n" << WHITE;
-		std::cout << PURPLE << "=============================================\n\n\n" << WHITE;
 	}
 }
 
