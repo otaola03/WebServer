@@ -114,7 +114,7 @@ void	HttpRequest::saveHeaders(const std::string& toProccess)
 		if (it->find("multipart/form-data") != std::string::npos)
 			headers[it->substr(0, p)] = "multipart/form-data";
 		else
-			headers[it->substr(0, p)] = it->substr(p + 1);
+			headers[it->substr(0, p)] = it->substr(p + 1, it->size() - p - 2);
 	}
 }
 
@@ -125,6 +125,8 @@ HttpRequest::HttpRequest(const std::string& toProcess)
 	saveHeaders(toProcess);
 	if (type == POST)
 		saveBody(toProcess);
+	printRequest();
+	printHeaders();
 }
 
 HttpRequest::HttpRequest(const HttpRequest& toCopy)
@@ -138,9 +140,7 @@ HttpRequest::~HttpRequest()
 
 void	HttpRequest::printRequest()
 {
-	for (std::map<std::string, std::string>::iterator it = headers.begin(); \
-		it != headers.end(); ++it)
-		std::cout << (*it).first << ":" << (*it).second << "\n";
+	std::cout << "Request: " << path << std::endl;
 }
 
 HttpRequest& HttpRequest::operator=(const HttpRequest& toAssign)

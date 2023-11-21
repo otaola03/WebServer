@@ -145,7 +145,10 @@ std::string HttpResponse::postImage(std::string path, std::string body, std::map
 		body_content = body.substr(body.find("\r\n\r\n") + 4);
 	}
 	else{
-		fileName = "archivo";
+		if (headers["Content-Type"] == "plain/text")
+			fileName = "archivo.txt";
+		else
+			fileName = "archivo";
 	}
 	std::string msg = "HTTP/1.1 201 Created\nLocation: /resources/bin/";
 	DIR *dir;
@@ -212,7 +215,7 @@ std::string HttpResponse::getMessage(HttpRequest& parser)
 		// }
 	}
 	else if (parser.getType() == DELETE){
-		if (fileFinder(parser.getPath().substr(1), founDir) && parser.getPath().find(".png") != std::string::npos){
+		if (fileFinder(parser.getPath().substr(1), founDir)){
 			std::remove(founDir.c_str());
 			return (getIndex(C204, "./resources/html/index.html"));
 		}
