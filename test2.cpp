@@ -1,3 +1,20 @@
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <filesystem>
+#include <stdio.h>
+#include <dirent.h>
+#include <signal.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <map>
+#include <vector>
+#include <cstdlib>
+#include <ctime>
+
+
 std::string HttpResponse::phpCgiHandler(std::string script, char **av)
 {
 	(void)av;

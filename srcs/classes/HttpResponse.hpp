@@ -13,17 +13,22 @@
 #include <filesystem>
 #include <stdio.h>
 #include <dirent.h>
+#include <signal.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <map>
 #include <vector>
 #include <cstdlib>
+#include <ctime>
+#include <sys/wait.h>
+
 
 #define C200 "HTTP/1.1 200 OK"
 #define C204 "HTTP/1.1 204 No Content"
 #define C404 "HTTP/1.1 404 Not Found"
 #define C405 "HTTP/1.1 405 Method Not Allowed"
+#define C504 "HTTP/1.1 504 Gateway Timeout"
 
 
 extern char** environ;

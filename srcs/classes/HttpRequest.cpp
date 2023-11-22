@@ -125,8 +125,6 @@ HttpRequest::HttpRequest(const std::string& toProcess)
 	saveHeaders(toProcess);
 	if (type == POST)
 		saveBody(toProcess);
-	printRequest();
-	printHeaders();
 }
 
 HttpRequest::HttpRequest(const HttpRequest& toCopy)
