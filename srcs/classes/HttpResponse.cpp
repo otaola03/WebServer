@@ -1,13 +1,5 @@
 #include "HttpResponse.hpp"
 
-volatile sig_atomic_t terminationSignalReceived = 0;
-
-void handleTerminationSignal(int signo) {
-	(void)signo;
-	std::cout << "Termination signal received" << std::endl;
-	terminationSignalReceived = 1;
-}
-
 HttpResponse::HttpResponse(HttpRequest& parser)
 {
 	msg = getMessage(parser);
@@ -180,7 +172,7 @@ std::string HttpResponse::getMessage(HttpRequest& parser)
 			if (parser.getPath() == "/")
 				return (getIndex(C200, "./resources/html/index.html"));
 			else if (fileFinder(parser.getPath().substr(1), founDir) && parser.getPath().find(".html") != std::string::npos)
-				return (getIndex(C204, founDir));
+				return (getIndex(C200, founDir));
 			else if ((fileFinder(parser.getPath().substr(1), founDir) && parser.getPath().find(".png") != std::string::npos) ||
 					(fileFinder(parser.getPath().substr(1), founDir) && parser.getPath().find(".jpg") != std::string::npos) ||
 					(fileFinder(parser.getPath().substr(1), founDir) && parser.getPath().find(".jpeg") != std::string::npos) ||
@@ -213,7 +205,6 @@ std::string HttpResponse::getMessage(HttpRequest& parser)
 std::string HttpResponse::phpCgiHandler(std::string script, char **av)
 {
 	(void)av;
-	signal(SIGTERM, handleTerminationSignal);
 	std::string phpScript = script;
 	int pipefd[2];
 	if (pipe(pipefd) == -1) {
@@ -223,29 +214,23 @@ std::string HttpResponse::phpCgiHandler(std::string script, char **av)
 	if (childPid < 0) {
 		std::cerr << "PID Error" << std::endl;
 	} else if (childPid == 0) {
-		signal(SIGTERM, SIG_DFL);
-		while (!terminationSignalReceived) {
-			close(pipefd[0]);
-			dup2(pipefd[1], STDOUT_FILENO);
-			const char* phpArgs[] = {"php", phpScript.c_str(), nullptr};
-			execve("/usr/bin/php", const_cast<char**>(phpArgs), nullptr);
-			std::cerr << "CGI Error" << std::endl;
-		}
-		exit(0);
+		close(pipefd[0]);
+		dup2(pipefd[1], STDOUT_FILENO);
+		const char* phpArgs[] = {"php", phpScript.c_str(), nullptr};
+		execve("/usr/bin/php", const_cast<char**>(phpArgs), nullptr);
+		std::cerr << "CGI Error" << std::endl;
 	} else {
 		close(pipefd[1]);
 		std::string output;
 		char buffer[128];
 		ssize_t bytesRead;
 		int status;
-		usleep(300000);
-		if (waitpid(childPid, &status, WNOHANG) == 0) {
-			sleep(4);
-			if (waitpid(childPid, &status, WNOHANG) == 0) {
+		clock_t startTime = std::clock();
+		while (waitpid(childPid, &status, WNOHANG) == 0) {
+			clock_t endTime = std::clock();
+			if (static_cast<double>(endTime - startTime) / CLOCKS_PER_SEC > 5.0) {
 				kill(childPid, SIGTERM);
-				usleep(100);
-				waitpid(childPid, &status, 0);
-		}
+			}
 		}
 		if (WIFEXITED(status)) {
 			while ((bytesRead = read(pipefd[0], buffer, sizeof(buffer))) > 0) {
@@ -254,6 +239,8 @@ std::string HttpResponse::phpCgiHandler(std::string script, char **av)
 			std::string msg = "HTTP/1.1 200 OK";
 			msg.append("\nContent-Type: text/html");
 			msg.append("\nContent-Length: ");
+			msg.append(std::to_string(output.length()));
+			msg.append("\n\n");
 			msg.append(output);
 			return (msg);
 		} else {
