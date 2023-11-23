@@ -50,6 +50,9 @@ class Location
 		);
 		/* Location(const Location& toCopy); */
 		~Location();
+
+		std::string	getPath() const;
+
 		bool		isGET() const;
 		bool		isPOST() const;
 		bool		isDELETE() const;

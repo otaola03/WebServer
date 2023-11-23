@@ -44,6 +44,7 @@ class Server
 		intClientMap	fdClientsList;	//map(fd, Client*)
 		intCharMap		errorPages;
 		locationVector	locations;
+		int 			maxBodySize;
 
 		Server();
 
@@ -61,6 +62,9 @@ class Server
 		Server(const std::string& name, const std::vector<int> ports);
 		Server(const Server& toCopy);
 		~Server();
+
+		locationVector& getLocations();
+		int getMaxBodySize();
 
 		intPortMap& getPortsList();
 		/* void	addPortsToSet(fd_set& portsList); */

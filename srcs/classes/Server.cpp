@@ -10,7 +10,7 @@ Server::Server(\
 	const intVector& ports, \
 	const intCharMap& errorPages, \
 	const locationVector& locations\
-) : name(name), root(root), errorPages(errorPages), locations(locations)
+) : name(name), root(root), errorPages(errorPages), locations(locations), maxBodySize(5000)
 {
 	std::cerr << "construimos " << name << "\n";
 	for (int i = 0; i != (int)ports.size(); i++)
@@ -35,7 +35,10 @@ Server::~Server()
 
 intPortMap& Server::getPortsList() {return fdPortsList;}
 
+int	Server::getMaxBodySize() {return maxBodySize;}
 
+
+locationVector&	Server::getLocations() {return locations;}
 
 
 //------------------------------------------------------------------------------------------

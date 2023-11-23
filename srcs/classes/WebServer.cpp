@@ -109,33 +109,34 @@ bool	WebServer::isAPort(int fd)
 /* 	return recvData; */
 /* } */
 
-static std::string	recvData(int sockfd)
-{
-	char buf[1025];
-	std::string recvData;
-	int numbytes = 1024;
-	int i = 0;
+/* static std::string	recvData(int sockfd) */
+/* { */
+/* 	char buf[1025]; */
+/* 	std::string recvData; */
+/* 	int numbytes = 1024; */
+/* 	int bytesRecived = 0; */
 
-	while (numbytes == 1024)
-	{
-		if ((numbytes = recv(sockfd, buf, sizeof(buf) - 1, 0)) <= 0)
-		{
-			if (numbytes == 0)
-				std::cout << "selectserver: socket "<< sockfd << " hung up\n";
-			if (numbytes == -1)
-			{
- 				perror("recv");
-				return "";
-			}
-			if (numbytes == EWOULDBLOCK)
-				return (std::cout << "HHHHHHHHHHHHHHHHHHHHHHHHHHHHH\n\n\n", "");
-		}
-		std::string vaca(buf, numbytes);
-		i += numbytes;
-		recvData += vaca;
-	}
-	return recvData;
-}
+/* 	while (numbytes == 1024) */
+/* 	{ */
+/* 		if ((numbytes = recv(sockfd, buf, sizeof(buf) - 1, 0)) <= 0) */
+/* 		{ */
+/* 			if (numbytes == 0) */
+/* 				std::cout << "selectserver: socket "<< sockfd << " hung up\n"; */
+/* 			if (numbytes == -1) */
+/* 			{ */
+/*  				perror("recv"); */
+/* 				return ""; */
+/* 			} */
+/* 			if (numbytes == EWOULDBLOCK) */
+/* 				return (std::cout << "HHHHHHHHHHHHHHHHHHHHHHHHHHHHH\n\n\n", ""); */
+/* 		} */
+/* 		std::string vaca(buf, numbytes); */
+/* 		bytesRecived += numbytes; */
+/* 		recvData += vaca; */
+/* 	} */
+/* 	std::cout << recvData << "\n\n"; */
+/* 	return recvData; */
+/* } */
 
 static bool	sendData(int sockfd, std::string msg)
 {
@@ -164,7 +165,7 @@ void	WebServer::serverLoop()
 	int numEvents;
 	int	fd;
 	std::string data;
-	Server* server;
+	/* Server* server; */
 
     while (1) 
 	{
@@ -180,33 +181,38 @@ void	WebServer::serverLoop()
 			// NEW CLIENT
 			else if (isAPort(fd))
 			{
-				server = getServerFromPort(fd);
+				int portFd = fd;
 				if ((fd = ports[fd]->acceptConnection()) == -1)
 					close(fd);
 				else
 					if (!kq.manageNewConnection(fd))
 						close(fd);
+				clientsServers[fd] = getServerFromPort(portFd);
 			}
 
 			// RECIVE DATA ------- MIRA LO DEL MAXBODY SIZE
 			else if (kq.getEvSet(i).filter == EVFILT_READ)
 			{
 				/* data += recvData(fd); */
-				clientsData[fd] = recvData(fd);
+				/* clientsData[fd] = recvData(fd); */
+				clientsRequests[fd] = new HttpRequest(fd, clientsServers[fd]->getMaxBodySize(), clientsServers[fd]->getLocations());
 
 				/* if (data == "") */
-				if (clientsData[fd] == "")
+				/* if (clientsData[fd] == "") */
+				if (clientsRequests[fd]->getType() == UNDEFINED)
 					close(fd);
 				else if(!kq.enableWrite(fd))
 					close(fd);
+				std::cout << clientsRequests[fd]->getType() << "\n";
 			}
 
 			// SEND
 			else if (kq.getEvSet(i).filter == EVFILT_WRITE)
 			{
-				HttpRequest parser(clientsData[fd]);
+				/* HttpRequest parser(clientsData[fd]); */
 
-				HttpResponse response(parser);
+				/* HttpResponse response(parser); */
+				HttpResponse response(*clientsRequests[fd]);
 				std::string msg = response.getMsg();
 
 				sendData(fd, msg);
@@ -215,6 +221,7 @@ void	WebServer::serverLoop()
 				/* 	perror("send"); */
 				kq.manageEndedConnection(fd);
 				close(fd);
+				delete clientsRequests[fd];
 				data = "";
 			}
 		}

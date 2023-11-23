@@ -6,7 +6,7 @@ server:
 
       locations:
           - name: login
-            path: /login
+            path: /
             root: ./public/html
             index: 
             allowed_methods: [GET, POST, DELETE]
@@ -35,8 +35,9 @@ server:
 
       locations:
           - name: login
-            path: /login
+            path: /
             root: ./public/html
+            # file1 file2 file3
             index: 
             allowed_methods: [GET, POST, DELETE]
             autoindex: on
@@ -45,9 +46,21 @@ server:
             destination: 
             cgi_destinaation: 
 
+          - name: login
+            path: /html
+            root: ./www/html
+            # file3 file4
+            index: indexx.html
+            allowed_methods: [GET, POST, DELETE]
+            autoindex: on
+            max_body_size: 15000
+            redirection: google.com
+            destination: 
+            cgi_destinaation: 
+
           - name: Images
-            path: /imgs
-            root: ./public/html
+            path: /file3
+            root: ./src/html
             index: index.html
             allowed_methods: [GET, POST, DELETE]
             autoindex: on

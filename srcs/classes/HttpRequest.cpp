@@ -107,12 +107,88 @@ void	HttpRequest::saveHeaders(const std::string& toProccess)
 }
 
 
-HttpRequest::HttpRequest(const std::string& toProcess)
+/* HttpRequest::HttpRequest(const std::string& toProcess) */
+/* { */
+/* 	saveRequest(toProcess); */
+/* 	saveHeaders(toProcess); */
+/* 	if (type == POST) */
+/* 		saveBody(toProcess); */
+/* } */
+
+
+bool	HttpRequest::checkRequest(locationVector& locations)
 {
-	saveRequest(toProcess);
-	saveHeaders(toProcess);
-	if (type == POST)
-		saveBody(toProcess);
+	std::cout << "path; " << path << "\n";
+	for (locationVector::iterator it = locations.begin(); it != locations.end(); ++it)
+	{
+		if (it->getPath() == "/")
+			location = *it;
+		if (it->getPath().length() != 1 && it->getPath() == path.substr(0, it->getPath().length()))
+		{
+			if (type == GET && it->isGET())
+				return true;
+			else if (type == POST && it->isPOST())
+				return true;
+			else if (type == DELETE && it->isDELETE())
+				return true;
+			else
+				return (type = METHOD_ERROR, false);
+			location = *it;
+			return true;
+		}
+	}
+	if ()
+		return true;
+	type = PATH_ERROR;
+	return false;
+}
+
+HttpRequest::HttpRequest(int sockfd, int maxBodySize, locationVector& locations)
+{
+	char buf[1025];
+	std::string recvData;
+	int numbytes = 1024;
+	int bytesRecived = 0;
+
+	while (numbytes == 1024)
+	{
+		if ((numbytes = recv(sockfd, buf, sizeof(buf) - 1, 0)) <= 0)
+		{
+			if (numbytes == 0)
+				std::cout << "selectserver: socket "<< sockfd << " hung up\n";
+			if (numbytes == -1)
+			{
+ 				perror("recv");
+				type = UNDEFINED;
+				return ;
+			}
+			if (numbytes == EWOULDBLOCK)
+			{
+				type = UNDEFINED;
+				return ;
+			}
+		}
+
+		std::string readData(buf, numbytes);
+		bytesRecived += numbytes;
+		recvData += readData;;
+
+		if (readData.find("HTTP/1.1"))
+		{
+			saveRequest(recvData);
+			if (checkRequest(locations))
+				return ;
+		}
+
+		if (bytesRecived > maxBodySize)
+		{
+			type = LENGTH_ERROR;
+			return ;
+		}
+	}
+	/* std::cout << recvData << "\n\n"; */
+	return ;
+
 }
 
 HttpRequest::HttpRequest(const HttpRequest& toCopy)
@@ -123,6 +199,8 @@ HttpRequest::HttpRequest(const HttpRequest& toCopy)
 HttpRequest::~HttpRequest()
 {
 }
+
+bool	HttpRequest::isValidRequest() const {return (type == GET || type == POST || type == DELETE);}
 
 void	HttpRequest::printRequest()
 {

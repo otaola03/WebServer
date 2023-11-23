@@ -63,6 +63,8 @@ Location& Location::operator=(const Location& toAssign)
 	return *this;
 }
 
+std::string	Location::getPath() const {return path;};
+
 bool	Location::isGET() const
 {
 	return GET;
