@@ -55,7 +55,7 @@ class HttpResponse
 		std::string pythonCgiHandler(std::string script, char **av);
 		std::string phpCgiHandler(std::string script, char **av);
 		bool	isMethodAllowed(HttpRequest& parser, Location& location);
-		bool	fileFinder(const std::string& path, std::string& founDir);
+		bool	fileFinder(const std::string& path, std::string& founDir, std::string& root);
 
 		HttpResponse& operator=(const HttpResponse& toCopy);
 };
