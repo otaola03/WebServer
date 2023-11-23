@@ -16,10 +16,14 @@ class Location
 		std::string	redirection;
 		std::string	destination;
 		std::string	cgi_destinaation;
+
 		// Location();
 		bool	isAllowed(const std::string	&method);
+
+
 	public:
 		Location();
+
 		Location(\
 				const std::string	path, \
 				const std::string	root, \
@@ -43,11 +47,14 @@ class Location
 		);
 		/* Location(const Location& toCopy); */
 		~Location();
+
 		std::string	getPath() const;
+
 		bool		isGET() const;
 		bool		isPOST() const;
 		bool		isDELETE() const;
-		Location& operator=(const Location& toCopy);
+		std::string	getRoot() const;
+		//Location& operator=(const Location& toCopy);
 };
 
 #endif

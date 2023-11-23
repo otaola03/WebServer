@@ -30,6 +30,10 @@
 typedef std::map<int, Client*> intClientMap;
 typedef std::map<int, Port*> intPortMap;
 
+typedef std::map<int, Client*> intClientMap;
+typedef std::map<int, Port*> intPortMap;
+
+extern char** environ;
 
 class Server
 {
@@ -40,6 +44,7 @@ class Server
 		intClientMap	fdClientsList;	//map(fd, Client*)
 		intCharMap		errorPages;
 		locationVector	locations;
+		int 			maxBodySize;
 
 		Server();
 
@@ -58,6 +63,9 @@ class Server
 		Server(const Server& toCopy);
 		~Server();
 
+		locationVector& getLocations();
+		int getMaxBodySize();
+
 		intPortMap& getPortsList();
 		/* void	addPortsToSet(fd_set& portsList); */
 		/* void	addPortsToConnectionsList(intConnectionMap& connectionsList); */
@@ -74,6 +82,7 @@ class Server
 		void	addPortsToSet(fd_set& portsList);
 
 		Server& operator=(const Server& toAssign);
+		std::ostream& operator<<(std::ostream& os) const;
 };
 
 #endif

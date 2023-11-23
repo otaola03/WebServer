@@ -8,8 +8,13 @@
 # include<sstream>
 # include<map>
 # include "../../includes/colors.h"
+#include <sys/socket.h>
+#include "FileFinder.hpp"
 
-enum RequestType {GET, POST, DELETE, UNDEFINED};
+# include "Location.hpp"
+typedef std::vector<Location> locationVector;
+
+enum RequestType {GET, POST, DELETE, UNDEFINED, METHOD_ERROR, LENGTH_ERROR, PATH_ERROR};
 
 class HttpRequest
 {
@@ -18,15 +23,20 @@ class HttpRequest
 		std::string	path;
 		std::map<std::string, std::string> headers;
 		std::string	body;
+		Location	location;
 
 		void	saveRequest(const std::string& toProcess);
 		void	saveHeaders(const std::string& toProcess);
 		void	saveBody(const std::string& toProcess);
 
 	public:
-		HttpRequest(const std::string& toProcess);
+		/* HttpRequest(const std::string& toProcess); */
+		HttpRequest(int sockfd, int maxBodySize, locationVector& locations);
 		HttpRequest(const HttpRequest& toCopy);
 		~HttpRequest();
+
+		bool		isValidRequest() const;
+		bool		checkRequest(locationVector& locations);
 
 		void		printRequest();
 		void		printHeaders();

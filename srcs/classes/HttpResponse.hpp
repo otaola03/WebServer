@@ -28,6 +28,7 @@
 #define C204 "HTTP/1.1 204 No Content"
 #define C404 "HTTP/1.1 404 Not Found"
 #define C405 "HTTP/1.1 405 Method Not Allowed"
+#define C413 "HTTP/1.1 413 Method Not Allowed"
 #define C504 "HTTP/1.1 504 Gateway Timeout"
 
 
@@ -55,7 +56,6 @@ class HttpResponse
 		std::string pythonCgiHandler(std::string script, char **av);
 		std::string phpCgiHandler(std::string script, char **av);
 		bool	isMethodAllowed(HttpRequest& parser, Location& location);
-		bool	fileFinder(const std::string& path, std::string& founDir, std::string& root);
 
 		HttpResponse& operator=(const HttpResponse& toCopy);
 };

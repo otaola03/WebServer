@@ -1,47 +1,68 @@
 server:
     - server_name: WebServer
       root: /public
-      listen: [80, 50]
+      listen: [8080]
       error_pages:
-          - "404": ./public/html/404.html
-          - "405": ./public/html/405.html
 
       locations:
-          - path: /login
-            root: ./public/html
+          - name: login
+            path: /
+            root: ./resources/html
+            index: 
             allowed_methods: [GET, POST, DELETE]
             autoindex: on
             max_body_size: 15000
-            redirection: "google.com"
+            redirection: google.com
+            destination: 
+            cgi_destinaation: 
 
-          - path: /imgs
-            root: ./public/html
+          - name: Images
+            path: /imgs
+            root: ./reources/cgi-bin
             index: index.html
             allowed_methods: [GET, POST, DELETE]
             autoindex: on
+            max_body_size: 
             redirection: "google.com"
             destination: ./images #direccion donde se guarda el POST
             cgi_destinaation: ./cgi-bin #direccion del cgi
 
-    - server_name: WebServer
-      listen: [80, 50]
+
+    - server_name: AJO 
+      root: /public
+      listen: [9090]
       error_pages:
-          - "404": ./public/html/404.html
-          - "405": ./public/html/405.html
 
       locations:
-          - path: /login
+          - name: login
+            path: /
             root: ./public/html
+            index: hola.html
             allowed_methods: [GET, POST, DELETE]
             autoindex: on
             max_body_size: 15000
-            redirection: "google.com"
+            redirection: google.com
+            destination: 
+            cgi_destinaation: 
 
-          - path: /imgs
-            root: ./public/html
+          - name: login
+            path: /html
+            root: ./www/html
+            index: indexx.html
+            allowed_methods: [GET, POST, DELETE]
+            autoindex: on
+            max_body_size: 15000
+            redirection: google.com
+            destination: 
+            cgi_destinaation: 
+
+          - name: Images
+            path: /file3
+            root: ./src/html
             index: index.html
             allowed_methods: [GET, POST, DELETE]
             autoindex: on
+            max_body_size: 
             redirection: "google.com"
-            destination: ./images #direccion donde se guarda el POST
-            cgi_destinaation: ./cgi-bin #direccion del cgi
+            destination: ./images
+            cgi_destinaation: ./cgi-bin

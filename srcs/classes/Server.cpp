@@ -10,8 +10,9 @@ Server::Server(\
 	const intVector& ports, \
 	const intCharMap& errorPages, \
 	const locationVector& locations\
-) : name(name), root(root), errorPages(errorPages), locations(locations)
+) : name(name), root(root), errorPages(errorPages), locations(locations), maxBodySize(5000)
 {
+	std::cerr << "construimos " << name << "\n";
 	for (int i = 0; i != (int)ports.size(); i++)
 	{
 		std::cerr << "Creating port " << ports[i] << "\n";
@@ -34,7 +35,10 @@ Server::~Server()
 
 intPortMap& Server::getPortsList() {return fdPortsList;}
 
+int	Server::getMaxBodySize() {return maxBodySize;}
 
+
+locationVector&	Server::getLocations() {return locations;}
 
 
 //------------------------------------------------------------------------------------------
@@ -65,4 +69,11 @@ Server& Server::operator=(const Server& toAssign)
 {
 	(void)toAssign;
 	return *this;
+}
+
+std::ostream& Server::operator<<(std::ostream& os) const
+{
+	os << "Name: " << name << "\n";
+	os << "root: " << root << "\n";
+	return os;
 }

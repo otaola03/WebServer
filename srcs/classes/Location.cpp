@@ -44,17 +44,23 @@ redirection(redirection),
 destination(destination),
 cgi_destinaation(cgi_destinaation)
 {
+
 }
+
+/* Location::Location(const Location& toCopy) */
+/* { */
+/* 	(void)toCopy; */
+/* } */
 
 Location::~Location()
 {
 }
 
-Location& Location::operator=(const Location& toAssign)
-{
-	(void)toAssign;
-	return *this;
-}
+// Location& Location::operator=(const Location& toAssign)
+// {
+// 	(void)toAssign;
+// 	return *this;
+// }
 
 std::string	Location::getPath() const {return path;};
 bool	Location::isGET() const
@@ -75,4 +81,9 @@ bool	Location::isDELETE() const
 bool	Location::isAllowed(const std::string	&method)
 {
 	return(allowed_methods.find(method) != std::string::npos);
+}
+
+std::string	Location::getRoot() const
+{
+	return root;
 }

@@ -119,12 +119,106 @@ void	HttpRequest::saveHeaders(const std::string& toProccess)
 }
 
 
-HttpRequest::HttpRequest(const std::string& toProcess)
+/* HttpRequest::HttpRequest(const std::string& toProcess) */
+/* { */
+/* 	saveRequest(toProcess); */
+/* 	saveHeaders(toProcess); */
+/* 	if (type == POST) */
+/* 		saveBody(toProcess); */
+/* } */
+
+
+bool	HttpRequest::checkRequest(locationVector& locations)
 {
-	saveRequest(toProcess);
-	saveHeaders(toProcess);
-	if (type == POST)
-		saveBody(toProcess);
+	std::string file;
+	for (locationVector::iterator it = locations.begin(); it != locations.end(); ++it)
+	{
+		if (it->getPath() == "/")
+			location = *it;
+		else if (it->getPath() == path.substr(0, it->getPath().length()))
+		{
+			if (type == GET && it->isGET())
+			{
+				location = *it;
+				path = path.substr(it->getPath().length());
+				return (true);
+			}
+			else if (type == POST && it->isPOST())
+			{
+				location = *it;
+				path = path.substr(it->getPath().length());
+				return (true);
+			}
+			else if (type == DELETE && it->isDELETE())
+			{
+				location = *it;
+				path = path.substr(it->getPath().length());
+				return (true);
+			}
+			else
+				return (type = METHOD_ERROR, false);
+		}
+	}
+	std::string filePath;
+	std::string fileName;
+	if (this->path == "/")
+		fileName = "index.html";
+	else
+		fileName = this->path.substr(1);
+	if (FileFinder::fileFinder(fileName, filePath, location.getRoot()))
+	{
+		return true;
+	}
+	type = PATH_ERROR;
+	return false;
+}
+
+HttpRequest::HttpRequest(int sockfd, int maxBodySize, locationVector& locations)
+{
+	char buf[1025];
+	std::string recvData;
+	int numbytes = 1024;
+	int bytesRecived = 0;
+
+	while (numbytes == 1024)
+	{
+		if ((numbytes = recv(sockfd, buf, sizeof(buf) - 1, 0)) <= 0)
+		{
+			if (numbytes == 0)
+				std::cout << "selectserver: socket "<< sockfd << " hung up\n";
+			if (numbytes == -1)
+			{
+ 				perror("recv");
+				type = UNDEFINED;
+				return ;
+			}
+			if (numbytes == EWOULDBLOCK)
+			{
+				type = UNDEFINED;
+				return ;
+			}
+		}
+
+		std::string readData(buf, numbytes);
+		bytesRecived += numbytes;
+		recvData += readData;;
+
+		if (readData.find("HTTP/1.1"))
+		{
+			saveRequest(recvData);
+			if (checkRequest(locations))
+				return ;
+		}
+
+		if (bytesRecived > maxBodySize)
+		{
+			type = LENGTH_ERROR;
+			return ;
+		}
+	}
+	/* std::cout << recvData << "\n\n"; */
+	return ;
+
 }
 
 HttpRequest::HttpRequest(const HttpRequest& toCopy)
@@ -135,6 +229,8 @@ HttpRequest::HttpRequest(const HttpRequest& toCopy)
 HttpRequest::~HttpRequest()
 {
 }
+
+bool	HttpRequest::isValidRequest() const {return (type == GET || type == POST || type == DELETE);}
 
 void	HttpRequest::printRequest()
 {
