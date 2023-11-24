@@ -45,35 +45,61 @@ Client::~Client()
 /* 	return recvData; */
 /* } */
 
+// std::string	Client::recvData()
+// {
+// 	char buf[MAXDATASIZE];
+// 	std::string recvData;
+// 	int numbytes = MAXDATASIZE - 1;
+
+// 	/* while (numbytes > 0) */
+// 	while (numbytes == MAXDATASIZE - 1)
+// 	{
+// 		if ((numbytes = recv(sockfd, buf, sizeof(buf) - 1, 0)) <= 0)
+// 		{
+// 			if (numbytes == 0)
+// 				std::cout << RED << "selectserver: socket "<< sockfd << " hung up\n" << WHITE;
+// 				return "";
+// 			if (numbytes == -1)
+// 			{
+//  				perror("recv");
+// 				return "";
+//  				/* exit(1); */
+// 			}
+// 			if (numbytes == EWOULDBLOCK)
+// 				return (perror("recv blcok"), "X");
+// 		}
+// 		std::string vaca(buf, numbytes);
+// 		recvData += vaca;
+// 	}
+// 	/* std::cout << recvData << "\n\n"; */
+// 	return recvData;
+// }
+
 std::string	Client::recvData()
 {
-	char buf[MAXDATASIZE];
+	char buf[1025];
 	std::string recvData;
-	int numbytes = MAXDATASIZE;
+	int numbytes = 1024;
+	int i = 0;
 
-	/* while (numbytes > 0) */
-	while (numbytes == MAXDATASIZE)
+	while (numbytes == 1024)
 	{
-		if ((numbytes = recv(sockfd, buf, sizeof(buf), 0)) <= 0)
+		if ((numbytes = recv(sockfd, buf, sizeof(buf) - 1, 0)) <= 0)
 		{
 			if (numbytes == 0)
-			{
-				std::cout << RED << "selectserver: socket "<< sockfd << " hung up\n" << WHITE;
-				return "";
-			}
+				std::cout << "selectserver: socket "<< sockfd << " hung up\n";
 			if (numbytes == -1)
 			{
  				perror("recv");
-				return "";
- 				/* exit(1); */
+ 				exit(1);
 			}
 			if (numbytes == EWOULDBLOCK)
-				return (perror("recv blcok"), "X");
+				return (std::cout << "HHHHHHHHHHHHHHHHHHHHHHHHHHHHH\n\n\n", "");
 		}
-		buf[numbytes] = '\0';
-		recvData += buf;
+		std::string vaca(buf, numbytes);
+		i += numbytes;
+		recvData += vaca;
 	}
-	/* std::cout << recvData << "\n\n"; */
 	return recvData;
 }
 

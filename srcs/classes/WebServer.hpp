@@ -4,12 +4,17 @@
 
 #include "Server.hpp"
 #include "Connection.hpp"
+#include "Config.hpp"
 #include "Kqueue.hpp"
+#include "HttpResponse.hpp"
 
 
 typedef std::vector<Server*> serverVector;
 typedef std::map<int, Port*> intPortMap;
 typedef std::map<int, Client*> intClientMap;
+typedef std::map<int, std::string> intStrMap;
+typedef std::map<int, Server*> intServerMap;
+typedef std::map<int, HttpRequest*> intRequestMap;
 
 class WebServer
 {
@@ -17,12 +22,18 @@ class WebServer
 		Kqueue kq;
 		serverVector	serversList;
 		intPortMap			ports;
+		intStrMap			clientsData;
+		intServerMap			clientsServers;
+		intRequestMap		clientsRequests;
 
 		Server*	getServerFromPort(int portFd);
 
-	public:
 		WebServer();
+
+
+	public:
 		WebServer(const WebServer& toCopy);
+		WebServer(const Config& config);
 		~WebServer();
 
 		void	serverLoop();

@@ -10,15 +10,18 @@ Server::Server(\
 	const intVector& ports, \
 	const intCharMap& errorPages, \
 	const locationVector& locations\
-) : name(name), root(root), errorPages(errorPages), locations(locations)
+) : name(name), root(root), errorPages(errorPages), locations(locations), maxBodySize(5000)
 {
+	std::cerr << "construimos " << name << "\n";
 	for (int i = 0; i != (int)ports.size(); i++)
 	{
+		std::cerr << "Creating port " << ports[i] << "\n";
 		Port *port = new Port(ports[i]);
 		fdMax = port->getSockFd();
 		port->activatePort();
 		fdPortsList[port->getSockFd()] = port;
 	}
+	std::cout << "fdMax: " << fdMax << "\n";
 }
 
 Server::Server(const Server& toCopy)
@@ -32,21 +35,10 @@ Server::~Server()
 
 intPortMap& Server::getPortsList() {return fdPortsList;}
 
+int	Server::getMaxBodySize() {return maxBodySize;}
 
-//------------------------------------------------------------------------------------------
-/* void	Server::addPortsToSet(fd_set& portsFdSet) */
-/* { */
-/* 	for (intPortMap::iterator it = fdPortsList.begin(); it != fdPortsList.end(); ++it) */
-/* 		FD_SET(it->first, &portsFdSet); */
-/* } */
 
-/* void	Server::addPortsToConnectionsList(intConnectionMap& connectionsList) */
-/* { */
-/* 	for (intPortMap::iterator it = fdPortsList.begin(); it != fdPortsList.end(); ++it) */
-/* 		connectionsList[it->first] = it->second; */
-/* } */
-//------------------------------------------------------------------------------------------
-
+locationVector&	Server::getLocations() {return locations;}
 
 
 //------------------------------------------------------------------------------------------
@@ -59,18 +51,6 @@ void	Server::addPortsToPortsList(intPortMap& portsList)
 
 
 
-//------------------------------------------------------------------------------------------
-/* void	Server::addPortsToKq(int kq) */
-/* { */
-/* 	for (intPortMap::iterator it = fdPortsList.begin(); it != fdPortsList.end(); ++it) */
-/* 	{ */
-/* 		std::cout << "i\n"; */
-/* 		kevent(kq, &it->second->getEvSet(), 1, NULL, 0, NULL); */
-/* 	} */
-/* } */
-//------------------------------------------------------------------------------------------
-
-
 void	Server::addClient(int clientFd, Client* client) {fdClientsList[clientFd] = client;}
 
 bool	Server::containsThisPort(int portFd)
@@ -79,11 +59,11 @@ bool	Server::containsThisPort(int portFd)
 	return (it != fdPortsList.end());
 }
 
-bool	Server::containsThisClient(int clientFd)
-{
-	intClientMap::iterator it = fdClientsList.find(clientFd);
-	return (it != fdClientsList.end());
-}
+/* bool	Server::containsThisClient(int clientFd) */
+/* { */
+/* 	intClientMap::iterator it = fdClientsList.find(clientFd); */
+/* 	return (it != fdClientsList.end()); */
+/* } */
 
 Server& Server::operator=(const Server& toAssign)
 {
@@ -91,3 +71,9 @@ Server& Server::operator=(const Server& toAssign)
 	return *this;
 }
 
+std::ostream& Server::operator<<(std::ostream& os) const
+{
+	os << "Name: " << name << "\n";
+	os << "root: " << root << "\n";
+	return os;
+}

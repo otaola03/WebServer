@@ -2,17 +2,38 @@
 
 # define SERVER_HPP
 
+
+
 #include "Port.hpp"
 #include "Location.hpp"
 #include "Client.hpp"
+#include "HttpRequest.hpp"
 
 #include "../../includes/templates.h"
 
 #include <algorithm>
 #include <exception>
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <filesystem>
+#include <stdio.h>
+#include <dirent.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <map>
+#include <vector>
+#include <cstdlib>
+
 typedef std::map<int, Client*> intClientMap;
 typedef std::map<int, Port*> intPortMap;
 
+typedef std::map<int, Client*> intClientMap;
+typedef std::map<int, Port*> intPortMap;
+
+extern char** environ;
 
 class Server
 {
@@ -23,6 +44,7 @@ class Server
 		intClientMap	fdClientsList;	//map(fd, Client*)
 		intCharMap		errorPages;
 		locationVector	locations;
+		int 			maxBodySize;
 
 		Server();
 
@@ -41,20 +63,26 @@ class Server
 		Server(const Server& toCopy);
 		~Server();
 
+		locationVector& getLocations();
+		int getMaxBodySize();
+
 		intPortMap& getPortsList();
 		/* void	addPortsToSet(fd_set& portsList); */
 		/* void	addPortsToConnectionsList(intConnectionMap& connectionsList); */
 		void	addClient(int clientFd, Client* client);
 
 		bool	containsThisPort(int portFd);
-		bool	containsThisClient(int clientFd);
+		/* bool	containsThisClient(int clientFd); */
 
 		void	addPortsToPortsList(intPortMap& portsList);
-		void	addPortsToClientsList(intClientMap& clientsList);
+		/* void	addPortsToClientsList(intClientMap& clientsList); */
 
-		void	addPortsToKq(int kq);
+		/* void	addPortsToKq(int kq); */
+
+		void	addPortsToSet(fd_set& portsList);
 
 		Server& operator=(const Server& toAssign);
+		std::ostream& operator<<(std::ostream& os) const;
 };
 
 #endif

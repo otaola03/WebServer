@@ -26,7 +26,7 @@ class Client : public Connection
 		Client(const Client& toCopy);
 		~Client();
 
-		std::string	recvData();
+		 std::string	recvData();
 		void		sendData(const void* buf);
 		/* void		enableWrite(int kq); */
 		/* void		disableWrite(int kq); */
