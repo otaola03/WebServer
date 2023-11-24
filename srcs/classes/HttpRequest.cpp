@@ -139,6 +139,19 @@ static bool	isValidType(RequestType& type, Location& location)
 	return false;
 }
 
+static bool	isASlashLocation(const std::string& requestedPath, const std::string& rootDir, const std::string& path)
+{
+	std::string filePath;
+	std::string fileName;
+	if (path == "/")
+		fileName = "index.html";
+	else
+		fileName = requestedPath;
+	if (FileFinder::fileFinder(fileName, filePath, rootDir))
+		return true;
+	return false;
+}
+
 bool	HttpRequest::checkRequest(locationVector& locations)
 {
 	std::string file;
@@ -148,24 +161,6 @@ bool	HttpRequest::checkRequest(locationVector& locations)
 			location = *it;
 		else if (it->getPath() == path.substr(0, it->getPath().length()))
 		{
-			/* if (type == GET && it->isGET()) */
-			/* { */
-			/* 	location = *it; */
-			/* 	path = path.substr(it->getPath().length()); */
-			/* 	return (true); */
-			/* } */
-			/* else if (type == POST && it->isPOST()) */
-			/* { */
-			/* 	location = *it; */
-			/* 	path = path.substr(it->getPath().length()); */
-			/* 	return (true); */
-			/* } */
-			/* else if (type == DELETE && it->isDELETE()) */
-			/* { */
-			/* 	location = *it; */
-			/* 	path = path.substr(it->getPath().length()); */
-			/* 	return (true); */
-			/* } */
 			if (isValidType(type, *it))
 			{
 				location = *it;
@@ -176,16 +171,8 @@ bool	HttpRequest::checkRequest(locationVector& locations)
 				return (type = METHOD_ERROR, false);
 		}
 	}
-	std::string filePath;
-	std::string fileName;
-	if (this->path == "/")
-		fileName = "index.html";
-	else
-		fileName = this->path.substr(1);
-	if (FileFinder::fileFinder(fileName, filePath, location.getRoot()))
-	{
+	if (isASlashLocation(this->path.substr(1), location.getRoot(), path))
 		return true;
-	}
 	type = PATH_ERROR;
 	return false;
 }
