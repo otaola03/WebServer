@@ -177,6 +177,30 @@ bool	HttpRequest::checkRequest(locationVector& locations)
 	return false;
 }
 
+static bool	checkNumBytes(int numbytes, RequestType& type, int sockfd)
+{
+	if (numbytes <= 0)
+	{
+		if (numbytes == 0)
+		{
+			std::cout << "selectserver: socket "<< sockfd << " hung up\n";
+			return false;
+		}
+		if (numbytes == -1)
+		{
+ 			perror("recv");
+			type = UNDEFINED;
+			return false;
+		}
+		if (numbytes == EWOULDBLOCK)
+		{
+			type = UNDEFINED;
+			return false;
+		}
+	}
+	return true;
+}
+
 HttpRequest::HttpRequest(int sockfd, int maxBodySize, locationVector& locations)
 {
 	char buf[1025];
@@ -186,22 +210,9 @@ HttpRequest::HttpRequest(int sockfd, int maxBodySize, locationVector& locations)
 
 	while (numbytes == 1024)
 	{
-		if ((numbytes = recv(sockfd, buf, sizeof(buf) - 1, 0)) <= 0)
-		{
-			if (numbytes == 0)
-				std::cout << "selectserver: socket "<< sockfd << " hung up\n";
-			if (numbytes == -1)
-			{
- 				perror("recv");
-				type = UNDEFINED;
-				return ;
-			}
-			if (numbytes == EWOULDBLOCK)
-			{
-				type = UNDEFINED;
-				return ;
-			}
-		}
+		numbytes = recv(sockfd, buf, sizeof(buf) - 1, 0);
+		if (!checkNumBytes(numbytes, type, sockfd))
+			return ;
 
 		std::string readData(buf, numbytes);
 		bytesRecived += numbytes;
