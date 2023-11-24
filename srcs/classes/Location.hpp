@@ -3,8 +3,17 @@
 # define LOCATION_HPP
 
 #include <iostream>
+#include <vector>
 
 #include <sys/stat.h>
+
+#include <string>
+#include <dirent.h>
+#include <fstream>
+using namespace std;
+
+
+using namespace std;
 class Location
 {
 	private://mejor const
@@ -16,13 +25,15 @@ class Location
 		bool	POST;
 		bool	DELETE;
 		bool	autoindex;
-		size_t		max_body_size;
 		std::string	redirection;
 		std::string	destination;
 		std::string	cgi_destinaation;
 
 		// Location();
 		bool	isAllowed(const std::string	&method);
+
+		vector<struct dirent*>  getFiles();
+
 
 		void		check();
 
@@ -46,7 +57,6 @@ class Location
 			const std::string	&index, \
 			const std::string	&allowed_methods, \
 			const std::string	&autoindex, \
-			const std::string	&max_body_size, \
 			const std::string	&redirection, \
 			const std::string	&destination, \
 			const std::string	&cgi_destinaation \
@@ -56,6 +66,8 @@ class Location
 		bool		isGET() const;
 		bool		isPOST() const;
 		bool		isDELETE() const;
+
+		void generate_autoindex_http();
 
 		Location& operator=(const Location& toCopy);
 };

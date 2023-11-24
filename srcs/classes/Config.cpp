@@ -6,7 +6,7 @@
 /*   By: xmatute- <xmatute-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/29 10:32:09 by xmatute-          #+#    #+#             */
-/*   Updated: 2023/11/05 18:27:49 by xmatute-         ###   ########.fr       */
+/*   Updated: 2023/11/24 13:57:50 by xmatute-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,29 @@ Config::Config(const std::string &path) : ifstream(path), path(path), line(), Se
 {
 	cout << " entrando a Config::Config(const std::string &path) path: " << '"' << path << '"' << endl;
 	init();
+	check();
+}
+
+// bool	Config::isLocation(const std::string &to_find)
+// {
+// 	locationVector::iterator	i;
+
+// 	while (/* condition */)
+// 	{
+// 		/* code */
+// 	}
+	
+// }
+
+void	Config::check()
+{
+	std::vector<locationVector>::iterator	i = locations.begin();
+
+	while (i != locations.end())
+	{
+		i++;
+	}
+	
 }
 
 string		&Config::nextline()
@@ -77,6 +100,7 @@ void	Config::init()
 	server_name.push_back(getToken(		"    - server_name: "));
 	root.push_back(getToken(			"      root: "));
 	ports.push_back(parsePorts(getToken("      listen: ").c_str()));
+	max_body_size.push_back(atol(getToken("      max_body_size: ").c_str()));
 	
 	error_pages.push_back(parseErrorPages());
 
@@ -144,7 +168,6 @@ locationVector	Config::parseLocations()
 				getToken("            index: "),
 				getToken("            allowed_methods: "),
 				getToken("            autoindex: "),
-				getToken("            max_body_size: "),
 				getToken("            redirection: "),
 				getToken("            destination: "),
 				getToken("            cgi_destinaation: ")
@@ -154,8 +177,6 @@ locationVector	Config::parseLocations()
 	}
 	return (vector);
 }
-
-
 
 void	Config::lineException(const std::string &problem)
 {
@@ -191,3 +212,9 @@ locationVector	Config::getLocations(size_t index) const
 {
 	return(locations[index]);
 }
+
+//siempre tiene que haber un location - por server o en total te refieres a / no?
+//pon lo del maxbodysize en server ✅ 
+//termina lo de autoindex
+//carpeta que no existe ✅ root no?
+//tiene que empezar con /  ✅ path no?

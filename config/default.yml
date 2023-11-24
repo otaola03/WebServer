@@ -2,6 +2,7 @@ server:
     - server_name: WebServer
       root: /public
       listen: [6969]
+      max_body_size: 15000
       error_pages:
 
       locations:
@@ -11,7 +12,6 @@ server:
             index: 
             allowed_methods: [GET, POST, DELETE]
             autoindex: on
-            max_body_size: 15000
             redirection: google.com
             destination: 
             cgi_destinaation: 
@@ -21,8 +21,17 @@ server:
             root: ./public/html
             index: index.html
             allowed_methods: [GET, POST, DELETE]
-            autoindex: on
-            max_body_size: 
+            autoindex: off
+            redirection: "google.com"
+            destination: ./images #direccion donde se guarda el POST
+            cgi_destinaation: ./cgi-bin #direccion del cgi
+
+          - name: Images
+            path: imgs
+            root: ./public/html
+            index: index.html
+            allowed_methods: [GET, POST, DELETE]
+            autoindex: off
             redirection: "google.com"
             destination: ./images #direccion donde se guarda el POST
             cgi_destinaation: ./cgi-bin #direccion del cgi
