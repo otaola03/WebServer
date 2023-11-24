@@ -88,6 +88,7 @@ std::string HttpResponse::postImage(std::string path, std::string body, std::map
 	std::string body_content = body;
 	std::string contentType;
 	std::string fileName;
+
 	if (headers["Content-Type"] == "multipart/form-data"){
 		size_t i = body.find("\r\n");
 		std::string boundary = body.substr(i + 2, body.find("\r\n", i + 2) - i - 2);
@@ -116,6 +117,8 @@ std::string HttpResponse::postImage(std::string path, std::string body, std::map
 		imageFile.close();
 		closedir(dir);
 	}
+
+
 	msg.append("\nContent-Type: text/html");
 	msg.append("\nContent-Length: ");
 	std::string html_name = "./resources/html/post.html";
@@ -134,12 +137,15 @@ std::string HttpResponse::postImage(std::string path, std::string body, std::map
 
 std::string HttpResponse::getMessage(HttpRequest& parser)
 {
+	std::cout << GREEN << "-----------------------\n" << WHITE;
 	if (parser.getType() == PATH_ERROR)
 		return (getIndex(C404, "./resources/html/404.html"));
 	else if (parser.getType() == METHOD_ERROR || parser.getType() == UNDEFINED)
 		return (getIndex(C405, "./resources/html/405.html"));
 	else if (parser.getType() == LENGTH_ERROR)
 		return (getIndex(C413, "./resources/html/413.html"));
+
+
 	std::string founDir;
 	std::string root = "./resources";
 	if (parser.getType() == GET){

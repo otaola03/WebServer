@@ -206,18 +206,18 @@ HttpRequest::HttpRequest(int sockfd, int maxBodySize, locationVector& locations)
 		if (readData.find("HTTP/1.1"))
 		{
 			saveRequest(recvData);
-			if (checkRequest(locations))
+			if (!checkRequest(locations))
 				return ;
 		}
 
 		if (bytesRecived > maxBodySize)
 		{
 			type = LENGTH_ERROR;
+			std::cout << RED << "Error: MAXBODY_SIZE\n" << WHITE;
 			return ;
 		}
 	}
 	/* std::cout << recvData << "\n\n"; */
-	return ;
 
 }
 
@@ -231,6 +231,8 @@ HttpRequest::~HttpRequest()
 }
 
 bool	HttpRequest::isValidRequest() const {return (type == GET || type == POST || type == DELETE);}
+
+bool	HttpRequest::isUnfinishedRequest() const {return (type == METHOD_ERROR || type == LENGTH_ERROR || type == PATH_ERROR);}
 
 void	HttpRequest::printRequest()
 {

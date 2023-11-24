@@ -201,7 +201,9 @@ void	WebServer::serverLoop()
 				/* if (clientsData[fd] == "") */
 				if (clientsRequests[fd]->getType() == UNDEFINED)
 					close(fd);
-				else if(!kq.enableWrite(fd))
+				else if (clientsRequests[fd]->isUnfinishedRequest())
+					kq.disableRead(fd);
+				if(!kq.enableWrite(fd))
 					close(fd);
 				std::cout << clientsRequests[fd]->getType() << "\n";
 			}

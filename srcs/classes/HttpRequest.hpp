@@ -36,6 +36,7 @@ class HttpRequest
 		~HttpRequest();
 
 		bool		isValidRequest() const;
+		bool		isUnfinishedRequest() const;
 		bool		checkRequest(locationVector& locations);
 
 		void		printRequest();

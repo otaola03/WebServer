@@ -57,6 +57,13 @@ bool	Kqueue::enableWrite(int fd)
 	return true;
 }
 
+bool	Kqueue::disableRead(int fd)
+{
+	if (!manage_event(kq, fd, evSet, EVFILT_READ, EV_DISABLE))
+		return false;
+	return true;
+}
+
 bool	Kqueue::manageEndedConnection(int fd)
 {
 	if (!manage_event(kq, fd, evSet, EVFILT_WRITE, EV_DISABLE))
