@@ -137,14 +137,12 @@ std::string HttpResponse::postImage(std::string path, std::string body, std::map
 
 std::string HttpResponse::getMessage(HttpRequest& parser)
 {
-	std::cout << GREEN << "-----------------------\n" << WHITE;
 	if (parser.getType() == PATH_ERROR)
 		return (getIndex(C404, "./resources/html/404.html"));
 	else if (parser.getType() == METHOD_ERROR || parser.getType() == UNDEFINED)
 		return (getIndex(C405, "./resources/html/405.html"));
 	else if (parser.getType() == LENGTH_ERROR)
 		return (getIndex(C413, "./resources/html/413.html"));
-
 
 	std::string founDir;
 	std::string root = "./resources";

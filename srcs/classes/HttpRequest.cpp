@@ -222,6 +222,9 @@ HttpRequest::HttpRequest(int sockfd, int maxBodySize, locationVector& locations)
 		}
 	}
 	/* std::cout << recvData << "\n\n"; */
+	saveHeaders(recvData);
+	if (type == POST)
+		saveBody(recvData);
 
 }
 
