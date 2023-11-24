@@ -128,6 +128,17 @@ void	HttpRequest::saveHeaders(const std::string& toProccess)
 /* } */
 
 
+static bool	isValidType(RequestType& type, Location& location)
+{
+	if (type == GET && location.isGET())
+		return true;
+	else if (type == POST && location.isPOST())
+		return true;
+	else if (type == DELETE && location.isDELETE())
+		return true;
+	return false;
+}
+
 bool	HttpRequest::checkRequest(locationVector& locations)
 {
 	std::string file;
@@ -137,19 +148,25 @@ bool	HttpRequest::checkRequest(locationVector& locations)
 			location = *it;
 		else if (it->getPath() == path.substr(0, it->getPath().length()))
 		{
-			if (type == GET && it->isGET())
-			{
-				location = *it;
-				path = path.substr(it->getPath().length());
-				return (true);
-			}
-			else if (type == POST && it->isPOST())
-			{
-				location = *it;
-				path = path.substr(it->getPath().length());
-				return (true);
-			}
-			else if (type == DELETE && it->isDELETE())
+			/* if (type == GET && it->isGET()) */
+			/* { */
+			/* 	location = *it; */
+			/* 	path = path.substr(it->getPath().length()); */
+			/* 	return (true); */
+			/* } */
+			/* else if (type == POST && it->isPOST()) */
+			/* { */
+			/* 	location = *it; */
+			/* 	path = path.substr(it->getPath().length()); */
+			/* 	return (true); */
+			/* } */
+			/* else if (type == DELETE && it->isDELETE()) */
+			/* { */
+			/* 	location = *it; */
+			/* 	path = path.substr(it->getPath().length()); */
+			/* 	return (true); */
+			/* } */
+			if (isValidType(type, *it))
 			{
 				location = *it;
 				path = path.substr(it->getPath().length());
