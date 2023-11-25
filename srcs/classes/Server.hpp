@@ -6,7 +6,6 @@
 
 #include "Port.hpp"
 #include "Location.hpp"
-#include "Client.hpp"
 #include "HttpRequest.hpp"
 
 #include "../../includes/templates.h"
@@ -27,10 +26,8 @@
 #include <vector>
 #include <cstdlib>
 
-typedef std::map<int, Client*> intClientMap;
 typedef std::map<int, Port*> intPortMap;
 
-typedef std::map<int, Client*> intClientMap;
 typedef std::map<int, Port*> intPortMap;
 
 extern char** environ;
@@ -41,7 +38,6 @@ class Server
 		std::string 	name;
 		std::string 	root;
 		intPortMap		fdPortsList;	//map(fd, Port*)
-		intClientMap	fdClientsList;	//map(fd, Client*)
 		intCharMap		errorPages;
 		locationVector	locations;
 		int 			maxBodySize;
@@ -67,19 +63,10 @@ class Server
 		int getMaxBodySize();
 
 		intPortMap& getPortsList();
-		/* void	addPortsToSet(fd_set& portsList); */
-		/* void	addPortsToConnectionsList(intConnectionMap& connectionsList); */
-		void	addClient(int clientFd, Client* client);
 
 		bool	containsThisPort(int portFd);
-		/* bool	containsThisClient(int clientFd); */
 
 		void	addPortsToPortsList(intPortMap& portsList);
-		/* void	addPortsToClientsList(intClientMap& clientsList); */
-
-		/* void	addPortsToKq(int kq); */
-
-		void	addPortsToSet(fd_set& portsList);
 
 		Server& operator=(const Server& toAssign);
 		std::ostream& operator<<(std::ostream& os) const;

@@ -51,19 +51,11 @@ void	Server::addPortsToPortsList(intPortMap& portsList)
 
 
 
-void	Server::addClient(int clientFd, Client* client) {fdClientsList[clientFd] = client;}
-
 bool	Server::containsThisPort(int portFd)
 {
 	intPortMap::iterator it = fdPortsList.find(portFd);
 	return (it != fdPortsList.end());
 }
-
-/* bool	Server::containsThisClient(int clientFd) */
-/* { */
-/* 	intClientMap::iterator it = fdClientsList.find(clientFd); */
-/* 	return (it != fdClientsList.end()); */
-/* } */
 
 Server& Server::operator=(const Server& toAssign)
 {

@@ -224,7 +224,6 @@ void	WebServer::serverLoop()
 				kq.manageEndedConnection(fd);
 				close(fd);
 				delete clientsRequests[fd];
-				data = "";
 			}
 		}
 	}
