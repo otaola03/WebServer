@@ -6,7 +6,7 @@
 /*   By: xmatute- <xmatute-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/29 10:32:09 by xmatute-          #+#    #+#             */
-/*   Updated: 2023/11/25 12:01:33 by xmatute-         ###   ########.fr       */
+/*   Updated: 2023/11/25 12:07:39 by xmatute-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -208,6 +208,5 @@ locationVector	Config::getLocations(size_t index) const
 
 //siempre tiene que haber un location / por server ✅
 //pon lo del maxbodysize en server ✅ 
-//termina lo de autoindex recibe el path devuelve un string
 //carpeta que no existe ✅ root
 //tiene que empezar con /  ✅ path

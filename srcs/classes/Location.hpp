@@ -32,9 +32,6 @@ class Location
 		// Location();
 		bool	isAllowed(const std::string	&method);
 
-		vector<struct dirent*>  getFiles();
-
-
 		void		check();
 
 
@@ -66,8 +63,6 @@ class Location
 		bool		isGET() const;
 		bool		isPOST() const;
 		bool		isDELETE() const;
-
-		void generate_autoindex_http();
 
 		Location& operator=(const Location& toCopy);
 		// Getters

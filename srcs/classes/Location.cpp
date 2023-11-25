@@ -1,6 +1,6 @@
 #include "Location.hpp"
 
-bool isDirectory(const std::string& path)//arregla esto
+bool isDirectory(const std::string& path)
 {
     struct stat info = {};
     if (stat(path.c_str(), &info) != 0)
@@ -108,65 +108,4 @@ bool	Location::isDELETE() const
 bool	Location::isAllowed(const std::string	&method)
 {
 	return(allowed_methods.find(method) != std::string::npos);
-}
-
-vector<struct dirent*>  getFiles(const string& directory)
-{
-    DIR* dir = opendir(directory.c_str());
-    if (!dir) {
-        cerr << "No se puede abrir el directorio " << directory << endl;//iug
-    }
-    vector<struct dirent*> files;
-    while (struct dirent* file = readdir(dir)) {
-        files.push_back(file);
-    }
-    closedir(dir);
-    return(files);
-}
-
-vector<struct dirent*>  Location::getFiles()
-{
-	return(::getFiles(root));
-}
-
-void	listFiles(const string& directory)
-{
-  vector<struct dirent*> files = getFiles(directory);
-
-	// cout << endl << "🎱 entramos con " << directory << endl;
-	for (size_t i = 0; i < files.size(); i++)
-	{
-		struct dirent* file = files[i];
-		// cout << endl << "🎗 " << i << " " << file->d_name << endl;
-		
-		if (file->d_name[0] && file->d_name[0] != '.')
-		{
-			if (!isDirectory(directory + "/" + file->d_name))
-			{
-				cout << "<li><a href=\"" << directory + "/" + file->d_name << "\">";
-				cout << directory + "/" + file->d_name;
-				cout << "</a></li>\n";
-			}
-			else
-				listFiles(directory + "/" + file->d_name);
-		}
-	}
-}
-
-void Location::generate_autoindex_http()
-{
-	ofstream	file("autoindex.html");
-	cout << "HTTP/1.1 200 OK\n\n";
-	cout << "<html>\n";
-	cout << "<head>\n";
-	cout << "<title>Autoindex</title>\n";
-	cout << "</head>\n";
-	cout << "<body>\n";
-	cout << "<ul>\n";
-
-	listFiles(root);
-
-	cout << "</ul>\n";
-	cout << "</body>\n";
-	cout << "</html>\n";
 }
