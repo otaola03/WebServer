@@ -25,6 +25,7 @@ class WebServer
 		intServerMap			clientsServers;
 		intRequestMap		clientsRequests;
 
+		static bool	isWebServerActivated;
 		Server*	getServerFromPort(int portFd);
 
 		WebServer();
@@ -39,6 +40,7 @@ class WebServer
 		bool	isAPort(int fd);
 		bool	acceptNewClient(int fd);
 		void	deleteClient(int fd);
+		static void	signalHandler(int signal);
 
 		WebServer& operator=(const WebServer& toAssign);
 };

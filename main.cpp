@@ -55,6 +55,9 @@ int run(const string &path)
 		Config	config(path);
 
 		WebServer	werbserver(config);
+		signal(SIGINT, WebServer::signalHandler);
+		signal(SIGTERM, WebServer::signalHandler);
+
 		werbserver.serverLoop();
 	}
 	catch(const std::exception& e)

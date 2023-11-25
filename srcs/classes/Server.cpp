@@ -31,6 +31,8 @@ Server::Server(const Server& toCopy)
 
 Server::~Server()
 {
+	for (intPortMap::iterator it = fdPortsList.begin(); it != fdPortsList.end(); ++it)
+		delete it->second;
 }
 
 intPortMap& Server::getPortsList() {return fdPortsList;}

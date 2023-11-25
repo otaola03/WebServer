@@ -3,6 +3,8 @@
  #include <sys/event.h>
 #include "HttpRequest.hpp"
 
+bool	WebServer::isWebServerActivated = true;
+
 Server*	WebServer::getServerFromPort(int portFd)
 {
 	for (serverVector::iterator it = serversList.begin(); it != serversList.end(); ++it)
@@ -64,6 +66,8 @@ WebServer::WebServer(const WebServer& toCopy)
 
 WebServer::~WebServer()
 {
+	for (int i = 0; i < (int)serversList.size(); i++)
+		delete serversList[i];
 }
 
 bool	WebServer::isAPort(int fd)
@@ -72,71 +76,6 @@ bool	WebServer::isAPort(int fd)
 	return (it != ports.end());
 }
 
-/* static std::string	recvData(int sockfd) */
-/* { */
-/* 	char buf[1024]; */
-/* 	std::string recvData; */
-/* 	int numbytes = 1024 - 1; */
-
-/* 	/1* while (numbytes == 1024 - 1) *1/ */
-/* 	while (numbytes > 0) */
-/* 	{ */
-/* 		if ((numbytes = recv(sockfd, buf, sizeof(buf) - 1, 0)) <= 0) */
-/* 		{ */
-/* 			if (numbytes == 0) */
-/* 			{ */
-/* 				std::cout << RED << "selectserver: socket "<< sockfd << " hung up\n" << WHITE; */
-/* 				return ""; */
-/* 			} */
-/* 			else if (numbytes == -1) */
-/* 			{ */
-/*  				/1* perror("recv"); *1/ */
-/* 				/1* return ""; *1/ */
-/*  				/1* exit(1); *1/ */
-/* 			} */
-/* 			else if (numbytes == EWOULDBLOCK) */
-/* 				return (perror("recv blcok"), ""); */
-/* 		} */
-/* 		else */
-/* 		{ */
-/* 			buf[numbytes] = '\0'; */
-/* 			std::string stringBuf(buf); */
-/* 			recvData += buf; */
-/* 		} */
-/* 		/1* std::cout << "numbytes: " << numbytes << "\n"; *1/ */
-/* 	} */
-/* 	/1* std::cout << recvData << "\n\n"; *1/ */
-/* 	return recvData; */
-/* } */
-
-/* static std::string	recvData(int sockfd) */
-/* { */
-/* 	char buf[1025]; */
-/* 	std::string recvData; */
-/* 	int numbytes = 1024; */
-/* 	int bytesRecived = 0; */
-
-/* 	while (numbytes == 1024) */
-/* 	{ */
-/* 		if ((numbytes = recv(sockfd, buf, sizeof(buf) - 1, 0)) <= 0) */
-/* 		{ */
-/* 			if (numbytes == 0) */
-/* 				std::cout << "selectserver: socket "<< sockfd << " hung up\n"; */
-/* 			if (numbytes == -1) */
-/* 			{ */
-/*  				perror("recv"); */
-/* 				return ""; */
-/* 			} */
-/* 			if (numbytes == EWOULDBLOCK) */
-/* 				return (std::cout << "HHHHHHHHHHHHHHHHHHHHHHHHHHHHH\n\n\n", ""); */
-/* 		} */
-/* 		std::string vaca(buf, numbytes); */
-/* 		bytesRecived += numbytes; */
-/* 		recvData += vaca; */
-/* 	} */
-/* 	std::cout << recvData << "\n\n"; */
-/* 	return recvData; */
-/* } */
 
 static bool	sendData(int sockfd, std::string msg)
 {
@@ -167,7 +106,7 @@ void	WebServer::serverLoop()
 	std::string data;
 	/* Server* server; */
 
-    while (1) 
+    while (isWebServerActivated) 
 	{
 		numEvents = kq.listenNewEvents();
 		for (int i = 0; i < numEvents; i++)
@@ -227,8 +166,14 @@ void	WebServer::serverLoop()
 			}
 		}
 	}
+	system("leaks webserver");
 }
 
+void	WebServer::signalHandler(int signal)
+{
+	if (signal == SIGINT || signal == SIGTERM)
+		isWebServerActivated = false;
+}
 
 
 WebServer& WebServer::operator=(const WebServer& toAssign)
