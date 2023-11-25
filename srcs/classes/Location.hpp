@@ -70,6 +70,34 @@ class Location
 		void generate_autoindex_http();
 
 		Location& operator=(const Location& toCopy);
+		// Getters
+		std::string getPath() const {
+			return path;
+		}
+
+		std::string getRoot() const {
+			return root;
+		}
+
+		std::string getIndex() const {
+			return index;
+		}
+
+		bool getAutoindex() const {
+			return autoindex;
+		}
+
+		std::string getRedirection() const {
+			return redirection;
+		}
+
+		std::string getDestination() const {
+			return destination;
+		}
+
+		std::string getCGIDestination() const {
+			return cgi_destinaation;
+		}
 };
 
 #endif

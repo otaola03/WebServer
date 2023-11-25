@@ -1,10 +1,11 @@
 #include "Location.hpp"
 
-bool isDirectory(const std::string& path)
+bool isDirectory(const std::string& path)//arregla esto
 {
-    struct stat info;
+    struct stat info = {};
     if (stat(path.c_str(), &info) != 0)
         return false;
+	std::cout << S_ISDIR(info.st_mode) << std::endl;
     return S_ISDIR(info.st_mode);
 }
 
@@ -64,15 +65,16 @@ void Location::check()
 {
 	if (path[0] != '/')
 		throw (std::runtime_error("Location's path \"" + path + "\" does not start with '/'"));
-	if (isDirectory(root))
+	if (!isDirectory(root))//esto no va
 		throw (std::runtime_error("Location's root \"" + root + "\" is not a directoy"));
 	if (index.empty() && !autoindex)
 		throw (std::runtime_error("Location has not index and autoindex is not on"));
 	if (!index.empty() && autoindex)
 		throw (std::runtime_error("Location has index and autoindex is on"));
-	if (!index.empty() && isDirectory(index))
-		throw (std::runtime_error("Location's index is not a directory"));//??
+	// if (!index.empty() && isDirectory(index))
+	// 	throw (std::runtime_error("Location's index is not a directory"));//??
 }
+
 /* Location::Location(const Location& toCopy) */
 /* { */
 /* 	(void)toCopy; */

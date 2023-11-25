@@ -6,7 +6,7 @@
 /*   By: xmatute- <xmatute-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/29 10:32:09 by xmatute-          #+#    #+#             */
-/*   Updated: 2023/11/24 13:57:50 by xmatute-         ###   ########.fr       */
+/*   Updated: 2023/11/25 12:01:33 by xmatute-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,26 +45,19 @@ Config::Config(const std::string &path) : ifstream(path), path(path), line(), Se
 	check();
 }
 
-// bool	Config::isLocation(const std::string &to_find)
-// {
-// 	locationVector::iterator	i;
-
-// 	while (/* condition */)
-// 	{
-// 		/* code */
-// 	}
-	
-// }
+bool	haveRoot(locationVector	locations)
+{
+	for (locationVector::const_iterator i = locations.begin(); i != locations.end(); i++)
+		if (i->getPath() == "/")
+			return true;
+	return false;
+}
 
 void	Config::check()
 {
-	std::vector<locationVector>::iterator	i = locations.begin();
-
-	while (i != locations.end())
-	{
-		i++;
-	}
-	
+	for (std::vector<locationVector>::const_iterator i = locations.begin(); i != locations.end(); i++)
+		if (!haveRoot(*i))
+			throw (std::runtime_error("Root location (path: /) missing"));
 }
 
 string		&Config::nextline()
@@ -213,8 +206,8 @@ locationVector	Config::getLocations(size_t index) const
 	return(locations[index]);
 }
 
-//siempre tiene que haber un location - por server o en total te refieres a / no?
+//siempre tiene que haber un location / por server ✅
 //pon lo del maxbodysize en server ✅ 
-//termina lo de autoindex
-//carpeta que no existe ✅ root no?
-//tiene que empezar con /  ✅ path no?
+//termina lo de autoindex recibe el path devuelve un string
+//carpeta que no existe ✅ root
+//tiene que empezar con /  ✅ path
