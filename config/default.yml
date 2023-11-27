@@ -28,7 +28,7 @@ server:
 
           - name: Images
             path: /
-            root: ./resources/html
+            root: ./resources
             index: index.html
             allowed_methods: [GET, POST, DELETE]
             autoindex: off

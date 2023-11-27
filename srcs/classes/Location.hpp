@@ -87,6 +87,9 @@ class Location
 		std::string getCGIDestination() const {
 			return cgi_destinaation;
 		}
+		bool hasAutoindex() const{
+			return autoindex;
+		}
 };
 
 #endif

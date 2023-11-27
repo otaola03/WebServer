@@ -35,6 +35,7 @@ class HttpRequest
 		HttpRequest(const HttpRequest& toCopy);
 		~HttpRequest();
 
+		Location	getLocation() const;
 		bool		isValidRequest() const;
 		bool		isUnfinishedRequest() const;
 		bool		checkRequest(locationVector& locations);

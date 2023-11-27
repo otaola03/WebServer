@@ -1,5 +1,72 @@
 #include "HttpResponse.hpp"
 
+static bool isDirectory(const std::string& path) {
+    struct stat info;
+    if (stat(path.c_str(), &info) != 0)
+        return false;
+    return S_ISDIR(info.st_mode);
+}
+
+static vector<struct dirent*>  getFiles(const string& directory)
+{
+    DIR* dir = opendir(directory.c_str());
+    if (!dir) {
+        cerr << "No se puede abrir el directorio " << directory << endl;//iug
+    }
+    vector<struct dirent*> files;
+    while (struct dirent* file = readdir(dir)) {
+        files.push_back(file);
+    }
+    closedir(dir);
+    return(files);
+}
+
+static string	listFiles(const string& directory)
+{
+  vector<struct dirent*> files = getFiles(directory);
+  string  index;
+
+	// index += endl << "🎱 entramos con " << directory << endl;
+	for (int i = 0; i < (int)files.size(); i++)
+	{
+		struct dirent* file = files[i];
+		// index += endl << "🎗 " << i << " " << file->d_name << endl;
+		
+		if (file->d_name[0] && file->d_name[0] != '.')
+		{
+			if (!isDirectory(directory + "/" + file->d_name))
+			{
+				index += "<li><a href=\"" + directory + "/" + file->d_name + "\">";
+				index += directory + "/" + file->d_name;
+				index += "</a></li>\n";
+			}
+			else
+				listFiles(directory + "/" + file->d_name);
+		}
+	}
+  return (index);
+}
+
+static string generate_autoindex_http(const string& directory)
+{
+  string  index;
+
+  index += "HTTP/1.1 200 OK\n\n";
+  index += "<html>\n";
+  index += "<head>\n";
+  index += "<title>Autoindex</title>\n";
+  index += "</head>\n";
+  index += "<body>\n";
+  index += "<ul>\n";
+
+	index += listFiles(directory);
+
+  index += "</ul>\n";
+  index += "</body>\n";
+  index += "</html>\n";
+  return (index);
+}
+
 HttpResponse::HttpResponse(HttpRequest& parser)
 {
 	msg = getMessage(parser);
@@ -137,6 +204,7 @@ std::string HttpResponse::postImage(std::string path, std::string body, std::map
 
 std::string HttpResponse::getMessage(HttpRequest& parser)
 {
+	Location	location = parser.getLocation();
 	if (parser.getType() == PATH_ERROR)
 		return (getIndex(C404, "./resources/html/404.html"));
 	else if (parser.getType() == METHOD_ERROR || parser.getType() == UNDEFINED)
@@ -145,8 +213,10 @@ std::string HttpResponse::getMessage(HttpRequest& parser)
 		return (getIndex(C413, "./resources/html/413.html"));
 
 	std::string founDir;
-	std::string root = "./resources";
+	std::string root = location.getRoot();
 	if (parser.getType() == GET){
+		if (location.hasAutoindex())
+			return (generate_autoindex_http(root));
 		if (parser.getPath() == "/")
 			return (getIndex(C200, "./resources/html/index.html"));
 		else if (FileFinder::fileFinder(parser.getPath().substr(1), founDir, root) && parser.getPath().find(".html") != std::string::npos)
@@ -160,6 +230,8 @@ std::string HttpResponse::getMessage(HttpRequest& parser)
 			return (getPhp(founDir));
 		else if (FileFinder::fileFinder(parser.getPath().substr(1), founDir, root) && parser.getPath().find(".ico") != std::string::npos)
 			return (getIco(founDir));
+		else
+			return (getIndex(C404, "./resources/html/404.html"));
 	}
 	else if (parser.getType() == POST){
 		return (postImage(parser.getPath(), parser.getBody(), parser.getHeaders()));

@@ -165,6 +165,7 @@ bool	HttpRequest::checkRequest(locationVector& locations)
 			{
 				location = *it;
 				path = path.substr(it->getPath().length());
+				std::cout << "PATH: " << path << "\n";
 				return (true);
 			}
 			else
@@ -247,6 +248,8 @@ HttpRequest::HttpRequest(const HttpRequest& toCopy)
 HttpRequest::~HttpRequest()
 {
 }
+
+Location	HttpRequest::getLocation() const {return (this->location);}
 
 bool	HttpRequest::isValidRequest() const {return (type == GET || type == POST || type == DELETE);}
 
