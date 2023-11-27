@@ -2,67 +2,36 @@ server:
     - server_name: WebServer
       root: /public
       listen: [8080]
+      max_body_size: 15000
       error_pages:
 
       locations:
           - name: login
-            path: /
+            path: /login
             root: ./resources/html
             index: 
             allowed_methods: [GET, POST, DELETE]
             autoindex: on
-            max_body_size: 15000
             redirection: google.com
             destination: 
             cgi_destinaation: 
 
           - name: Images
             path: /imgs
-            root: ./reources/cgi-bin
+            root: ./resources/html
             index: index.html
             allowed_methods: [GET, POST, DELETE]
-            autoindex: on
-            max_body_size: 
+            autoindex: off
             redirection: "google.com"
             destination: ./images #direccion donde se guarda el POST
             cgi_destinaation: ./cgi-bin #direccion del cgi
 
-
-    - server_name: AJO 
-      root: /public
-      listen: [9090]
-      error_pages:
-
-      locations:
-          - name: login
-            path: /
-            root: ./public/html
-            index: hola.html
-            allowed_methods: [GET, POST, DELETE]
-            autoindex: on
-            max_body_size: 15000
-            redirection: google.com
-            destination: 
-            cgi_destinaation: 
-
-          - name: login
-            path: /html
-            root: ./www/html
-            index: indexx.html
-            allowed_methods: [GET, POST, DELETE]
-            autoindex: on
-            max_body_size: 15000
-            redirection: google.com
-            destination: 
-            cgi_destinaation: 
-
           - name: Images
-            path: /file3
-            root: ./src/html
+            path: /
+            root: ./resources/html
             index: index.html
             allowed_methods: [GET, POST, DELETE]
-            autoindex: on
-            max_body_size: 
+            autoindex: off
             redirection: "google.com"
-            destination: ./images
-            cgi_destinaation: ./cgi-bin
+            destination: ./images #direccion donde se guarda el POST
+            cgi_destinaation: ./cgi-bin #direccion del cgi
