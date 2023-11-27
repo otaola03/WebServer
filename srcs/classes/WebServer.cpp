@@ -155,6 +155,7 @@ void	WebServer::serverLoop()
 				/* HttpResponse response(parser); */
 				HttpResponse response(*clientsRequests[fd]);
 				std::string msg = response.getMsg();
+				std::cerr << "MSG: " << msg << "\n";
 
 				sendData(fd, msg);
 

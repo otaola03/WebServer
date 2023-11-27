@@ -202,6 +202,15 @@ std::string HttpResponse::postImage(std::string path, std::string body, std::map
 	return msg;
 }
 
+std::string HttpResponse::redirector(std::string page){
+	std::string rtn;
+
+	rtn += C302;
+	rtn += "\r\n";
+	rtn += "Location: http://" + page;
+	return rtn;
+}
+
 std::string HttpResponse::getMessage(HttpRequest& parser)
 {
 	Location	location = parser.getLocation();
@@ -214,7 +223,10 @@ std::string HttpResponse::getMessage(HttpRequest& parser)
 
 	std::string founDir;
 	std::string root = location.getRoot();
+	std::string redir = location.getRedirection();
 	if (parser.getType() == GET){
+		if (redir.c_str() != NULL)
+			return (redirector(redir));
 		if (location.hasAutoindex())
 			return (generate_autoindex_http(root));
 		if (parser.getPath() == "/")

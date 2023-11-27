@@ -22,7 +22,7 @@ server:
             index: index.html
             allowed_methods: [GET, POST, DELETE]
             autoindex: off
-            redirection: "google.com"
+            redirection: google.com
             destination: ./images #direccion donde se guarda el POST
             cgi_destinaation: ./cgi-bin #direccion del cgi
 
@@ -32,6 +32,6 @@ server:
             index: index.html
             allowed_methods: [GET, POST, DELETE]
             autoindex: off
-            redirection: "google.com"
+            redirection: google.com
             destination: ./images #direccion donde se guarda el POST
             cgi_destinaation: ./cgi-bin #direccion del cgi

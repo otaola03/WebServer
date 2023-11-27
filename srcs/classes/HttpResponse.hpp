@@ -26,6 +26,7 @@
 
 #define C200 "HTTP/1.1 200 OK"
 #define C204 "HTTP/1.1 204 No Content"
+#define C302 "HTTP/1.1 302 Found"
 #define C404 "HTTP/1.1 404 Not Found"
 #define C405 "HTTP/1.1 405 Method Not Allowed"
 #define C413 "HTTP/1.1 413 Method Not Allowed"
@@ -45,6 +46,7 @@ class HttpResponse
 		~HttpResponse();
 
 		std::string getMsg();
+		std::string redirector(std::string page);
 
 		std::string postImage(std::string path, std::string body, std::map<std::string, std::string> headers);
 		std::string	getIndex(std::string code, std::string path);
