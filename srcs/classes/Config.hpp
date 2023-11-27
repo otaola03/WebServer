@@ -6,7 +6,7 @@
 /*   By: xmatute- <xmatute-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/29 10:32:06 by xmatute-          #+#    #+#             */
-/*   Updated: 2023/11/24 13:14:03 by xmatute-         ###   ########.fr       */
+/*   Updated: 2023/11/27 20:37:00 by xmatute-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,6 +63,9 @@ class Config : protected ifstream
 		intCharMap	parseErrorPages();
 		locationVector	parseLocations();
 		bool		isLocation(const std::string &to_find);
+		
+		int firstCheck(const std::string &filePath);
+		int initServerNum(const std::string &filePath);
 		
 	public:
 		Config(const std::string &path);

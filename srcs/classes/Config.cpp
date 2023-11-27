@@ -6,13 +6,38 @@
 /*   By: xmatute- <xmatute-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/29 10:32:09 by xmatute-          #+#    #+#             */
-/*   Updated: 2023/11/25 12:07:39 by xmatute-         ###   ########.fr       */
+/*   Updated: 2023/11/27 20:38:37 by xmatute-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Config.hpp"
 
-int initServerNum(const std::string &filePath) {
+int Config::firstCheck(const std::string &filePath) //parche guarro
+{
+    std::ifstream inputFile(filePath.c_str());
+    if (!inputFile) {
+        std::cerr << "No se pudo abrir el archivo: " << filePath << std::endl;
+        return -1;
+    }
+
+    std::string line;
+    int count = 0;
+    const std::string targetPrefix = "    - server_name:";
+
+	std::getline(inputFile, line);
+	std::getline(inputFile, line);	
+    if (line.find(targetPrefix) != 0)
+	{
+		this->line = line;
+		lineNum = 2;
+		lineException(filePath + " tiene la linea \"" + line + "\" en vez de \"" + targetPrefix + "\".");
+	}
+    inputFile.close();
+    return count;
+}
+
+int Config::initServerNum(const std::string &filePath) {
+	firstCheck(filePath);
     std::ifstream inputFile(filePath.c_str()); // Abre el archivo usando una cadena de caracteres C
     if (!inputFile) {
         std::cerr << "No se pudo abrir el archivo: " << filePath << std::endl;
@@ -23,8 +48,9 @@ int initServerNum(const std::string &filePath) {
     int count = 0;
     const std::string targetPrefix = "    - server_name:";
 
-    while (std::getline(inputFile, line)) {
+    while (std::getline(inputFile, line)) {		
         if (line.find(targetPrefix) == 0) {
+
             count++;
         }
     }
@@ -36,6 +62,7 @@ int initServerNum(const std::string &filePath) {
 Config::~Config()
 {
 	cout << " entrando a Config::~Config() " << endl;
+	this->close();
 }
 
 Config::Config(const std::string &path) : ifstream(path), path(path), line(), ServerNum(initServerNum(path)), lineNum(0)
