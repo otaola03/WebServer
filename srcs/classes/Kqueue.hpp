@@ -32,6 +32,7 @@ class Kqueue
 
 		bool	manageNewConnection(int fd);
 		bool	enableWrite(int fd);
+		bool	disableRead(int fd);
 		bool	manageEndedConnection(int fd);
 
 		Kqueue& operator=(const Kqueue& toCopy);

@@ -10,7 +10,7 @@ Server::Server(\
 	const intVector& ports, \
 	const intCharMap& errorPages, \
 	const locationVector& locations\
-) : name(name), root(root), errorPages(errorPages), locations(locations), maxBodySize(5000)
+) : name(name), root(root), errorPages(errorPages), locations(locations), maxBodySize(5000000)
 {
 	std::cerr << "construimos " << name << "\n";
 	for (int i = 0; i != (int)ports.size(); i++)
@@ -31,6 +31,8 @@ Server::Server(const Server& toCopy)
 
 Server::~Server()
 {
+	for (intPortMap::iterator it = fdPortsList.begin(); it != fdPortsList.end(); ++it)
+		delete it->second;
 }
 
 intPortMap& Server::getPortsList() {return fdPortsList;}
@@ -51,19 +53,11 @@ void	Server::addPortsToPortsList(intPortMap& portsList)
 
 
 
-void	Server::addClient(int clientFd, Client* client) {fdClientsList[clientFd] = client;}
-
 bool	Server::containsThisPort(int portFd)
 {
 	intPortMap::iterator it = fdPortsList.find(portFd);
 	return (it != fdPortsList.end());
 }
-
-/* bool	Server::containsThisClient(int clientFd) */
-/* { */
-/* 	intClientMap::iterator it = fdClientsList.find(clientFd); */
-/* 	return (it != fdClientsList.end()); */
-/* } */
 
 Server& Server::operator=(const Server& toAssign)
 {

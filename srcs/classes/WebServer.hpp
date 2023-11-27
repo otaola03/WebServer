@@ -11,7 +11,6 @@
 
 typedef std::vector<Server*> serverVector;
 typedef std::map<int, Port*> intPortMap;
-typedef std::map<int, Client*> intClientMap;
 typedef std::map<int, std::string> intStrMap;
 typedef std::map<int, Server*> intServerMap;
 typedef std::map<int, HttpRequest*> intRequestMap;
@@ -26,6 +25,7 @@ class WebServer
 		intServerMap			clientsServers;
 		intRequestMap		clientsRequests;
 
+		static bool	isWebServerActivated;
 		Server*	getServerFromPort(int portFd);
 
 		WebServer();
@@ -40,6 +40,7 @@ class WebServer
 		bool	isAPort(int fd);
 		bool	acceptNewClient(int fd);
 		void	deleteClient(int fd);
+		static void	signalHandler(int signal);
 
 		WebServer& operator=(const WebServer& toAssign);
 };

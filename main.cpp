@@ -55,11 +55,14 @@ int run(const string &path)
 		Config	config(path);
 
 		WebServer	werbserver(config);
+		signal(SIGINT, WebServer::signalHandler);
+		signal(SIGTERM, WebServer::signalHandler);
+
 		werbserver.serverLoop();
 	}
 	catch(const std::exception& e)
 	{
-		std::cerr << '\n' << "Error:\n" << e.what() << '\n';
+		std::cerr << '\n' << "Runtime error:\n" << e.what() << '\n';
 		return (EXIT_FAILURE);
 	}
 	return (EXIT_SUCCESS);

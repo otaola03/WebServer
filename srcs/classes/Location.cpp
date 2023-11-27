@@ -1,4 +1,14 @@
 #include "Location.hpp"
+
+bool isDirectory(const std::string& path)
+{
+    struct stat info = {};
+    if (stat(path.c_str(), &info) != 0)
+        return false;
+	std::cout << S_ISDIR(info.st_mode) << std::endl;
+    return S_ISDIR(info.st_mode);
+}
+
 Location::Location() : GET(false), POST(false), DELETE(false), autoindex(false)
 {
 	if (GET && POST && DELETE && autoindex)
@@ -26,7 +36,6 @@ Location::Location(\
 				const std::string	&index, \
 				const std::string	&allowed_methods, \
 				const std::string	&autoindex, \
-				const std::string	&max_body_size, \
 				const std::string	&redirection, \
 				const std::string	&destination, \
 				const std::string	&cgi_destinaation \
@@ -39,12 +48,31 @@ GET(isAllowed("GET")),
 POST(isAllowed("POST")),
 DELETE(isAllowed("DELETE")),
 autoindex(autoindex.find("on") == 0),///hmmmm
-max_body_size(atol(max_body_size.c_str())),
 redirection(redirection),
 destination(destination),
 cgi_destinaation(cgi_destinaation)
 {
+	check();
+	// if (autoindex)
+	// 	createAutoindex();
+	
+}
 
+
+
+#include "iostream"
+void Location::check()
+{
+	if (path[0] != '/')
+		throw (std::runtime_error("Location's path \"" + path + "\" does not start with '/'"));
+	if (!isDirectory(root))//esto no va
+		throw (std::runtime_error("Location's root \"" + root + "\" is not a directoy"));
+	if (index.empty() && !autoindex)
+		throw (std::runtime_error("Location has not index and autoindex is not on"));
+	if (!index.empty() && autoindex)
+		throw (std::runtime_error("Location has index and autoindex is on"));
+	// if (!index.empty() && isDirectory(index))
+	// 	throw (std::runtime_error("Location's index is not a directory"));//??
 }
 
 /* Location::Location(const Location& toCopy) */
@@ -72,6 +100,7 @@ bool	Location::isPOST() const
 {
 	return POST;
 }
+
 
 bool	Location::isDELETE() const
 {

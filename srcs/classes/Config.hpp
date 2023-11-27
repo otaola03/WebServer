@@ -1,14 +1,4 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   Config.hpp                                         :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: xmatute- <xmatute-@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/10/29 10:32:06 by xmatute-          #+#    #+#             */
-/*   Updated: 2023/11/08 17:30:43 by xmatute-         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
+
 
 #ifndef Config_HPP
 # define Config_HPP
@@ -27,6 +17,8 @@ using	std::string;
 #include <vector>
 #include <map>
 
+#include <cstdlib>
+
 // #include "templates.h"
 
 typedef std::vector<int> intVector;//ta feo k este aqui
@@ -44,13 +36,15 @@ class Config : protected ifstream
 		size_t	ServerNum;
 		size_t	lineNum;
 
-		std::vector<string>		server_name;
-		std::vector<string>		root;
-		std::vector<intVector>	ports;
-		std::vector<intCharMap>	error_pages;
+		std::vector<string>			server_name;
+		std::vector<string>			root;
+		std::vector<size_t>			max_body_size;
+		std::vector<intVector>		ports;
+		std::vector<intCharMap>		error_pages;
 		std::vector<locationVector>	locations;
 
 		void		init();
+		void		check();
 		string		&nextline();
 		string		&skipLine(const std::string &expected);
 		void		lineException(const std::string &problem);
@@ -58,6 +52,7 @@ class Config : protected ifstream
 		intVector	parsePorts(const char *s);
 		intCharMap	parseErrorPages();
 		locationVector	parseLocations();
+		bool		isLocation(const std::string &to_find);
 		
 	public:
 		Config(const std::string &path);
