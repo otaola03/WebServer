@@ -41,7 +41,7 @@ class HttpResponse
 		std::string msg;
 
 	public:
-		HttpResponse(HttpRequest& parser);
+		HttpResponse(HttpRequest& parser, std::map<int, std::string> errors);
 		HttpResponse(const HttpResponse& toCopy);
 		~HttpResponse();
 
@@ -54,7 +54,7 @@ class HttpResponse
 		std::string getIco(std::string path);
 		std::string getPython(std::string path);
 		std::string getPhp(std::string path);
-		std::string	getMessage(HttpRequest& parser);
+		std::string	getMessage(HttpRequest& parser, std::map<int, std::string> errors);
 		std::string pythonCgiHandler(std::string script, char **av);
 		std::string phpCgiHandler(std::string script, char **av);
 		bool	isMethodAllowed(HttpRequest& parser, Location& location);

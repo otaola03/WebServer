@@ -153,10 +153,9 @@ void	WebServer::serverLoop()
 				/* HttpRequest parser(clientsData[fd]); */
 
 				/* HttpResponse response(parser); */
-				HttpResponse response(*clientsRequests[fd]);
+				std::map<int, std::string> errorPagesMap = clientsServers[fd]->getErrorPages();
+				HttpResponse response(*clientsRequests[fd], errorPagesMap);
 				std::string msg = response.getMsg();
-				std::cerr << "MSG: " << msg << "\n";
-
 				sendData(fd, msg);
 
 				/* if (send(fd, msg.c_str(), msg.length(), 0) == -1) */

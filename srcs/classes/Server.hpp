@@ -70,6 +70,7 @@ class Server
 
 		Server& operator=(const Server& toAssign);
 		std::ostream& operator<<(std::ostream& os) const;
+		std::map <int, std::string> getErrorPages();
 };
 
 #endif

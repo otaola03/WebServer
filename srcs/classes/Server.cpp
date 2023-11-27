@@ -4,6 +4,11 @@ Server::Server()
 {
 }
 
+std::map <int, std::string> Server::getErrorPages()
+{
+	return errorPages;
+}
+
 Server::Server(\
 	const std::string& name, \
 	const std::string& root, \

@@ -67,9 +67,9 @@ static string generate_autoindex_http(const string& directory)
   return (index);
 }
 
-HttpResponse::HttpResponse(HttpRequest& parser)
+HttpResponse::HttpResponse(HttpRequest& parser, std::map<int, std::string> errors)
 {
-	msg = getMessage(parser);
+	msg = getMessage(parser, errors);
 }
 
 HttpResponse::HttpResponse(const HttpResponse& toCopy)
@@ -211,11 +211,11 @@ std::string HttpResponse::redirector(std::string page){
 	return rtn;
 }
 
-std::string HttpResponse::getMessage(HttpRequest& parser)
+std::string HttpResponse::getMessage(HttpRequest& parser, std::map<int, std::string> errors)
 {
 	Location	location = parser.getLocation();
 	if (parser.getType() == PATH_ERROR)
-		return (getIndex(C404, "./resources/html/404.html"));
+		return (getIndex(C404, errors[404]));
 	else if (parser.getType() == METHOD_ERROR || parser.getType() == UNDEFINED)
 		return (getIndex(C405, "./resources/html/405.html"));
 	else if (parser.getType() == LENGTH_ERROR)
