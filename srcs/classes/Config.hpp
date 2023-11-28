@@ -1,5 +1,3 @@
-
-
 #ifndef Config_HPP
 # define Config_HPP
 
@@ -53,6 +51,9 @@ class Config : protected ifstream
 		intCharMap	parseErrorPages();
 		locationVector	parseLocations();
 		bool		isLocation(const std::string &to_find);
+		
+		int firstCheck(const std::string &filePath);
+		int initServerNum(const std::string &filePath);
 		
 	public:
 		Config(const std::string &path);

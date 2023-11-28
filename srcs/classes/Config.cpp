@@ -1,7 +1,45 @@
-
 #include "Config.hpp"
 
-int initServerNum(const std::string &filePath) {
+int Config::firstCheck(const std::string &filePath) //parche guarro
+{
+    std::ifstream inputFile(filePath.c_str());
+    if (!inputFile) {
+        std::cerr << "No se pudo abrir el archivo: " << filePath << std::endl;
+        return -1;
+    }
+
+    std::string line;
+    int count = 0;
+    std::string targetPrefix = "    - server_name:";
+
+	std::getline(inputFile, line);
+	std::getline(inputFile, line);	
+    if (line.find(targetPrefix) != 0)
+	{
+		this->line = line;
+		lineNum = 2;
+		lineException(filePath + " tiene la linea \"" + line + "\" en vez de \"" + targetPrefix + "\".");
+	}
+
+	while (std::getline(inputFile, line)) {		
+		if (line.find("        - ") == 0) {
+			targetPrefix = "            path: ";
+			std::getline(inputFile, line);
+			if (line.find(targetPrefix) != 0)
+			{
+				this->line = line;
+				lineNum = 2;
+				lineException(filePath + " tiene la linea \"" + line + "\" en vez de \"" + targetPrefix + "\".");
+			}
+			targetPrefix = "          - ";
+		}
+}
+    inputFile.close();
+    return count;
+}
+
+int Config::initServerNum(const std::string &filePath) {
+	firstCheck(filePath);
     std::ifstream inputFile(filePath.c_str()); // Abre el archivo usando una cadena de caracteres C
     if (!inputFile) {
         std::cerr << "No se pudo abrir el archivo: " << filePath << std::endl;
@@ -12,8 +50,9 @@ int initServerNum(const std::string &filePath) {
     int count = 0;
     const std::string targetPrefix = "    - server_name:";
 
-    while (std::getline(inputFile, line)) {
+    while (std::getline(inputFile, line)) {		
         if (line.find(targetPrefix) == 0) {
+
             count++;
         }
     }
@@ -25,6 +64,7 @@ int initServerNum(const std::string &filePath) {
 Config::~Config()
 {
 	cout << " entrando a Config::~Config() " << endl;
+	this->close();
 }
 
 Config::Config(const std::string &path) : ifstream(path), path(path), line(), ServerNum(initServerNum(path)), lineNum(0)
@@ -36,14 +76,20 @@ Config::Config(const std::string &path) : ifstream(path), path(path), line(), Se
 
 bool	haveRoot(locationVector	locations)
 {
+	std::cout << "🐽" << locations.size() << std::endl;
 	for (locationVector::const_iterator i = locations.begin(); i != locations.end(); i++)
+	{
+		std::cout << "🦂" << i->getPath() << std::endl;
 		if (i->getPath() == "/")
 			return true;
+	}
 	return false;
 }
 
 void	Config::check()
 {
+	std::cout << &locations << "🐽🐽" << locations.size() << std::endl;
+	std::cout << &locations[0] << "🐽 " << locations[0].size() << std::endl;
 	for (std::vector<locationVector>::const_iterator i = locations.begin(); i != locations.end(); i++)
 		if (!haveRoot(*i))
 			throw (std::runtime_error("Root location (path: /) missing"));

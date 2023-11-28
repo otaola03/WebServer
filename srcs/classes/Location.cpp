@@ -90,7 +90,6 @@ Location::~Location()
 // 	return *this;
 // }
 
-std::string	Location::getPath() const {return path;};
 bool	Location::isGET() const
 {
 	return GET;
@@ -110,9 +109,4 @@ bool	Location::isDELETE() const
 bool	Location::isAllowed(const std::string	&method)
 {
 	return(allowed_methods.find(method) != std::string::npos);
-}
-
-std::string	Location::getRoot() const
-{
-	return root;
 }

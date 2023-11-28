@@ -205,6 +205,7 @@ std::string HttpResponse::postImage(std::string path, std::string body, std::map
 std::string HttpResponse::redirector(std::string page){
 	std::string rtn;
 
+	// std::cerr << "REDIRECTOR: {" << page << "}" << std::endl;
 	rtn += C302;
 	rtn += "\r\n";
 	rtn += "Location: http://" + page;
@@ -225,7 +226,7 @@ std::string HttpResponse::getMessage(HttpRequest& parser, std::map<int, std::str
 	std::string root = location.getRoot();
 	std::string redir = location.getRedirection();
 	if (parser.getType() == GET){
-		if (redir.c_str() != NULL)
+		if (redir.empty() == false)
 			return (redirector(redir));
 		if (location.hasAutoindex())
 			return (generate_autoindex_http(root));

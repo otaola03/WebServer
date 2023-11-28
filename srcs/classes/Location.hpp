@@ -2,9 +2,7 @@
 # define LOCATION_HPP
 #include <iostream>
 #include <vector>
-
 #include <sys/stat.h>
-
 #include <string>
 #include <dirent.h>
 #include <fstream>
@@ -62,11 +60,15 @@ class Location
 		bool		isPOST() const;
 		bool		isDELETE() const;
 
-		//Location& operator=(const Location& toCopy);
+		// Location& operator=(const Location& toCopy);
 		// Getters
+		std::string getPath() const {
+			return path;
+		}
 
-		std::string	getPath() const;
-		std::string	getRoot() const;
+		std::string getRoot() const {
+			return root;
+		}
 
 		std::string getIndex() const {
 			return index;
