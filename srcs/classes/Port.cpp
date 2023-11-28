@@ -39,7 +39,6 @@ static int	getListenFd(struct addrinfo *portInfo)
 	return sockfd;
 }
 
-Port::Port() {}
 
 //Pon el constructo vacio privado y haz uno que requeora un puerto como int
 Port::Port(const int port) : port(port)
@@ -57,13 +56,15 @@ Port::Port(const int port) : port(port)
 	// std::string stringPort = std::to_string(port);
 	ss << port;
 	std::string stringPort = ss.str();
-	if ((status = getaddrinfo(NULL, stringPort.c_str(), &templateAddr, &portInfo)) != 0)
+	if ((status = getaddrinfo("127.0.0.1", stringPort.c_str(), &templateAddr, &portInfo)) != 0)
 	{
     	fprintf(stderr, "getaddrinfo error: %s\n", gai_strerror(status));
     	exit(1);
 	}
 
 	sockfd = getListenFd(portInfo);
+	ev_set();
+	setSocketNonBlocking(sockfd);
 	freeaddrinfo(portInfo);
 }
 
@@ -77,8 +78,6 @@ Port::~Port()
 	std::cout << "Port closed\n";
 	close(sockfd);
 }
-
-int	Port::getSockFd() {return sockfd;}
 
 void	Port::activatePort()
 {
@@ -96,11 +95,11 @@ static void *get_in_addr(struct sockaddr *sa)
     return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 
-static void	printClientInfo(struct sockaddr_storage &their_addr)
+static void	printClientInfo(struct sockaddr_storage &their_addr, int sockfd, int port)
 {
 	char s[INET6_ADDRSTRLEN];
-	inet_ntop(their_addr.ss_family, get_in_addr((struct sockaddr *)&their_addr), s, sizeof s);
-	std::cout << "port: got conection from " << s << "\n";
+	inet_ntop(AF_INET, get_in_addr((struct sockaddr *)&their_addr), s, sizeof s);
+	std::cout << "Connection from " << s << ":" << port << " throught socket " << sockfd << "\n";
 }
 
 int	Port::acceptConnection()
@@ -109,16 +108,15 @@ int	Port::acceptConnection()
 	socklen_t sin_size;
 	struct sockaddr_storage their_addr;
 
-   sin_size = sizeof their_addr;
-   new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &sin_size);
-   if (new_fd == -1)
-       perror("accept");
-   if (new_fd != -1)
-	   printClientInfo(their_addr);
-   return (new_fd);
+	sin_size = sizeof their_addr;
+	new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &sin_size);
+	if (new_fd == -1 || new_fd == 0)
+		perror("accept");
+	else
+	   printClientInfo(their_addr, new_fd, port);
+	fcntl(new_fd, F_SETFL, O_NONBLOCK);
+	return (new_fd);
 }
-
-void	Port::closePort() {close(sockfd);}
 
 Port& Port::operator=(const Port& toAssign)
 {
@@ -127,4 +125,3 @@ Port& Port::operator=(const Port& toAssign)
 	port = toAssign.port;
 	return *this;
 }
-
