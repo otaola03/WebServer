@@ -4,14 +4,14 @@ server:
       listen: [6969]
       max_body_size: 15000
       error_pages:
-          - 404: ./resources/html/413.html
+          - 404: ./resources/html/404.html
           - 405: ./resources/html/405.html
           - 406: ./resources/html/foca.html
 
       locations:
           - name: login
             path: /login
-            root: ./resources/html
+            root: ./resources
             index: 
             allowed_methods: [GET, POST, DELETE]
             autoindex: on
@@ -21,10 +21,10 @@ server:
 
           - name: Images
             path: /imgs
-            root: ./resources/html
+            root: ./resources
             index: index.html
             allowed_methods: [GET, POST, DELETE]
-            autoindex: on
+            autoindex: off
             redirection: 
             destination: ./images #direccion donde se guarda el POST
             cgi_destinaation: ./cgi-bin #direccion del cgi
@@ -32,9 +32,9 @@ server:
           - name: default
             path: /
             root: ./resources
-            index: index.html
+            index: 
             allowed_methods: [GET, POST, DELETE]
-            autoindex: off
+            autoindex: on
             redirection: 
             destination: ./images #direccion donde se guarda el POST
             cgi_destinaation: ./cgi-bin #direccion del cgi

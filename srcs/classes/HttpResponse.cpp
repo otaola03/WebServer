@@ -104,6 +104,7 @@ std::string HttpResponse::getIco(std::string path)
 
 std::string HttpResponse::getImg(std::string path)
 {
+	std::cerr << "IMG: {" << path << "}" << std::endl;
 	std::string msg = "HTTP/1.1 200 OK";
 	msg.append("\nContent-Type: image/" + path.substr(path.find(".") + 1));
 	msg.append("\nContent-Length: ");
@@ -132,6 +133,7 @@ std::string HttpResponse::getPhp(std::string path)
 }
 
 std::string HttpResponse::getIndex(std::string code, std::string path){
+	std::cerr << "INDEX: {" << path << "}" << std::endl;
 	std::string msg = code;
 	msg.append("\nContent-Type: text/html");
 	msg.append("\nContent-Length: ");
@@ -215,6 +217,8 @@ std::string HttpResponse::redirector(std::string page){
 std::string HttpResponse::getMessage(HttpRequest& parser, std::map<int, std::string> errors)
 {
 	Location	location = parser.getLocation();
+	std::cerr << "LOCATION: {" << location.getPath() << "}" << std::endl;
+	std::cerr << "PARSER: {" << parser.getPath() << "}" << std::endl;
 	if (parser.getType() == PATH_ERROR)
 		return (getIndex(C404, errors[404]));
 	else if (parser.getType() == METHOD_ERROR || parser.getType() == UNDEFINED)
@@ -230,8 +234,14 @@ std::string HttpResponse::getMessage(HttpRequest& parser, std::map<int, std::str
 			return (redirector(redir));
 		if (location.hasAutoindex())
 			return (generate_autoindex_http(root));
-		if (parser.getPath() == "/")
-			return (getIndex(C200, "./resources/html/index.html"));
+		if (parser.getPath().empty() == true){
+			FileFinder::fileFinder(location.getIndex(), founDir, root);
+			return (getIndex(C200, founDir));
+		}
+		if (parser.getPath() == "/"){
+			FileFinder::fileFinder(location.getIndex(), founDir, root);
+			return (getIndex(C200, founDir));
+		}
 		else if (FileFinder::fileFinder(parser.getPath().substr(1), founDir, root) && parser.getPath().find(".html") != std::string::npos)
 			return (getIndex(C200, founDir));
 		else if ((FileFinder::fileFinder(parser.getPath().substr(1), founDir, root) && parser.getPath().find(".png") != std::string::npos) ||
@@ -244,7 +254,7 @@ std::string HttpResponse::getMessage(HttpRequest& parser, std::map<int, std::str
 		else if (FileFinder::fileFinder(parser.getPath().substr(1), founDir, root) && parser.getPath().find(".ico") != std::string::npos)
 			return (getIco(founDir));
 		else
-			return (getIndex(C404, "./resources/html/404.html"));
+			return (getIndex(C404, errors[404]));
 	}
 	else if (parser.getType() == POST){
 		return (postImage(parser.getPath(), parser.getBody(), parser.getHeaders()));
@@ -252,9 +262,11 @@ std::string HttpResponse::getMessage(HttpRequest& parser, std::map<int, std::str
 	else if (parser.getType() == DELETE){
 		if (FileFinder::fileFinder(parser.getPath().substr(1), founDir, root)){
 			std::remove(founDir.c_str());
-			return (getIndex(C204, "./resources/html/index.html"));
+			FileFinder::fileFinder(location.getIndex(), founDir, root);
+			return (getIndex(C200, founDir));
 		}
 	}
+	std::cerr << "ERROR" << std::endl;
 	return "";
 }
 

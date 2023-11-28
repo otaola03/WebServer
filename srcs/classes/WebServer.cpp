@@ -129,7 +129,7 @@ void	WebServer::serverLoop()
 				clientsServers[fd] = getServerFromPort(portFd);
 			}
 
-			// RECIVE DATA ------- MIRA LO DEL MAXBODY SIZE
+			// RECIVE DATA
 			else if (kq.getEvSet(i).filter == EVFILT_READ)
 			{
 				/* data += recvData(fd); */
@@ -144,14 +144,12 @@ void	WebServer::serverLoop()
 					kq.disableRead(fd);
 				if(!kq.enableWrite(fd))
 					close(fd);
-				std::cout << clientsRequests[fd]->getType() << "\n";
 			}
 
 			// SEND
 			else if (kq.getEvSet(i).filter == EVFILT_WRITE)
 			{
 				/* HttpRequest parser(clientsData[fd]); */
-
 				/* HttpResponse response(parser); */
 				std::map<int, std::string> errorPagesMap = clientsServers[fd]->getErrorPages();
 				HttpResponse response(*clientsRequests[fd], errorPagesMap);
