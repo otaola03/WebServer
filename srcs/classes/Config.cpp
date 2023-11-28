@@ -6,7 +6,7 @@
 /*   By: xmatute- <xmatute-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/29 10:32:09 by xmatute-          #+#    #+#             */
-/*   Updated: 2023/11/27 20:38:37 by xmatute-         ###   ########.fr       */
+/*   Updated: 2023/11/28 12:18:21 by xmatute-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ int Config::firstCheck(const std::string &filePath) //parche guarro
 
     std::string line;
     int count = 0;
-    const std::string targetPrefix = "    - server_name:";
+    std::string targetPrefix = "    - server_name:";
 
 	std::getline(inputFile, line);
 	std::getline(inputFile, line);	
@@ -32,6 +32,20 @@ int Config::firstCheck(const std::string &filePath) //parche guarro
 		lineNum = 2;
 		lineException(filePath + " tiene la linea \"" + line + "\" en vez de \"" + targetPrefix + "\".");
 	}
+
+	while (std::getline(inputFile, line)) {		
+		if (line.find("        - ") == 0) {
+			targetPrefix = "            path: ";
+			std::getline(inputFile, line);
+			if (line.find(targetPrefix) != 0)
+			{
+				this->line = line;
+				lineNum = 2;
+				lineException(filePath + " tiene la linea \"" + line + "\" en vez de \"" + targetPrefix + "\".");
+			}
+			targetPrefix = "          - ";
+		}
+}
     inputFile.close();
     return count;
 }
@@ -74,14 +88,20 @@ Config::Config(const std::string &path) : ifstream(path), path(path), line(), Se
 
 bool	haveRoot(locationVector	locations)
 {
+	std::cout << "🐽" << locations.size() << std::endl;
 	for (locationVector::const_iterator i = locations.begin(); i != locations.end(); i++)
+	{
+		std::cout << "🦂" << i->getPath() << std::endl;
 		if (i->getPath() == "/")
 			return true;
+	}
 	return false;
 }
 
 void	Config::check()
 {
+	std::cout << &locations << "🐽🐽" << locations.size() << std::endl;
+	std::cout << &locations[0] << "🐽 " << locations[0].size() << std::endl;
 	for (std::vector<locationVector>::const_iterator i = locations.begin(); i != locations.end(); i++)
 		if (!haveRoot(*i))
 			throw (std::runtime_error("Root location (path: /) missing"));
@@ -125,6 +145,8 @@ void	Config::init()
 	error_pages.push_back(parseErrorPages());
 
 	locations.push_back(parseLocations());
+	std::cout << &locations << "🐽🐽" << locations.size() << std::endl;
+	std::cout << &locations[0] << "🐽 " << locations[0].size() << std::endl;
 	}
 }
 
