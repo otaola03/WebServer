@@ -164,7 +164,6 @@ void	WebServer::serverLoop()
 			}
 		}
 	}
-	system("leaks webserver");
 }
 
 void	WebServer::signalHandler(int signal)

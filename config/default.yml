@@ -1,7 +1,7 @@
 server:
     - server_name: WebServer
       root: /resources
-      listen: [6969]
+      listen: [8080]
       max_body_size: 15000
       error_pages:
           - 404: ./resources/html/404.html
@@ -9,20 +9,20 @@ server:
           - 406: ./resources/html/foca.html
 
       locations:
-          - name: login
-            path: /login
+          - name: Post
+            path: /post
             root: ./resources
-            index: 
+            index: post.html
             allowed_methods: [GET, POST, DELETE]
-            autoindex: on
+            autoindex: off
             redirection: google.com
             destination: 
             cgi_destinaation: 
 
-          - name: Images
-            path: /imgs
+          - name: Gallery
+            path: /images
             root: ./resources
-            index: index.html
+            index: gallery.php
             allowed_methods: [GET, POST, DELETE]
             autoindex: off
             redirection: 
@@ -32,9 +32,9 @@ server:
           - name: default
             path: /
             root: ./resources
-            index: 
-            allowed_methods: [GET, POST, DELETE]
-            autoindex: on
+            index: index.html
+            allowed_methods: [POST, DELETE]
+            autoindex: off
             redirection: 
             destination: ./images #direccion donde se guarda el POST
             cgi_destinaation: ./cgi-bin #direccion del cgi

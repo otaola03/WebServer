@@ -157,15 +157,24 @@ bool	HttpRequest::checkRequest(locationVector& locations)
 	std::string file;
 	for (locationVector::iterator it = locations.begin(); it != locations.end(); ++it)
 	{
-		if (it->getPath() == "/")
-			location = *it;
+		if (it->getPath() == "/"){
+			if (isValidType(type, *it))
+			{
+				std::cout << "PATH: " << path << "\n";
+				location = *it;
+				path = path.substr(it->getPath().length());
+				return (true);
+			}
+			else
+				return (type = METHOD_ERROR, false);
+		}
 		else if (it->getPath() == path.substr(0, it->getPath().length()))
 		{
 			if (isValidType(type, *it))
 			{
+				std::cout << "PATH: " << path << "\n";
 				location = *it;
 				path = path.substr(it->getPath().length());
-				std::cout << "PATH: " << path << "\n";
 				return (true);
 			}
 			else
