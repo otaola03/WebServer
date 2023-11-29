@@ -63,36 +63,47 @@ int Config::initServerNum(const std::string &filePath) {
 
 Config::~Config()
 {
-	cout << " entrando a Config::~Config() " << endl;
 	this->close();
 }
 
 Config::Config(const std::string &path) : ifstream(path), path(path), line(), ServerNum(initServerNum(path)), lineNum(0)
 {
-	cout << " entrando a Config::Config(const std::string &path) path: " << '"' << path << '"' << endl;
 	init();
 	check();
 }
 
 bool	haveRoot(locationVector	locations)
 {
-	std::cout << "🐽" << locations.size() << std::endl;
 	for (locationVector::const_iterator i = locations.begin(); i != locations.end(); i++)
 	{
-		std::cout << "🦂" << i->getPath() << std::endl;
 		if (i->getPath() == "/")
 			return true;
 	}
 	return false;
 }
 
+bool	haveRepeatedPath(locationVector	locations)
+{
+	for (locationVector::const_iterator i = locations.begin(); i != locations.end(); i++)
+	{
+		for (locationVector::const_iterator j = i + 1; j != locations.end(); j++)
+		{
+			if (i->getPath() == j->getPath())
+				throw (std::runtime_error("There are two locations with the same path (" + i->getPath() + ")"));
+		}
+	}
+	return false;
+}
+
 void	Config::check()
 {
-	std::cout << &locations << "🐽🐽" << locations.size() << std::endl;
-	std::cout << &locations[0] << "🐽 " << locations[0].size() << std::endl;
 	for (std::vector<locationVector>::const_iterator i = locations.begin(); i != locations.end(); i++)
+	{
 		if (!haveRoot(*i))
 			throw (std::runtime_error("Root location (path: /) missing"));
+		if (haveRepeatedPath(*i))
+			throw (std::runtime_error("There are two server with the same path "));
+	}
 }
 
 string		&Config::nextline()
@@ -112,7 +123,7 @@ string		&Config::skipLine(const std::string &expected)
 string	Config::getToken(const std::string &pre)
 {
 	if (nextline().find(pre) != 0)
-		lineException("💮\"" + pre + "\" expected");
+		lineException("\"" + pre + "\" expected");
 	return(line.substr(strlen(pre.c_str())));
 }
 
@@ -240,8 +251,3 @@ locationVector	Config::getLocations(size_t index) const
 {
 	return(locations[index]);
 }
-
-//siempre tiene que haber un location / por server ✅
-//pon lo del maxbodysize en server ✅ 
-//carpeta que no existe ✅ root
-//tiene que empezar con /  ✅ path
