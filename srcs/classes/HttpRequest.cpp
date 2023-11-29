@@ -154,9 +154,9 @@ static bool	isASlashLocation(const std::string& requestedPath, const std::string
 
 static bool	isValidPath(const std::string& path, std::string locationPath)
 {
-	size_t pos = locationPath.find('/', 1);
-	std::string temp = locationPath.substr(0, pos);
-	if (path == temp)
+	size_t pos = path.find('/', 1);
+	std::string temp = path.substr(0, pos);
+	if (locationPath == temp)
 		return true;
 	return false;
 }

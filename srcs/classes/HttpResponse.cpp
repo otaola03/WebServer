@@ -211,10 +211,20 @@ std::string HttpResponse::redirector(std::string page){
 	return rtn;
 }
 
+void jose(std::string& varPath, std::string& root){
+	
+	size_t lastSlashPos = varPath.rfind('/');
+	if (lastSlashPos == std::string::npos)
+		return ;
+	root = root + "/" + varPath.substr(0, lastSlashPos);
+	varPath = varPath.substr(lastSlashPos + 1);
+}
+
 std::string HttpResponse::returner(HttpRequest& parser, std::map<int, std::string> errors, std::string varPath){
 	std::string founDir;
 	std::string root = parser.getLocation().getRoot();
 
+	jose(varPath, root);
 	if (FileFinder::fileFinder(varPath, founDir, root) && varPath.find(".html") != std::string::npos)
 			return (getIndex(C200, founDir));
 	else if ((FileFinder::fileFinder(varPath, founDir, root) && varPath.find(".png") != std::string::npos) ||
@@ -233,8 +243,11 @@ std::string HttpResponse::returner(HttpRequest& parser, std::map<int, std::strin
 
 std::string HttpResponse::getMessage(HttpRequest& parser, std::map<int, std::string> errors)
 {
+	std::cerr << "PATH " << parser.getPath() << std::endl;
+	std::cerr << "TYPE " << parser.getType() << std::endl;
 	std::cout << std::endl;
 	Location	location = parser.getLocation();
+	std::cerr << "LOCATION " << location.getPath() << std::endl;
 
 	if (parser.getType() == PATH_ERROR){
 		if (errors[404].empty() == false)
