@@ -157,7 +157,8 @@ bool	HttpRequest::checkRequest(locationVector& locations)
 	std::string file;
 	for (locationVector::iterator it = locations.begin(); it != locations.end(); ++it)
 	{
-		if (it->getPath() == "/"){
+		if (it->getPath() == "/" && path == "/")
+		{
 			if (isValidType(type, *it))
 			{
 				location = *it;
@@ -166,7 +167,8 @@ bool	HttpRequest::checkRequest(locationVector& locations)
 			else
 				return (type = METHOD_ERROR, false);
 		}
-		else if (it->getPath() == path.substr(0, it->getPath().length()))
+
+		else if (it->getPath() != "/" && it->getPath() == path.substr(0, it->getPath().length()))
 		{
 			if (isValidType(type, *it))
 			{
