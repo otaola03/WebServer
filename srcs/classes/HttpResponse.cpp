@@ -149,7 +149,7 @@ std::string HttpResponse::getIndex(std::string code, std::string path){
 	return msg;
 }
 
-std::string HttpResponse::postImage(std::string path, std::string body, std::map<std::string, std::string> headers){
+std::string HttpResponse::postImage(std::string path, std::string body, std::map<std::string, std::string> headers, std::string destination){
 
 	(void)path;
 	std::string body_content = body;
@@ -169,17 +169,18 @@ std::string HttpResponse::postImage(std::string path, std::string body, std::map
 		else
 			fileName = "archivo";
 	}
-	std::string msg = "HTTP/1.1 201 Created\nLocation: /resources/bin/";
+	std::string msg = "HTTP/1.1 201 Created\nLocation: " + destination;
 	DIR *dir;
 	struct dirent *entry;
-	dir = opendir("./resources/bin");
+	mkdir(destination.c_str(), 0777);
+	dir = opendir(destination.c_str());
 	if (dir){
 		while ((entry = readdir(dir)) != NULL) {
 			if (entry->d_name == fileName){
 				fileName = + "copy_" + fileName;
 			}
 		}
-		std::ofstream imageFile("./resources/bin/" + fileName, std::ios::binary);
+		std::ofstream imageFile(destination + "/" + fileName, std::ios::binary);
 		imageFile.write(body_content.c_str(), body_content.length());
 		imageFile.close();
 		closedir(dir);
@@ -266,7 +267,7 @@ std::string HttpResponse::getMessage(HttpRequest& parser, std::map<int, std::str
 	}
 
 	else if (parser.getType() == POST){
-		return (postImage(parser.getPath(), parser.getBody(), parser.getHeaders()));
+		return (postImage(parser.getPath(), parser.getBody(), parser.getHeaders(), location.getRoot() + "/" + location.getDestination()));
 	}
 	else if (parser.getType() == DELETE){
 		if (FileFinder::fileFinder(parser.getPath().substr(1), founDir, root)){

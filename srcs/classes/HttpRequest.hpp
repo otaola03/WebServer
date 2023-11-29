@@ -39,6 +39,7 @@ class HttpRequest
 		bool		isValidRequest() const;
 		bool		isUnfinishedRequest() const;
 		bool		checkRequest(locationVector& locations);
+		void		refererCheck(std::map<std::string, std::string> headers, locationVector& locations);
 
 		void		printRequest();
 		void		printHeaders();

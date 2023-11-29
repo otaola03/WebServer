@@ -152,7 +152,7 @@ static bool	isASlashLocation(const std::string& requestedPath, const std::string
 	return false;
 }
 
-bool	isValidPath(const std::string& path, std::string locationPath)
+static bool	isValidPath(const std::string& path, std::string locationPath)
 {
 	size_t pos = locationPath.find('/', 1);
 	std::string temp = locationPath.substr(0, pos);
@@ -166,9 +166,6 @@ bool	HttpRequest::checkRequest(locationVector& locations)
 	std::string file;
 	for (locationVector::iterator it = locations.begin(); it != locations.end(); ++it)
 	{
-		std::cerr << "\n\nlocation: " << it->getPath() << std::endl;
-		std::cerr << "path: " << path << std::endl;
-		std::cerr << "YAHPPP: " << path.substr(0, it->getPath().length()) << std::endl;
 		if (it->getPath() == "/"){
 			if (isValidType(type, *it))
 			{
@@ -220,6 +217,29 @@ static bool	checkNumBytes(int numbytes, RequestType& type, int sockfd)
 	return true;
 }
 
+void HttpRequest::refererCheck(std::map<std::string, std::string> headers, locationVector& locations)
+{
+	std::string referer = headers["Referer"];
+	size_t lastSlashPos = referer.rfind('/');
+
+	if (lastSlashPos != std::string::npos)
+		referer = referer.substr(lastSlashPos + 1);
+	for (locationVector::iterator it = locations.begin(); it != locations.end(); ++it)
+	{
+		if (isValidPath("/" + referer, it->getPath()))
+		{
+			if (isValidType(type, *it))
+			{
+				location = *it;
+				path = path.substr(it->getPath().length());
+			}
+			else
+				type = METHOD_ERROR;
+			return;
+		}
+	}
+}
+
 HttpRequest::HttpRequest(int sockfd, int maxBodySize, locationVector& locations)
 {
 	char buf[1025];
@@ -252,6 +272,8 @@ HttpRequest::HttpRequest(int sockfd, int maxBodySize, locationVector& locations)
 		}
 	}
 	saveHeaders(recvData);
+	if (type == DELETE)
+		refererCheck(headers, locations);
 	if (type == POST)
 		saveBody(recvData);
 

@@ -16,7 +16,7 @@ server:
             allowed_methods: [GET, POST, DELETE]
             autoindex: off
             redirection: 
-            destination: 
+            destination: culo
             cgi_destinaation: 
 
           - name: Gallery
