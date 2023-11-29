@@ -186,6 +186,8 @@ intCharMap	Config::parseErrorPages()
 locationVector	Config::parseLocations()
 {
 	locationVector	vector;
+	Location		temp;
+	int 			i = 0;
 
 	skipLine("      locations:");
 	while (nextline().find("          - ") == 0)
@@ -200,9 +202,16 @@ locationVector	Config::parseLocations()
 				getToken("            destination: "),
 				getToken("            cgi_destinaation: ")
 				);
+		if (location.getPath() == "/"){
+			temp = location;
+			i = 1;
+			skipLine("");
+			continue;}
 		vector.push_back(location);
 		skipLine("");
 	}
+	if (i == 1)
+		vector.push_back(temp);
 	return (vector);
 }
 

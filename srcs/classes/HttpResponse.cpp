@@ -104,7 +104,6 @@ std::string HttpResponse::getIco(std::string path)
 
 std::string HttpResponse::getImg(std::string path)
 {
-	std::cerr << "IMG: {" << path << "}" << std::endl;
 	std::string msg = "HTTP/1.1 200 OK";
 	msg.append("\nContent-Type: image/" + path.substr(path.find(".") + 1));
 	msg.append("\nContent-Length: ");
@@ -185,8 +184,6 @@ std::string HttpResponse::postImage(std::string path, std::string body, std::map
 		imageFile.close();
 		closedir(dir);
 	}
-
-
 	msg.append("\nContent-Type: text/html");
 	msg.append("\nContent-Length: ");
 	std::string html_name = "./resources/html/post.html";
@@ -213,15 +210,41 @@ std::string HttpResponse::redirector(std::string page){
 	return rtn;
 }
 
+std::string HttpResponse::returner(HttpRequest& parser, std::map<int, std::string> errors, std::string varPath){
+	std::string founDir;
+	std::string root = parser.getLocation().getRoot();
+
+	if (FileFinder::fileFinder(varPath, founDir, root) && varPath.find(".html") != std::string::npos)
+			return (getIndex(C200, founDir));
+	else if ((FileFinder::fileFinder(varPath, founDir, root) && varPath.find(".png") != std::string::npos) ||
+			(FileFinder::fileFinder(varPath, founDir, root) && varPath.find(".jpg") != std::string::npos) ||
+			(FileFinder::fileFinder(varPath, founDir, root) && varPath.find(".jpeg") != std::string::npos) ||
+			(FileFinder::fileFinder(varPath, founDir, root) && varPath.find(".gif") != std::string::npos))
+		return (getImg(founDir));
+	else if (FileFinder::fileFinder(varPath, founDir, root) && varPath.find(".php") != std::string::npos)
+		return (getPhp(founDir));
+	else if (FileFinder::fileFinder(varPath, founDir, root) && varPath.find(".ico") != std::string::npos)
+		return (getIco(founDir));
+	if (errors[404].empty() == false)
+		return (getIndex(C404, errors[404]));
+	return (getIndex(C404, "./resources/html/404.html"));
+}
+
 std::string HttpResponse::getMessage(HttpRequest& parser, std::map<int, std::string> errors)
 {
+	std::cout << std::endl;
 	Location	location = parser.getLocation();
-	if (parser.getType() == PATH_ERROR)
-		return (getIndex(C404, errors[404]));
-	else if (parser.getType() == METHOD_ERROR || parser.getType() == UNDEFINED)
+
+	if (parser.getType() == PATH_ERROR){
+		if (errors[404].empty() == false)
+			return (getIndex(C404, errors[404]));
+		return (getIndex(C404, "./resources/html/404.html"));
+	}
+	else if (parser.getType() == METHOD_ERROR || parser.getType() == UNDEFINED){
+		if (errors[405].empty() == false)
+			return (getIndex(C405, errors[405]));
 		return (getIndex(C405, "./resources/html/405.html"));
-	else if (parser.getType() == LENGTH_ERROR)
-		return (getIndex(C413, "./resources/html/413.html"));
+	}
 
 	std::string founDir;
 	std::string root = location.getRoot();
@@ -233,27 +256,15 @@ std::string HttpResponse::getMessage(HttpRequest& parser, std::map<int, std::str
 			return (generate_autoindex_http(root));
 		if (parser.getPath().empty() == true){
 			if (FileFinder::fileFinder(location.getIndex(), founDir, root))
-				return (getIndex(C200, founDir));
+				return (returner(parser, errors, location.getIndex()));
 		}
 		if (parser.getPath() == "/"){
 			if (FileFinder::fileFinder(location.getIndex(), founDir, root))
-				return (getIndex(C200, founDir));
+				return (returner(parser, errors, location.getIndex()));
 		}
-		else if (FileFinder::fileFinder(parser.getPath().substr(1), founDir, root) && parser.getPath().find(".html") != std::string::npos)
-			return (getIndex(C200, founDir));
-		else if ((FileFinder::fileFinder(parser.getPath().substr(1), founDir, root) && parser.getPath().find(".png") != std::string::npos) ||
-				(FileFinder::fileFinder(parser.getPath().substr(1), founDir, root) && parser.getPath().find(".jpg") != std::string::npos) ||
-				(FileFinder::fileFinder(parser.getPath().substr(1), founDir, root) && parser.getPath().find(".jpeg") != std::string::npos) ||
-				(FileFinder::fileFinder(parser.getPath().substr(1), founDir, root) && parser.getPath().find(".gif") != std::string::npos))
-			return (getImg(founDir));
-		else if (FileFinder::fileFinder(parser.getPath().substr(1), founDir, root) && parser.getPath().find(".php") != std::string::npos)
-			return (getPhp(founDir));
-		else if (FileFinder::fileFinder(parser.getPath().substr(1), founDir, root) && parser.getPath().find(".ico") != std::string::npos)
-			return (getIco(founDir));
-		if (errors[404].empty() == false)
-			return (getIndex(C404, errors[404]));
-		return (getIndex(C404, "./resources/html/404.html"));
+		return (returner(parser, errors, parser.getPath().substr(1)));
 	}
+
 	else if (parser.getType() == POST){
 		return (postImage(parser.getPath(), parser.getBody(), parser.getHeaders()));
 	}

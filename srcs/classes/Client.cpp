@@ -84,6 +84,7 @@ std::string	Client::recvData()
 
 	while (numbytes == 1024)
 	{
+		std::cerr << "numbytes: " << numbytes << "\n";
 		if ((numbytes = recv(sockfd, buf, sizeof(buf) - 1, 0)) <= 0)
 		{
 			if (numbytes == 0)

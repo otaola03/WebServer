@@ -13,7 +13,7 @@ server:
             path: /post
             root: ./resources
             index: post.html
-            allowed_methods: [GET, DELETE]
+            allowed_methods: [GET, POST, DELETE]
             autoindex: off
             redirection: 
             destination: 
@@ -23,18 +23,28 @@ server:
             path: /images
             root: ./resources
             index: gallery.php
-            allowed_methods: [GET, POST, DELETE]
+            allowed_methods: [GET, POST]
             autoindex: off
             redirection: 
-            destination: ./images #direccion donde se guarda el POST
-            cgi_destinaation: ./cgi-bin #direccion del cgi
+            destination: ./images
+            cgi_destinaation: ./cgi-bin
 
           - name: default
             path: /
             root: ./resources
             index: index.html
-            allowed_methods: [POST, DELETE]
+            allowed_methods: [GET, POST, DELETE]
             autoindex: off
             redirection: 
-            destination: ./images #direccion donde se guarda el POST
-            cgi_destinaation: ./cgi-bin #direccion del cgi
+            destination: ./images
+            cgi_destinaation: ./cgi-bin
+
+          - name: a
+            path: /a
+            root: ./resources
+            index: index.html
+            allowed_methods: [GET, POST, DELETE]
+            autoindex: off
+            redirection: 
+            destination: ./images
+            cgi_destinaation: ./cgi-bin

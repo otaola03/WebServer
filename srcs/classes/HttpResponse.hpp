@@ -29,7 +29,7 @@
 #define C302 "HTTP/1.1 302 Found"
 #define C404 "HTTP/1.1 404 Not Found"
 #define C405 "HTTP/1.1 405 Method Not Allowed"
-#define C413 "HTTP/1.1 413 Method Not Allowed"
+#define C413 "HTTP/1.1 413 Payload Too Large"
 #define C504 "HTTP/1.1 504 Gateway Timeout"
 
 
@@ -57,6 +57,7 @@ class HttpResponse
 		std::string	getMessage(HttpRequest& parser, std::map<int, std::string> errors);
 		std::string pythonCgiHandler(std::string script, char **av);
 		std::string phpCgiHandler(std::string script, char **av);
+		std::string returner(HttpRequest& parser, std::map<int, std::string> errors, std::string varPath);
 		bool	isMethodAllowed(HttpRequest& parser, Location& location);
 
 		HttpResponse& operator=(const HttpResponse& toCopy);

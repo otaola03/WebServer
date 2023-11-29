@@ -152,11 +152,23 @@ static bool	isASlashLocation(const std::string& requestedPath, const std::string
 	return false;
 }
 
+bool	isValidPath(const std::string& path, std::string locationPath)
+{
+	size_t pos = locationPath.find('/', 1);
+	std::string temp = locationPath.substr(0, pos);
+	if (path == temp)
+		return true;
+	return false;
+}
+
 bool	HttpRequest::checkRequest(locationVector& locations)
 {
 	std::string file;
 	for (locationVector::iterator it = locations.begin(); it != locations.end(); ++it)
 	{
+		std::cerr << "\n\nlocation: " << it->getPath() << std::endl;
+		std::cerr << "path: " << path << std::endl;
+		std::cerr << "YAHPPP: " << path.substr(0, it->getPath().length()) << std::endl;
 		if (it->getPath() == "/"){
 			if (isValidType(type, *it))
 			{
@@ -166,7 +178,7 @@ bool	HttpRequest::checkRequest(locationVector& locations)
 			else
 				return (type = METHOD_ERROR, false);
 		}
-		else if (it->getPath() == path.substr(0, it->getPath().length()))
+		else if (isValidPath(path, it->getPath()))
 		{
 			if (isValidType(type, *it))
 			{
