@@ -13,9 +13,9 @@ server:
             path: /post
             root: ./resources
             index: post.html
-            allowed_methods: [GET, POST, DELETE]
+            allowed_methods: [GET, DELETE]
             autoindex: off
-            redirection: google.com
+            redirection: 
             destination: 
             cgi_destinaation: 
 

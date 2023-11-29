@@ -1,4 +1,4 @@
-#include "HttpRequest.hpp"
+#include "HttpRequest.hpp" 
 
 // HttpRequest::HttpRequest()
 // {
@@ -160,9 +160,7 @@ bool	HttpRequest::checkRequest(locationVector& locations)
 		if (it->getPath() == "/"){
 			if (isValidType(type, *it))
 			{
-				std::cout << "PATH: " << path << "\n";
 				location = *it;
-				path = path.substr(it->getPath().length());
 				return (true);
 			}
 			else
@@ -172,7 +170,6 @@ bool	HttpRequest::checkRequest(locationVector& locations)
 		{
 			if (isValidType(type, *it))
 			{
-				std::cout << "PATH: " << path << "\n";
 				location = *it;
 				path = path.substr(it->getPath().length());
 				return (true);
