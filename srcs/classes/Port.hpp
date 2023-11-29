@@ -17,7 +17,7 @@
 #include "Connection.hpp"
 #include <curl/curl.h>
 
-#define BACKLOG 5
+#define BACKLOG 25
 
 class Port : public Connection
 {

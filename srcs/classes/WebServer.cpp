@@ -1,18 +1,14 @@
-#include "WebServer.hpp"
+ #include "WebServer.hpp"
+ #include <sys/types.h>
+ #include <sys/event.h>
 #include "HttpRequest.hpp"
+
+bool	WebServer::isWebServerActivated = true;
 
 Server*	WebServer::getServerFromPort(int portFd)
 {
 	for (serverVector::iterator it = serversList.begin(); it != serversList.end(); ++it)
 		if ((*it)->containsThisPort(portFd))
-			return (*it);
-	return NULL;
-}
-
-Server*	WebServer::getServerFromClient(int clientFd)
-{
-	for (serverVector::iterator it = serversList.begin(); it != serversList.end(); ++it)
-		if ((*it)->containsThisClient(clientFd))
 			return (*it);
 	return NULL;
 }
@@ -31,13 +27,36 @@ WebServer::WebServer()
 	locations.push_back(location);
 
 	Server *server = new Server("server1", "/", portsNum, errorPages, locations);
-	std::cout << "fdMax: " << server->fdMax << "\n";
 
-	server->addPortsToPortsList(ports);
-	kq = kqueue();
-	server->addPortsToKq(kq);
+	intPortMap& serverPorts = server->getPortsList();
+	for (intPortMap::iterator it = serverPorts.begin(); it != serverPorts.end(); ++it)
+	{
+		kq.addPort(it->first);
+		ports[it->first] = it->second;
+	}
 
 	serversList.push_back(server);
+}
+
+WebServer::WebServer(const Config& config)
+{
+    size_t  i = 0;
+
+    while (i < config.getServerNum())
+    {
+        serversList.push_back(new Server(config.getName(i), config.getRoot(i), config.getPorts(i), config.getErrorPages(i), config.getLocations(i)));
+        serversList[i]->addPortsToPortsList(ports);
+        /* serversList[i]->addPortsToKq(kq); */
+
+		intPortMap& serverPorts = serversList[i]->getPortsList();
+		for (intPortMap::iterator it = serverPorts.begin(); it != serverPorts.end(); ++it)
+		{
+			kq.addPort(it->first);
+			ports[it->first] = it->second;
+		}
+			i++;
+    	}
+	// socketList = portsList;
 }
 
 WebServer::WebServer(const WebServer& toCopy)
@@ -47,6 +66,8 @@ WebServer::WebServer(const WebServer& toCopy)
 
 WebServer::~WebServer()
 {
+	for (int i = 0; i < (int)serversList.size(); i++)
+		delete serversList[i];
 }
 
 bool	WebServer::isAPort(int fd)
@@ -55,97 +76,101 @@ bool	WebServer::isAPort(int fd)
 	return (it != ports.end());
 }
 
-bool	WebServer::acceptNewClient(int fd)
+
+static bool	sendData(int sockfd, std::string msg)
 {
-	int newfd = ports[fd]->acceptConnection();;
-	if (newfd == -1)
-		return false;
+	int numbytes;
+	int totalBitsSend = 0;
+	int	bitsToSend = msg.length();
 
-	Client* newClient = new Client(newfd);
-
-	getServerFromPort(fd)->addClient(newfd, newClient);
-	clients[newfd] = newClient;
-
-	kevent(kq, &newClient->getEvSet(), 1, NULL, 0, NULL);
-
-	if (!newClient->add_event(kq, EVFILT_READ))
-		return (false);
-	if (!newClient->add_event(kq, EVFILT_WRITE))
-		return (newClient->delete_event(kq, EVFILT_READ), false);
-
-	return (true);
+	while (totalBitsSend < bitsToSend)
+	{
+		numbytes = send(sockfd, msg.c_str(), msg.length(), 0);
+		if (numbytes == -1)
+ 			return (perror("recv"), false);
+		else
+		{
+			totalBitsSend += numbytes;
+			msg = msg.substr(numbytes, msg.length());
+		}
+	}
+	return true;
 }
 
-void	WebServer::deleteClient(int fd)
-{
-	clients[fd]->delete_event(kq, EVFILT_READ);
-	clients[fd]->delete_event(kq, EVFILT_WRITE);
-	close(fd);
-	delete clients[fd];
-}
 
 void	WebServer::serverLoop()
 {
-	//char msg[] = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 12\r\nConnection close\r\n\r\nHello world!";
-	struct kevent evList[MAX_EVENTS];
+	/* char msg[] = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 12\r\nConnection close\r\n\r\nHello world!"; */
 	int numEvents;
 	int	fd;
 	std::string data;
+	/* Server* server; */
 
-    while (1) 
+    while (isWebServerActivated) 
 	{
-		memset(evList, 0, sizeof(evList));
-		numEvents = kevent(kq, NULL, 0, evList, 1, NULL);
-		std::cerr << "kq: " << kq << "\n";
+		numEvents = kq.listenNewEvents();
 		for (int i = 0; i < numEvents; i++)
 		{
-			fd = evList[i].ident;
+			fd = kq.getEvSet(i).ident;
 
 			// DISCONNECT
-			if (evList[i].flags & EV_EOF){
-				std::cerr << "DISCONNECT\n";
-				deleteClient(fd);
-			}
+			if (kq.getEvSet(i).flags & EV_EOF)
+				close(fd);
 
 			// NEW CLIENT
 			else if (isAPort(fd))
 			{
-				if (!acceptNewClient(fd))
-				{
-					std::cerr << "acceptNewClient error\n";
+				int portFd = fd;
+				if ((fd = ports[fd]->acceptConnection()) == -1)
 					close(fd);
-					delete clients[fd];
-				}
+				else
+					if (!kq.manageNewConnection(fd))
+						close(fd);
+				clientsServers[fd] = getServerFromPort(portFd);
 			}
 
 			// RECIVE DATA
-			else if (evList[i].filter == EVFILT_READ)
+			else if (kq.getEvSet(i).filter == EVFILT_READ)
 			{
-				data = clients[fd]->recvData();
-				std::ofstream file("FOCAAA");
-				file << data << std::endl;
-				if (data == "")
-					deleteClient(fd);
-				else
-					clients[fd]->enable_event(kq, EVFILT_WRITE);
+				/* data += recvData(fd); */
+				/* clientsData[fd] = recvData(fd); */
+				clientsRequests[fd] = new HttpRequest(fd, clientsServers[fd]->getMaxBodySize(), clientsServers[fd]->getLocations());
+
+				/* if (data == "") */
+				/* if (clientsData[fd] == "") */
+				if (clientsRequests[fd]->getType() == UNDEFINED)
+					close(fd);
+				else if (clientsRequests[fd]->isUnfinishedRequest())
+					kq.disableRead(fd);
+				if(!kq.enableWrite(fd))
+					close(fd);
 			}
 
 			// SEND
-			else if (evList[i].filter == EVFILT_WRITE)
+			else if (kq.getEvSet(i).filter == EVFILT_WRITE)
 			{
-				/* std::cout << "WRITEEEEE\n"; */
-				HttpRequest parser(data.c_str());
-				std::string msg = getServerFromClient(fd)->getMessage(parser);
-				// std::cerr << "msg: " << msg << "\n";
-				if (send(fd, msg.c_str(), msg.length(), 0) == -1)
-					perror("send");
-				clients[fd]->disable_event(kq, EVFILT_WRITE);
-				deleteClient(fd);
+				/* HttpRequest parser(clientsData[fd]); */
+				/* HttpResponse response(parser); */
+				std::map<int, std::string> errorPagesMap = clientsServers[fd]->getErrorPages();
+				HttpResponse response(*clientsRequests[fd], errorPagesMap);
+				std::string msg = response.getMsg();
+				sendData(fd, msg);
+
+				/* if (send(fd, msg.c_str(), msg.length(), 0) == -1) */
+				/* 	perror("send"); */
+				kq.manageEndedConnection(fd);
+				close(fd);
+				delete clientsRequests[fd];
 			}
 		}
 	}
 }
 
+void	WebServer::signalHandler(int signal)
+{
+	if (signal == SIGINT || signal == SIGTERM)
+		isWebServerActivated = false;
+}
 
 
 WebServer& WebServer::operator=(const WebServer& toAssign)

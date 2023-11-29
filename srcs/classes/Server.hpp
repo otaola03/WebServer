@@ -2,15 +2,10 @@
 
 # define SERVER_HPP
 
-#define C200 "HTTP/1.1 200 OK"
-#define C204 "HTTP/1.1 204 No Content"
-#define C404 "HTTP/1.1 404 Not Found"
-#define C405 "HTTP/1.1 405 Method Not Allowed"
 
 
 #include "Port.hpp"
 #include "Location.hpp"
-#include "Client.hpp"
 #include "HttpRequest.hpp"
 
 #include "../../includes/templates.h"
@@ -31,7 +26,8 @@
 #include <vector>
 #include <cstdlib>
 
-typedef std::map<int, Client*> intClientMap;
+typedef std::map<int, Port*> intPortMap;
+
 typedef std::map<int, Port*> intPortMap;
 
 extern char** environ;
@@ -42,9 +38,9 @@ class Server
 		std::string 	name;
 		std::string 	root;
 		intPortMap		fdPortsList;	//map(fd, Port*)
-		intClientMap	fdClientsList;	//map(fd, Client*)
 		intCharMap		errorPages;
 		locationVector	locations;
+		int 			maxBodySize;
 
 		Server();
 
@@ -63,33 +59,18 @@ class Server
 		Server(const Server& toCopy);
 		~Server();
 
-		/* void	addPortsToSet(fd_set& portsList); */
-		/* void	addPortsToConnectionsList(intConnectionMap& connectionsList); */
-		void	addClient(int clientFd, Client* client);
+		locationVector& getLocations();
+		int getMaxBodySize();
+
+		intPortMap& getPortsList();
 
 		bool	containsThisPort(int portFd);
-		bool	containsThisClient(int clientFd);
 
 		void	addPortsToPortsList(intPortMap& portsList);
-		void	addPortsToClientsList(intClientMap& clientsList);
-
-		void	addPortsToKq(int kq);
-
-		std::string postImage(std::string path, std::string body);
-		std::string	getIndex(std::string code, std::string path);
-		std::string getImg(std::string path);
-		std::string getIco(std::string path);
-		std::string getPython(std::string path);
-		std::string getPhp(std::string path);
-		std::string	getMessage(HttpRequest& parser);
-		std::string pythonCgiHandler(std::string script, char **av);
-		std::string phpCgiHandler(std::string script, char **av);
-		bool	isMethodAllowed(HttpRequest& parser, Location& location);
-		bool	fileFinder(const std::string& path, std::string& founDir);
-
-		void	addPortsToSet(fd_set& portsList);
 
 		Server& operator=(const Server& toAssign);
+		std::ostream& operator<<(std::ostream& os) const;
+		std::map <int, std::string> getErrorPages();
 };
 
 #endif
