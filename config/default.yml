@@ -12,9 +12,9 @@ server:
           - name: Post
             path: /post
             root: ./resources
-            index: post.html
+            index: 
             allowed_methods: [GET, POST, DELETE]
-            autoindex: off
+            autoindex: on
             redirection: 
             destination: culo
             cgi_destinaation: 

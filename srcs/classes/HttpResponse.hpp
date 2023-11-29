@@ -27,6 +27,7 @@
 #define C200 "HTTP/1.1 200 OK"
 #define C204 "HTTP/1.1 204 No Content"
 #define C302 "HTTP/1.1 302 Found"
+#define C307 "HTTP/1.1 307 Temporary Redirect"
 #define C404 "HTTP/1.1 404 Not Found"
 #define C405 "HTTP/1.1 405 Method Not Allowed"
 #define C413 "HTTP/1.1 413 Payload Too Large"

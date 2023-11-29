@@ -76,7 +76,6 @@ Config::Config(const std::string &path) : ifstream(path), path(path), line(), Se
 
 bool	haveRoot(locationVector	locations)
 {
-	std::cout << "🐽" << locations.size() << std::endl;
 	for (locationVector::const_iterator i = locations.begin(); i != locations.end(); i++)
 	{
 		std::cout << "🦂" << i->getPath() << std::endl;
@@ -88,8 +87,6 @@ bool	haveRoot(locationVector	locations)
 
 void	Config::check()
 {
-	std::cout << &locations << "🐽🐽" << locations.size() << std::endl;
-	std::cout << &locations[0] << "🐽 " << locations[0].size() << std::endl;
 	for (std::vector<locationVector>::const_iterator i = locations.begin(); i != locations.end(); i++)
 		if (!haveRoot(*i))
 			throw (std::runtime_error("Root location (path: /) missing"));
@@ -112,7 +109,7 @@ string		&Config::skipLine(const std::string &expected)
 string	Config::getToken(const std::string &pre)
 {
 	if (nextline().find(pre) != 0)
-		lineException("💮\"" + pre + "\" expected");
+		lineException("\"" + pre + "\" expected");
 	return(line.substr(strlen(pre.c_str())));
 }
 
@@ -249,8 +246,3 @@ locationVector	Config::getLocations(size_t index) const
 {
 	return(locations[index]);
 }
-
-//siempre tiene que haber un location / por server ✅
-//pon lo del maxbodysize en server ✅ 
-//carpeta que no existe ✅ root
-//tiene que empezar con /  ✅ path
