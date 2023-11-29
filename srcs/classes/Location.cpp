@@ -30,6 +30,14 @@ Location::Location(
 		std::cout << "HOLA\n";
 }
 
+bool	isOn(const string &on)
+{
+	if (!(on.find("on") == 0 || on.find("off") == 0))
+		throw (std::runtime_error("A location have autoindex \"" + on + "\" (it must be \"on\" or \"off\")"));
+	return (on.find("on") == 0);
+	
+}
+
 Location::Location(\
 				const std::string	&path, \
 				const std::string	&root, \
@@ -47,7 +55,7 @@ allowed_methods(allowed_methods),
 GET(isAllowed("GET")),
 POST(isAllowed("POST")),
 DELETE(isAllowed("DELETE")),
-autoindex(autoindex.find("on") == 0),///hmmmm
+autoindex(isOn(autoindex)),
 redirection(redirection),
 destination(destination),
 cgi_destinaation(cgi_destinaation)
