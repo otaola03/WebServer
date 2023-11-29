@@ -21,71 +21,68 @@ bool isDirectory(const std::string& path) {
     return S_ISDIR(info.st_mode);
 }
 
-vector<struct dirent*>  getFiles(const string& directory)
+vector<string>  getFiles(const string& directory)
 {
     DIR* dir = opendir(directory.c_str());
     if (!dir) {
         cerr << "No se puede abrir el directorio " << directory << endl;//iug
     }
-    vector<struct dirent*> files;
+    vector<string> files;
     while (struct dirent* file = readdir(dir)) {
-        files.push_back(file);
+        files.push_back(file->d_name);
     }
     closedir(dir);
     return(files);
 }
 
-string	listFiles(const string& directory)
+string	listFiles(const string& path, const string& root)
 {
-  vector<struct dirent*> files = getFiles(directory);
-  string  index;
+    vector<string> const files = getFiles(root);
+    string  index;
 
-	// index += endl << "🎱 entramos con " << directory << endl;
 	for (int i = 0; i < files.size(); i++)
 	{
-		struct dirent* file = files[i];
-		// index += endl << "🎗 " << i << " " << file->d_name << endl;
+		string file = files[i];
 		
-		if (file->d_name[0] && file->d_name[0] != '.')
+		if (file[0] && file[0] != '.')
 		{
-			if (!isDirectory(directory + "/" + file->d_name))
+			if (!isDirectory(root + "/" + file))
 			{
-				index += "<li><a href=\"" + directory + "/" + file->d_name + "\">";
-				index += directory + "/" + file->d_name;
+				index += "<li><a href=\"" + root + "/" + file + "\">";
+				index += path + "/" + file;
 				index += "</a></li>\n";
 			}
 			else
-				listFiles(directory + "/" + file->d_name);
+        {
+            index += listFiles(path + "/" + file, root + "/" + file);
+        }
 		}
 	}
-  return (index);
+    return (index);
 }
 
-string generate_autoindex_http(const string& directory)
+string generate_autoindex_http(const string& path, const string& root)
 {
-  string  index;
+    string  index;
 
-  index += "HTTP/1.1 200 OK\n\n";
-  index += "<html>\n";
-  index += "<head>\n";
-  index += "<title>Autoindex</title>\n";
-  index += "</head>\n";
-  index += "<body>\n";
-  index += "<ul>\n";
+    index += "HTTP/1.1 200 OK\n\n";
+    index += "<html>\n";
+    index += "<head>\n";
+    index += "<title>Autoindex</title>\n";
+    index += "</head>\n";
+    index += "<body>\n";
+    index += "<ul>\n";
 
-	index += listFiles(directory);
+    index += listFiles(path, root);
 
-  index += "</ul>\n";
-  index += "</body>\n";
-  index += "</html>\n";
-  return (index);
+    index += "</ul>\n";
+    index += "</body>\n";
+    index += "</html>\n";
+    return (index);
 }
 
-int main() {
-  // Genera el autoindex para el directorio actual.
-  cout << generate_autoindex_http(".");
+// int main() {
+//   cout << generate_autoindex_http("directorio focal", "./resources");
 
-  return 0;
-}
-
-//termina lo de autoindex recibe el path devuelve un string
+//   return 0;
+// }
