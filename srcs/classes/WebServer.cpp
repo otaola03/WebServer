@@ -13,30 +13,30 @@ Server*	WebServer::getServerFromPort(int portFd)
 	return NULL;
 }
 
-WebServer::WebServer()
-{
-	intVector	portsNum;
-	portsNum.push_back(8080);
-	portsNum.push_back(9090);
+// WebServer::WebServer()
+// {
+// 	intVector	portsNum;
+// 	portsNum.push_back(8080);
+// 	portsNum.push_back(9090);
 
-	intCharMap	errorPages;
-	errorPages[404] = "/404.html";
+// 	intCharMap	errorPages;
+// 	errorPages[404] = "/404.html";
 
-	Location	location;
-	locationVector	locations;
-	locations.push_back(location);
+// 	Location	location;
+// 	locationVector	locations;
+// 	locations.push_back(location);
 
-	Server *server = new Server("server1", "/", portsNum, errorPages, locations);
+// 	Server *server = new Server("server1", "/", portsNum, errorPages, locations);
 
-	intPortMap& serverPorts = server->getPortsList();
-	for (intPortMap::iterator it = serverPorts.begin(); it != serverPorts.end(); ++it)
-	{
-		kq.addPort(it->first);
-		ports[it->first] = it->second;
-	}
+// 	intPortMap& serverPorts = server->getPortsList();
+// 	for (intPortMap::iterator it = serverPorts.begin(); it != serverPorts.end(); ++it)
+// 	{
+// 		kq.addPort(it->first);
+// 		ports[it->first] = it->second;
+// 	}
 
-	serversList.push_back(server);
-}
+// 	serversList.push_back(server);
+// }
 
 WebServer::WebServer(const Config& config)
 {
@@ -44,7 +44,7 @@ WebServer::WebServer(const Config& config)
 
     while (i < config.getServerNum())
     {
-        serversList.push_back(new Server(config.getName(i), config.getRoot(i), config.getPorts(i), config.getErrorPages(i), config.getLocations(i)));
+        serversList.push_back(new Server(config.getName(i), config.getRoot(i), config.getPorts(i), config.getErrorPages(i), config.getLocations(i), config.getMaxBodySize(i)));
         serversList[i]->addPortsToPortsList(ports);
         /* serversList[i]->addPortsToKq(kq); */
 

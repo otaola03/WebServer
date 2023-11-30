@@ -269,6 +269,11 @@ std::string HttpResponse::getMessage(HttpRequest& parser, std::map<int, std::str
 			return (getIndex(C505, errors[505]));
 		return (getIndex(C505, "./resources/html/505.html"));
 	}
+	else if (parser.getType() == LENGTH_ERROR){
+		if (errors[413].empty() == false)
+			return (getIndex(C413, errors[413]));
+		return (getIndex(C413, "./resources/html/413.html"));
+	}
 
 	std::string founDir;
 	std::string root = location.getRoot();

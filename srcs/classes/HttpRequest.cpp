@@ -167,6 +167,8 @@ bool	HttpRequest::checkRequest(locationVector& locations)
 			{
 				location = *it;
 				path = path.substr(it->getPath().length());
+				if (path.empty())
+					path = "/";
 				return (true);
 			}
 			else
@@ -274,7 +276,7 @@ int	HttpRequest::headCheck(const std::string& toProcess, locationVector& locatio
 		temps.push_back(temp);
 	}
 	for (std::vector<std::string>::iterator it = temps.begin(); it != temps.end(); ++it)
-		std::cerr << *it << std::endl;
+		std::cerr << "A: " << *it << std::endl;
 	if (temps.size() != 3){
 		std::cerr << "Error: Bad request\n";
 		return 1;
@@ -338,12 +340,10 @@ HttpRequest::HttpRequest(int sockfd, int maxBodySize, locationVector& locations)
 		type = HTTP_VERSION_ERROR;
 		return ;
 	}
-	if (maxBodySize == 0)
-		return ;
 	if (maxBodySize < 1024){
-		bytes = maxBodySize;
-		char buf[bytes + 1];
-		numbytes = recv(sockfd, buf, sizeof(buf) - 1, 0);
+		type = LENGTH_ERROR;
+		std::cout << RED << "Error: MAXBODY_SIZE\n" << WHITE;
+		return ;
 	}
 	while (numbytes == bytes)
 	{

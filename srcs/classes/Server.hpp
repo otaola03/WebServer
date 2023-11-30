@@ -53,7 +53,8 @@ class Server
 				const std::string& root, \
 				const intVector& ports, \
 				const intCharMap& errorPages, \
-				const locationVector& locations\
+				const locationVector& locations,\
+				const int& BodySize\
 		);
 		Server(const std::string& name, const std::vector<int> ports);
 		Server(const Server& toCopy);

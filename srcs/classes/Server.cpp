@@ -14,8 +14,9 @@ Server::Server(\
 	const std::string& root, \
 	const intVector& ports, \
 	const intCharMap& errorPages, \
-	const locationVector& locations\
-) : name(name), root(root), errorPages(errorPages), locations(locations), maxBodySize(5000000)
+	const locationVector& locations,\
+	const int& BodySize\
+) : name(name), root(root), errorPages(errorPages), locations(locations), maxBodySize(BodySize)
 {
 	std::cerr << "construimos " << name << "\n";
 	for (int i = 0; i != (int)ports.size(); i++)

@@ -246,3 +246,8 @@ locationVector	Config::getLocations(size_t index) const
 {
 	return(locations[index]);
 }
+
+size_t			Config::getMaxBodySize(size_t index) const
+{
+	return(max_body_size[index]);
+}

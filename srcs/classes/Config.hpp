@@ -65,6 +65,7 @@ class Config : protected ifstream
 		intVector		getPorts(size_t index) const;
 		intCharMap		getErrorPages(size_t index) const;
 		locationVector	getLocations(size_t index) const;
+		size_t			getMaxBodySize(size_t index) const;
 };
 
 
