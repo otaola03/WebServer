@@ -254,10 +254,20 @@ std::string HttpResponse::getMessage(HttpRequest& parser, std::map<int, std::str
 			return (getIndex(C404, errors[404]));
 		return (getIndex(C404, "./resources/html/404.html"));
 	}
-	else if (parser.getType() == METHOD_ERROR || parser.getType() == UNDEFINED){
+	else if (parser.getType() == METHOD_ERROR){
 		if (errors[405].empty() == false)
 			return (getIndex(C405, errors[405]));
 		return (getIndex(C405, "./resources/html/405.html"));
+	}
+	else if (parser.getType() == BAD_REQUEST || parser.getType() == UNDEFINED){
+		if (errors[400].empty() == false)
+			return (getIndex(C400, errors[400]));
+		return (getIndex(C400, "./resources/html/400.html"));
+	}
+	else if (parser.getType() == HTTP_VERSION_ERROR){
+		if (errors[505].empty() == false)
+			return (getIndex(C505, errors[505]));
+		return (getIndex(C505, "./resources/html/505.html"));
 	}
 
 	std::string founDir;
@@ -266,10 +276,8 @@ std::string HttpResponse::getMessage(HttpRequest& parser, std::map<int, std::str
 	if (parser.getType() == GET){
 		if (redir.empty() == false)
 			return (redirector(redir));
-		if (location.hasAutoindex() && (parser.getPath().empty() == true || parser.getPath() == "/")){
-			std::cerr << "AUTOINDEX" << std::endl;
+		if (location.hasAutoindex() && (parser.getPath().empty() == true || parser.getPath() == "/"))
 			return (generate_autoindex_http(location.getPath(), root));
-		}
 		if (parser.getPath().empty() == true){
 			if (FileFinder::fileFinder(location.getIndex(), founDir, root))
 				return (returner(parser, errors, location.getIndex()));

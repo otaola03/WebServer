@@ -23,7 +23,7 @@ server:
             path: /images
             root: ./resources
             index: gallery.php
-            allowed_methods: [GET, POST]
+            allowed_methods: [GET, POST, DELETE]
             autoindex: off
             redirection: 
             destination: images

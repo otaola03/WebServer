@@ -79,6 +79,8 @@ void Location::check()
 		throw (std::runtime_error("Location has not index and autoindex is not on"));
 	if (!index.empty() && autoindex)
 		throw (std::runtime_error("Location has index and autoindex is on"));
+	if (destination.empty())
+		throw (std::runtime_error("Location has an empty destination"));	
 	// if (!index.empty() && isDirectory(index))
 	// 	throw (std::runtime_error("Location's index is not a directory"));//??
 }
