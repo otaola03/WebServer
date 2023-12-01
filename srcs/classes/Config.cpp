@@ -40,10 +40,10 @@ int Config::firstCheck(const std::string &filePath) //parche guarro
 
 int Config::initServerNum(const std::string &filePath) {
 	firstCheck(filePath);
-    std::ifstream inputFile(filePath.c_str()); // Abre el archivo usando una cadena de caracteres C
+    std::ifstream inputFile(filePath.c_str());
     if (!inputFile) {
         std::cerr << "No se pudo abrir el archivo: " << filePath << std::endl;
-        return -1; // Indicar error
+        return -1;
     }
 
     std::string line;
@@ -63,13 +63,11 @@ int Config::initServerNum(const std::string &filePath) {
 
 Config::~Config()
 {
-	cout << " entrando a Config::~Config() " << endl;
 	this->close();
 }
 
 Config::Config(const std::string &path) : ifstream(path), path(path), line(), ServerNum(initServerNum(path)), lineNum(0)
 {
-	cout << " entrando a Config::Config(const std::string &path) path: " << '"' << path << '"' << endl;
 	init();
 	check();
 }
@@ -78,7 +76,6 @@ bool	haveRoot(locationVector	locations)
 {
 	for (locationVector::const_iterator i = locations.begin(); i != locations.end(); i++)
 	{
-		std::cout << "🦂" << i->getPath() << std::endl;
 		if (i->getPath() == "/")
 			return true;
 	}
@@ -87,6 +84,14 @@ bool	haveRoot(locationVector	locations)
 
 void	Config::check()
 {
+	for (std::vector<string>::const_iterator i = server_name.begin(); i != server_name.end(); i++)
+		if (i->empty())
+			throw (std::runtime_error("server_name can not be empty"));
+	
+	for (std::vector<size_t>::const_iterator i = max_body_size.begin(); i != max_body_size.end(); i++)
+		if (*i == 0)
+			throw (std::runtime_error("invalid max_body_size"));
+
 	for (std::vector<locationVector>::const_iterator i = locations.begin(); i != locations.end(); i++)
 		if (!haveRoot(*i))
 			throw (std::runtime_error("Root location (path: /) missing"));
@@ -123,7 +128,6 @@ void	Config::init()
 	while (i--)
 	{
 	server_name.push_back(getToken(		"    - server_name: "));
-	root.push_back(getToken(			"      root: "));
 	ports.push_back(parsePorts(getToken("      listen: ").c_str()));
 	max_body_size.push_back(atol(getToken("      max_body_size: ").c_str()));
 	
@@ -158,7 +162,6 @@ intVector	Config::parsePorts(const char *s)
 		while (isspace(*s))
 			s++;
 	}
-	cout << s << endl;
 	if (*s != ']')
 		lineException("']' expected");
 	return(ports);
@@ -196,8 +199,7 @@ locationVector	Config::parseLocations()
 				getToken("            allowed_methods: "),
 				getToken("            autoindex: "),
 				getToken("            redirection: "),
-				getToken("            destination: "),
-				getToken("            cgi_destinaation: ")
+				getToken("            destination: ")
 				);
 		if (location.getPath() == "/"){
 			temp = location;
@@ -226,10 +228,6 @@ size_t Config::getServerNum() const
 string			Config::getName(size_t index) const
 {
 	return(server_name[index]);
-}
-string			Config::getRoot(size_t index) const
-{
-	return(root[index]);
 }
 
 intVector		Config::getPorts(size_t index) const

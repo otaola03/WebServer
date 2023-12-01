@@ -44,7 +44,7 @@ WebServer::WebServer(const Config& config)
 
     while (i < config.getServerNum())
     {
-        serversList.push_back(new Server(config.getName(i), config.getRoot(i), config.getPorts(i), config.getErrorPages(i), config.getLocations(i), config.getMaxBodySize(i)));
+        serversList.push_back(new Server(config.getName(i), config.getPorts(i), config.getErrorPages(i), config.getLocations(i), config.getMaxBodySize(i)));
         serversList[i]->addPortsToPortsList(ports);
         /* serversList[i]->addPortsToKq(kq); */
 

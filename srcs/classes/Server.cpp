@@ -11,12 +11,11 @@ std::map <int, std::string> Server::getErrorPages()
 
 Server::Server(\
 	const std::string& name, \
-	const std::string& root, \
 	const intVector& ports, \
 	const intCharMap& errorPages, \
 	const locationVector& locations,\
 	const int& BodySize\
-) : name(name), root(root), errorPages(errorPages), locations(locations), maxBodySize(BodySize)
+) : name(name),errorPages(errorPages), locations(locations), maxBodySize(BodySize)
 {
 	std::cerr << "construimos " << name << "\n";
 	for (int i = 0; i != (int)ports.size(); i++)
@@ -74,6 +73,5 @@ Server& Server::operator=(const Server& toAssign)
 std::ostream& Server::operator<<(std::ostream& os) const
 {
 	os << "Name: " << name << "\n";
-	os << "root: " << root << "\n";
 	return os;
 }
