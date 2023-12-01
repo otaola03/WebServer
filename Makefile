@@ -20,7 +20,7 @@ WHITE = "\033[0;37m"
 CLASS = ./srcs/classes/
 
 CXX = c++ $(EFLAGS)
-CXXFLAGS = -std=c++98 -Wall -Werror -Wextra -g3 -fsanitize=address $(EFLAGS)
+CXXFLAGS = -std=c++98 -Wall -Werror -Wextra -g3 $(EFLAGS)
 RM = rm -rf
 SANI := -fsanitize=address -g3
 

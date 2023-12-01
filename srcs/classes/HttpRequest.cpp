@@ -188,13 +188,14 @@ static bool	checkNumBytes(int numbytes, RequestType& type, int sockfd)
 		if (numbytes == 0)
 		{
 			std::cout << "selectserver: socket "<< sockfd << " hung up\n";
+			type = UNDEFINED;
 			return false;
 		}
 		if (numbytes == -1)
 		{
  			perror("recv");
-			type = UNDEFINED;
-			return false;
+			// type = UNDEFINED;
+			// return false;
 		}
 		if (numbytes == EWOULDBLOCK)
 		{
@@ -273,8 +274,6 @@ int	HttpRequest::headCheck(const std::string& toProcess, locationVector& locatio
 	for (std::string temp; iss >> temp;) {
 		temps.push_back(temp);
 	}
-	for (std::vector<std::string>::iterator it = temps.begin(); it != temps.end(); ++it)
-		std::cerr << "A: " << *it << std::endl;
 	if (temps.size() != 3){
 		std::cerr << "Error: Bad request\n";
 		return 1;
@@ -356,13 +355,9 @@ HttpRequest::HttpRequest(int sockfd, int maxBodySize, locationVector& locations)
 			return ;
 		}
 	}
-	std::cout << "[" << recvData << "]" << std::endl;
 	saveHeaders(recvData);
-	if (type == DELETE){
-		std::cerr << "Path: " << path << std::endl;
+	if (type == DELETE)
 		refererCheck(headers, locations);
-		std::cerr << "Path: " << path << std::endl;
-	}
 	if (type == POST)
 		saveBody(recvData);
 }

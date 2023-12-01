@@ -243,11 +243,8 @@ std::string HttpResponse::returner(HttpRequest& parser, std::map<int, std::strin
 
 std::string HttpResponse::getMessage(HttpRequest& parser, std::map<int, std::string> errors)
 {
-	std::cerr << "PATH {" << parser.getPath() << "}" << std::endl;
-	std::cerr << "TYPE " << parser.getType() << std::endl;
 	std::cout << std::endl;
 	Location	location = parser.getLocation();
-	std::cerr << "LOCATION " << location.getPath() << std::endl;
 
 	if (parser.getType() == PATH_ERROR){
 		if (errors[404].empty() == false)

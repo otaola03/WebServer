@@ -34,10 +34,10 @@
 #define C404 "HTTP/1.1 404 Not Found"
 #define C405 "HTTP/1.1 405 Method Not Allowed"
 #define C411 "HTTP/1.1 411 Length Required"
+#define C413 "HTTP/1.1 413 Content Too Large"
 #define C500 "HTTP/1.1 500 Internal Server Error"
 #define C501 "HTTP/1.1 501 Not Implemented"
 #define C505 "HTTP/1.1 505 HTTP Version Not Supported"
-#define C413 "HTTP/1.1 413 Content Too Large"
 #define C504 "HTTP/1.1 504 Gateway Timeout"
 
 
