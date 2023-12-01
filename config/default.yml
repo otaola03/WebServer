@@ -2,7 +2,7 @@ server:
     - server_name: WebServer
       root: 
       listen: [8080]
-      max_body_size: 1026
+      max_body_size: 10000000000000
       error_pages:
           - 404: ./resources/html/404.html
           - 406: ./resources/html/foca.html
@@ -15,14 +15,14 @@ server:
             allowed_methods: [GET, POST, DELETE]
             autoindex: off
             redirection: 
-            destination: culo
+            destination: bin
             cgi_destinaation: 
 
           - name: Gallery
             path: /images
             root: ./resources
             index: gallery.php
-            allowed_methods: [GET, POST]
+            allowed_methods: [GET, POST, DELETE]
             autoindex: off
             redirection: 
             destination: images

@@ -212,15 +212,13 @@ void HttpRequest::refererCheck(std::map<std::string, std::string> headers, locat
 
 	if (lastSlashPos != std::string::npos)
 		referer = referer.substr(lastSlashPos + 1);
+	std::cerr << "Referer: " << referer << std::endl;
 	for (locationVector::iterator it = locations.begin(); it != locations.end(); ++it)
 	{
 		if (isValidPath("/" + referer, it->getPath()))
 		{
 			if (isValidType(type, *it))
-			{
 				location = *it;
-				path = path.substr(it->getPath().length());
-			}
 			else
 				type = METHOD_ERROR;
 			return;
@@ -360,8 +358,11 @@ HttpRequest::HttpRequest(int sockfd, int maxBodySize, locationVector& locations)
 	}
 	std::cout << "[" << recvData << "]" << std::endl;
 	saveHeaders(recvData);
-	if (type == DELETE)
+	if (type == DELETE){
+		std::cerr << "Path: " << path << std::endl;
 		refererCheck(headers, locations);
+		std::cerr << "Path: " << path << std::endl;
+	}
 	if (type == POST)
 		saveBody(recvData);
 }
