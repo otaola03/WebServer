@@ -2,18 +2,19 @@ server:
     - server_name: WebServer
       root: 
       listen: [8080]
-      max_body_size: 10000000000000
+      max_body_size: 
       error_pages:
           - 404: ./resources/html/404.html
           - 406: ./resources/html/foca.html
+          - 500: ./resources/html/500.html
 
       locations:
           - name: Post
             path: /post
             root: ./resources
-            index: 
+            index: post.html
             allowed_methods: [GET, POST, DELETE]
-            autoindex: on
+            autoindex: off
             redirection: 
             destination: bin
             cgi_destinaation: 

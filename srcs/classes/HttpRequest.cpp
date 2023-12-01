@@ -337,11 +337,6 @@ HttpRequest::HttpRequest(int sockfd, int maxBodySize, locationVector& locations)
 		type = HTTP_VERSION_ERROR;
 		return ;
 	}
-	if (maxBodySize < 1024){
-		type = LENGTH_ERROR;
-		std::cout << RED << "Error: MAXBODY_SIZE\n" << WHITE;
-		return ;
-	}
 	while (numbytes == bytes)
 	{
 		numbytes = recv(sockfd, buf, sizeof(buf) - 1, 0);
