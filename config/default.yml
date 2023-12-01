@@ -8,6 +8,15 @@ server:
           - 500: ./resources/html/500.html
 
       locations:
+          - name: Test
+            path: /cosas
+            root: ./resources
+            index: 
+            allowed_methods: [GET, POST, DELETE]
+            autoindex: on
+            redirection: 
+            destination: bin
+
           - name: Post
             path: /post
             root: ./resources
@@ -21,7 +30,7 @@ server:
             path: /images
             root: ./resources
             index: gallery.php
-            allowed_methods: [GET, PALLETE, DELETE]
+            allowed_methods: [GET, POST, DELETE]
             autoindex: off
             redirection: 
             destination: images
@@ -37,8 +46,8 @@ server:
 
           - name: a
             path: /a
-            root: ./resources
-            index: index.html
+            root: ./resources/siege
+            index: siegetest.html
             allowed_methods: [GET, POST, DELETE]
             autoindex: off
             redirection: 

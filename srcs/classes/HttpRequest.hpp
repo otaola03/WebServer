@@ -41,6 +41,7 @@ class HttpRequest
 		bool		checkRequest(locationVector& locations);
 		void		refererCheck(std::map<std::string, std::string> headers, locationVector& locations);
 		int			headCheck(const std::string& toProcess, locationVector& locations);
+		void		manageChunked(int sockfd, int maxBodySize, locationVector& locations);
 
 		void		printRequest();
 		void		printHeaders();

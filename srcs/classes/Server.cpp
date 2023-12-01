@@ -17,7 +17,6 @@ Server::Server(\
 	const int& BodySize\
 ) : name(name),errorPages(errorPages), locations(locations), maxBodySize(BodySize)
 {
-	std::cerr << "construimos " << name << "\n";
 	for (int i = 0; i != (int)ports.size(); i++)
 	{
 		std::cerr << "Creating port " << ports[i] << "\n";
@@ -26,7 +25,6 @@ Server::Server(\
 		port->activatePort();
 		fdPortsList[port->getSockFd()] = port;
 	}
-	std::cout << "fdMax: " << fdMax << "\n";
 }
 
 Server::Server(const Server& toCopy)

@@ -5,7 +5,6 @@ bool isDirectory(const std::string& path)
     struct stat info = {};
     if (stat(path.c_str(), &info) != 0)
         return false;
-	std::cout << S_ISDIR(info.st_mode) << std::endl;
     return S_ISDIR(info.st_mode);
 }
 
