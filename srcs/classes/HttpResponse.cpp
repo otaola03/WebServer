@@ -274,6 +274,8 @@ std::string HttpResponse::getMessage(HttpRequest& parser, std::map<int, std::str
 			return (getIndex(C413, errors[413]));
 		return (getIndex(C413, "./resources/html/413.html"));
 	}
+	if (parser.isChunked() == true)
+		return ("HTTP/1.1 100 Continue\r\n\r\n");
 
 	std::string founDir;
 	std::string root = location.getRoot();

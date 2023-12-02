@@ -146,7 +146,7 @@ void	WebServer::serverLoop()
 				else if (clientsRequests[fd]->isUnfinishedRequest())
 					kq.disableRead(fd);
 
-				if (!clientsRequests[fd]->chunked)
+				if (!clientsRequests[fd]->isChunked())
 					if(!kq.enableWrite(fd))
 						close(fd);
 			}

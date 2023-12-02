@@ -4,6 +4,11 @@
 // {
 // }
 
+bool	HttpRequest::isChunked()
+{
+	return chunked;
+}
+
 static	RequestType whatTypeIs(const std::string& type)
 {
 	if (type == "GET")
@@ -351,6 +356,7 @@ int	HttpRequest::recvData(int sockfd, int maxBodySize, locationVector& locations
 		{
 			if (recvData.find("0\r\n\r\n") != std::string::npos){
 				body += recvData.substr(0, recvData.find("0\r\n\r\n") - 2);
+				saveBody(body);
 				return (chunked = false, 0);
 			}
 			if (bytesRecived > maxBodySize){
@@ -369,7 +375,7 @@ int	HttpRequest::recvData(int sockfd, int maxBodySize, locationVector& locations
 				// std::cout << "+++++++++++++++++++++++++++++\n" << recvData << "\n\n\n";
 				body += recvData;
 			}
-			send(sockfd, "HTTP/1.1 100 Continue\r\n\r\n", 25, 0);
+			// send(sockfd, "HTTP/1.1 100 Continue\r\n\r\n", 25, 0);
 			chunked = true;
 			return CHUNKED;
 		}

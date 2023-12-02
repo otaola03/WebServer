@@ -28,9 +28,9 @@ class HttpRequest
 		void	saveRequest(const std::string& toProcess);
 		void	saveHeaders(const std::string& toProcess);
 		void	saveBody(const std::string& toProcess);
+		bool		chunked;
 
 	public:
-		bool		chunked;
 		/* HttpRequest(const std::string& toProcess); */
 		HttpRequest(int sockfd, int maxBodySize, locationVector& locations);
 		HttpRequest(const HttpRequest& toCopy);
@@ -45,6 +45,7 @@ class HttpRequest
 		void		refererCheck(std::map<std::string, std::string> headers, locationVector& locations);
 		int			headCheck(const std::string& toProcess, locationVector& locations);
 		void		manageChunked(int sockfd, int maxBodySize, locationVector& locations);
+		bool		isChunked();
 
 		void		printRequest();
 		void		printHeaders();
