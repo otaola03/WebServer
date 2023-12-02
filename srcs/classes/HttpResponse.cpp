@@ -176,7 +176,10 @@ std::string HttpResponse::postImage(std::string path, std::string body, std::map
 	dir = opendir(destination.c_str());
 	if (dir){
 		while ((entry = readdir(dir)) != NULL) {
+			std::cerr << "FILENAME = " << fileName << std::endl;
+			std::cerr << "DNAME = " << entry->d_name << std::endl;
 			if (entry->d_name == fileName){
+				dir = opendir(destination.c_str());
 				fileName = + "copy_" + fileName;
 			}
 		}
@@ -295,7 +298,6 @@ std::string HttpResponse::getMessage(HttpRequest& parser, std::map<int, std::str
 		return (postImage(parser.getPath(), parser.getBody(), parser.getHeaders(), location.getRoot() + "/" + location.getDestination()));
 	}
 	else if (parser.getType() == DELETE){
-		std::cerr << "FERRRRXXOOO" << std::endl;
 		if (FileFinder::fileFinder(parser.getPath().substr(1), founDir, root)){
 			std::remove(founDir.c_str());
 			if (FileFinder::fileFinder(location.getIndex(), founDir, root))
