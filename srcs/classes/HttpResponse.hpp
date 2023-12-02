@@ -56,16 +56,14 @@ class HttpResponse
 		std::string getMsg();
 		std::string redirector(std::string page);
 
-		std::string postImage(std::string path, std::string body, std::map<std::string, std::string> headers, std::string destination);
+		std::string postImage(std::string path, std::string body, std::map<std::string, std::string> headers, std::string destination, std::string root);
 		std::string	getIndex(std::string code, std::string path);
 		std::string getImg(std::string path);
 		std::string getIco(std::string path);
-		std::string getPython(std::string path);
-		std::string getPhp(std::string path);
+		std::string getPhp(std::string path, std::string args);
 		std::string	getMessage(HttpRequest& parser, std::map<int, std::string> errors);
-		std::string pythonCgiHandler(std::string script, char **av);
-		std::string phpCgiHandler(std::string script, char **av);
-		std::string returner(HttpRequest& parser, std::map<int, std::string> errors, std::string varPath);
+		std::string phpCgiHandler(std::string script, std::string args);
+		std::string returner(HttpRequest& parser, std::map<int, std::string> errors, std::string varPath, std::string args);
 		bool	isMethodAllowed(HttpRequest& parser, Location& location);
 
 		HttpResponse& operator=(const HttpResponse& toCopy);

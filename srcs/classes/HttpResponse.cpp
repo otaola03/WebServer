@@ -121,9 +121,9 @@ std::string HttpResponse::getImg(std::string path)
 	return msg;
 }
 
-std::string HttpResponse::getPhp(std::string path)
+std::string HttpResponse::getPhp(std::string path, std::string args)
 {
-	std::string php = phpCgiHandler(path, environ);
+	std::string php = phpCgiHandler(path, args);
 	std::string html_name = path;
 	std::ifstream file(html_name.c_str());
 	msg.append(php);
@@ -149,7 +149,7 @@ std::string HttpResponse::getIndex(std::string code, std::string path){
 	return msg;
 }
 
-std::string HttpResponse::postImage(std::string path, std::string body, std::map<std::string, std::string> headers, std::string destination){
+std::string HttpResponse::postImage(std::string path, std::string body, std::map<std::string, std::string> headers, std::string destination, std::string root){
 
 	(void)path;
 	std::string body_content = body;
@@ -162,6 +162,20 @@ std::string HttpResponse::postImage(std::string path, std::string body, std::map
 		contentType = body.substr(body.find("Content-Type: ") + 14, body.find("\r\n", body.find("Content-Type: ") + 14) - body.find("Content-Type: ") - 14);
 		fileName = body.substr(body.find("filename=\"") + 10, body.find("\"", body.find("filename=\"") + 10) - body.find("filename=\"") - 10);
 		body_content = body.substr(body.find("\r\n\r\n") + 4);
+	}
+	else if (path.find(".php") != std::string::npos){
+		std::string findPath;
+		std::string args = body_content;
+		FileFinder::fileFinder(path.substr(1), findPath, root);
+		std::cerr << "FINDPATH: " << findPath << std::endl;
+		std::cerr << "PATH: " << path << std::endl;
+		std::cerr << "ROOT: " << root << std::endl;
+		std::string php = phpCgiHandler(findPath, args);
+		std::string html_name = path;
+		std::ifstream file(html_name.c_str());
+		msg.append(php);
+		file.close();
+		return msg;
 	}
 	else{
 		if (headers["Content-Type"] == "plain/text")
@@ -186,19 +200,19 @@ std::string HttpResponse::postImage(std::string path, std::string body, std::map
 		imageFile.close();
 		closedir(dir);
 	}
-	msg.append("\nContent-Type: text/html");
-	msg.append("\nContent-Length: ");
-	std::string html_name = "./resources/html/post.html";
-	std::ifstream file(html_name.c_str());
-	if (file.is_open()) {
-		std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-		msg.append(std::to_string(content.length()));
-		msg.append("\n\n");
-		msg.append(content);
-		file.close();
-	} else {
-		std::cerr << "Fatal" << std::endl;
-	}
+	// msg.append("\nContent-Type: text/html");
+	// msg.append("\nContent-Length: ");
+	// std::string html_name = "./resources/html/post.html";
+	// std::ifstream file(html_name.c_str());
+	// if (file.is_open()) {
+	// 	std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+	// 	msg.append(std::to_string(content.length()));
+	// 	msg.append("\n\n");
+	// 	msg.append(content);
+	// 	file.close();
+	// } else {
+	// 	std::cerr << "Fatal" << std::endl;
+	// }
 	return msg;
 }
 
@@ -221,7 +235,7 @@ void jose(std::string& varPath, std::string& root){
 	varPath = varPath.substr(lastSlashPos + 1);
 }
 
-std::string HttpResponse::returner(HttpRequest& parser, std::map<int, std::string> errors, std::string varPath){
+std::string HttpResponse::returner(HttpRequest& parser, std::map<int, std::string> errors, std::string varPath, std::string args){
 	std::string founDir;
 	std::string root = parser.getLocation().getRoot();
 
@@ -234,7 +248,7 @@ std::string HttpResponse::returner(HttpRequest& parser, std::map<int, std::strin
 			(FileFinder::fileFinder(varPath, founDir, root) && varPath.find(".gif") != std::string::npos))
 		return (getImg(founDir));
 	else if (FileFinder::fileFinder(varPath, founDir, root) && varPath.find(".php") != std::string::npos)
-		return (getPhp(founDir));
+		return (getPhp(founDir, args));
 	else if (FileFinder::fileFinder(varPath, founDir, root) && varPath.find(".ico") != std::string::npos)
 		return (getIco(founDir));
 	if (errors[404].empty() == false)
@@ -245,8 +259,20 @@ std::string HttpResponse::returner(HttpRequest& parser, std::map<int, std::strin
 std::string HttpResponse::getMessage(HttpRequest& parser, std::map<int, std::string> errors)
 {
 	std::cout << std::endl;
+	std::string args;
+	std::string getPath;
 	Location	location = parser.getLocation();
+	// std::cerr << "TYPE: " << parser.getType() << std::endl;
+	// std::cerr << "PATH: " << parser.getPath() << std::endl;
+	// parser.printHeaders();
+	// parser.printBody();
 
+	if (parser.getPath().find("?") != std::string::npos){
+		args = parser.getPath().substr(parser.getPath().find("?") + 1);
+		getPath = parser.getPath().substr(0, parser.getPath().find("?"));
+	}
+	else
+		getPath = parser.getPath();
 	if (parser.getType() == PATH_ERROR){
 		if (errors[404].empty() == false)
 			return (getIndex(C404, errors[404]));
@@ -281,24 +307,24 @@ std::string HttpResponse::getMessage(HttpRequest& parser, std::map<int, std::str
 	if (parser.getType() == GET){
 		if (redir.empty() == false)
 			return (redirector(redir));
-		if (location.hasAutoindex() && (parser.getPath().empty() == true || parser.getPath() == "/"))
+		if (location.hasAutoindex() && (getPath.empty() == true || getPath == "/"))
 			return (generate_autoindex_http(location.getPath(), root));
-		if (parser.getPath().empty() == true){
+		if (getPath.empty() == true){
 			if (FileFinder::fileFinder(location.getIndex(), founDir, root))
-				return (returner(parser, errors, location.getIndex()));
+				return (returner(parser, errors, location.getIndex(), args));
 		}
-		if (parser.getPath() == "/"){
+		if (getPath == "/"){
 			if (FileFinder::fileFinder(location.getIndex(), founDir, root))
-				return (returner(parser, errors, location.getIndex()));
+				return (returner(parser, errors, location.getIndex(), args));
 		}
-		return (returner(parser, errors, parser.getPath().substr(1)));
+		return (returner(parser, errors, getPath.substr(1), args));
 	}
 
 	else if (parser.getType() == POST){
-		return (postImage(parser.getPath(), parser.getBody(), parser.getHeaders(), location.getRoot() + "/" + location.getDestination()));
+		return (postImage(getPath, parser.getBody(), parser.getHeaders(), location.getRoot() + "/" + location.getDestination(), location.getRoot()));
 	}
 	else if (parser.getType() == DELETE){
-		if (FileFinder::fileFinder(parser.getPath().substr(1), founDir, root)){
+		if (FileFinder::fileFinder(getPath.substr(1), founDir, root)){
 			std::remove(founDir.c_str());
 			if (FileFinder::fileFinder(location.getIndex(), founDir, root))
 				return (getIndex(C200, founDir));
@@ -307,10 +333,10 @@ std::string HttpResponse::getMessage(HttpRequest& parser, std::map<int, std::str
 	return "";
 }
 
-std::string HttpResponse::phpCgiHandler(std::string script, char **av)
+std::string HttpResponse::phpCgiHandler(std::string script, std::string args)
 {
-	(void)av;
 	std::string phpScript = script;
+	std::cerr << "ARGS: " << args << std::endl;
 	int pipefd[2];
 	if (pipe(pipefd) == -1) {
 		std::cerr << "PIPE Error" << std::endl;
@@ -321,8 +347,11 @@ std::string HttpResponse::phpCgiHandler(std::string script, char **av)
 	} else if (childPid == 0) {
 		close(pipefd[0]);
 		dup2(pipefd[1], STDOUT_FILENO);
-		const char* phpArgs[] = {"php", phpScript.c_str(), nullptr};
-		execve("/usr/bin/php", const_cast<char**>(phpArgs), nullptr);
+		const char* phpArgs[] = {"php", phpScript.c_str(), args.c_str(), nullptr};
+		if (execve("/usr/bin/php", const_cast<char**>(phpArgs), nullptr) == -1) {
+			perror("Error al ejecutar execve");
+			exit(EXIT_FAILURE);
+		}
 		std::cerr << "CGI Error" << std::endl;
 	} else {
 		close(pipefd[1]);
