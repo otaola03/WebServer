@@ -14,7 +14,7 @@
 # include "Location.hpp"
 typedef std::vector<Location> locationVector;
 
-enum RequestType {GET, POST, DELETE, UNDEFINED, METHOD_ERROR, LENGTH_ERROR, PATH_ERROR, BAD_REQUEST, HTTP_VERSION_ERROR, CHUNKED};
+enum RequestType {GET, POST, DELETE, UNDEFINED, METHOD_ERROR, LENGTH_ERROR, PATH_ERROR, BAD_REQUEST, HTTP_VERSION_ERROR, CHUNKED, UNRECIVED};
 
 class HttpRequest
 {

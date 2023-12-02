@@ -319,19 +319,18 @@ int	HttpRequest::recvData(int sockfd, int maxBodySize, locationVector& locations
 	char buf[bytes + 1];
 	std::string recvData;
 	int numbytes = bytes;
-	(void)locations;
+	/* int bytesRecived = 0; */
 	(void)maxBodySize;
-	int bytesRecived = 0;
 
-	while (bytesRecived < maxBodySize)
+	while (numbytes == bytes)
 	{
 		numbytes = recv(sockfd, buf, sizeof(buf) - 1, 0);
 		if (!checkNumBytes(numbytes, type, sockfd))
 			return UNDEFINED;
 		recvData += std::string(buf, numbytes);
-		std::cout << recvData << "\n";
+		/* std::cout << recvData << "\n"; */
 
-		if (recvData.find("\r\n\r\n") != std::string::npos)
+		if (recvData.find("\r\n\r\n") != std::string::npos && type == UNRECIVED)
 		{
 			int error_int = headCheck(recvData, locations);
 			if (error_int == 1)
@@ -349,30 +348,24 @@ int	HttpRequest::recvData(int sockfd, int maxBodySize, locationVector& locations
 
 		if (headers["Transfer-Encoding"] == " chunked")
 		{
-			if (recvData.find("\r\n0\r\n"))
+			if (recvData.find("0\r\n\r\n") != std::string::npos)
 				return (chunked = false, 0);
-			else
-			{
-				send(sockfd, "HTTP/1.1 100 Continue\r\n\r\n", 29, 0);
-				chunked = true;
-				return CHUNKED;
-			}
-		}
-		else
-		{
-			if (type == DELETE)
-				refererCheck(headers, locations);
-			if (type == POST)
-				saveBody(recvData);
-			if (type == GET && recvData.find("\r\n\r\n"))
-				return 0;
+			body += recvData;
+			send(sockfd, "HTTP/1.1 100 Continue\r\n\r\n", 25, 0);
+			chunked = true;
+			return CHUNKED;
 		}
 	}
+	if (type == DELETE)
+		refererCheck(headers, locations);
+	if (type == POST)
+		saveBody(recvData);
+	/* std::cout << body << "\n"; */
 	return 0;
 }
 
 
-HttpRequest::HttpRequest(int sockfd, int maxBodySize, locationVector& locations): chunked(false)
+HttpRequest::HttpRequest(int sockfd, int maxBodySize, locationVector& locations): type(UNRECIVED), chunked(false)
 {
 	recvData(sockfd, maxBodySize, locations);
 	/* exit(-1); */
