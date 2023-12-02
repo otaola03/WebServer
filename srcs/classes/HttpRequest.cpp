@@ -319,8 +319,7 @@ int	HttpRequest::recvData(int sockfd, int maxBodySize, locationVector& locations
 	char buf[bytes + 1];
 	std::string recvData;
 	int numbytes = bytes;
-	/* int bytesRecived = 0; */
-	(void)maxBodySize;
+	static int bytesRecived;
 
 	while (numbytes == bytes)
 	{
@@ -344,17 +343,31 @@ int	HttpRequest::recvData(int sockfd, int maxBodySize, locationVector& locations
 				return HTTP_VERSION_ERROR;
 			}
 			saveHeaders(recvData);
+			bytesRecived = 0;
 		}
+		else
+			bytesRecived += numbytes;
 
 		if (headers["Transfer-Encoding"] == " chunked")
 		{
 			if (recvData.find("0\r\n\r\n") != std::string::npos)
 				return (chunked = false, 0);
+			if (bytesRecived > maxBodySize){
+				type = LENGTH_ERROR;
+				std::cout << RED << "Error: MAXBODY_SIZE\n" << WHITE;
+				chunked = false;
+				return -1;
+			}
 			body += recvData;
 			send(sockfd, "HTTP/1.1 100 Continue\r\n\r\n", 25, 0);
 			chunked = true;
 			return CHUNKED;
 		}
+	}
+	if (bytesRecived > maxBodySize){
+		type = LENGTH_ERROR;
+		std::cout << RED << "Error: MAXBODY_SIZE\n" << WHITE;
+		return -1;
 	}
 	if (type == DELETE)
 		refererCheck(headers, locations);
