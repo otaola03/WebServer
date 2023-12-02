@@ -1,23 +1,30 @@
 server:
-    - server_name: WebServer
-      root: /resources
+    - server_name: pallete
       listen: [8080]
-      max_body_size: 15000
+      max_body_size: 42
       error_pages:
           - 404: ./resources/html/404.html
-          - 405: ./resources/html/405.html
           - 406: ./resources/html/foca.html
+          - 500: ./resources/html/500.html
 
       locations:
+          - name: Test
+            path: /cosas
+            root: ./resources
+            index: 
+            allowed_methods: [GET, POST, DELETE]
+            autoindex: on
+            redirection: 
+            destination: bin
+
           - name: Post
             path: /post
             root: ./resources
             index: post.html
-            allowed_methods: [GET, DELETE]
+            allowed_methods: [GET, POST, DELETE]
             autoindex: off
             redirection: 
-            destination: 
-            cgi_destinaation: 
+            destination: bin
 
           - name: Gallery
             path: /images
@@ -26,15 +33,22 @@ server:
             allowed_methods: [GET, POST, DELETE]
             autoindex: off
             redirection: 
-            destination: ./images #direccion donde se guarda el POST
-            cgi_destinaation: ./cgi-bin #direccion del cgi
+            destination: images
 
           - name: default
             path: /
             root: ./resources
             index: index.html
-            allowed_methods: [POST, DELETE]
+            allowed_methods: [GET, POST, DELETE]
             autoindex: off
             redirection: 
-            destination: ./images #direccion donde se guarda el POST
-            cgi_destinaation: ./cgi-bin #direccion del cgi
+            destination: images
+
+          - name: a
+            path: /a
+            root: ./resources/siege
+            index: siegetest.html
+            allowed_methods: [GET, POST, DELETE]
+            autoindex: off
+            redirection: 
+            destination: images

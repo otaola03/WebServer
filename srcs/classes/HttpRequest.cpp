@@ -32,20 +32,6 @@ void	HttpRequest::saveRequest(const std::string& toProcess)
 	path = path.erase(path.size() - 1);
 }
 
-/* void	HttpRequest::saveBody(const char* toProcess) */
-/* { */
-/* 	std::string contentLength; */
-/* 	contentLength = std::strstr(toProcess, "content-length: ") ? std::strstr(toProcess, "content-length: ") : std::strstr(toProcess, "Content-Length: "); */
-/* 	if (contentLength.empty()) */
-/* 		return ; */
-/* 	int length = std::atoi(contentLength.c_str() + 16); */
-/* 	const char* body_t = std::strstr(toProcess, "\r\n\r\n"); */
-/* 	body = std::string(body_t, length); */
-/* 	body = body.substr(body.find("\r\n\r\n") + 4); */
-/* 	size_t lastLine = body.find_last_of("\n"); */
-/* 	body = body.substr(0, lastLine); */
-/* } */
-
 void	HttpRequest::saveBody(const std::string& toProcess)
 {
 	/* std::string auxBody = toProcess.substr(toProcess.find("\r\n\r\n") + 4); */
@@ -152,13 +138,21 @@ static bool	isASlashLocation(const std::string& requestedPath, const std::string
 	return false;
 }
 
+static bool	isValidPath(const std::string& path, std::string locationPath)
+{
+	size_t pos = path.find('/', 1);
+	std::string temp = path.substr(0, pos);
+	if (locationPath == temp)
+		return true;
+	return false;
+}
+
 bool	HttpRequest::checkRequest(locationVector& locations)
 {
 	std::string file;
 	for (locationVector::iterator it = locations.begin(); it != locations.end(); ++it)
 	{
-		if (it->getPath() == "/" && path == "/")
-		{
+		if (it->getPath() == "/"){
 			if (isValidType(type, *it))
 			{
 				location = *it;
@@ -167,13 +161,14 @@ bool	HttpRequest::checkRequest(locationVector& locations)
 			else
 				return (type = METHOD_ERROR, false);
 		}
-
-		else if (it->getPath() != "/" && it->getPath() == path.substr(0, it->getPath().length()))
+		else if (isValidPath(path, it->getPath()))
 		{
 			if (isValidType(type, *it))
 			{
 				location = *it;
 				path = path.substr(it->getPath().length());
+				if (path.empty())
+					path = "/";
 				return (true);
 			}
 			else
@@ -193,13 +188,14 @@ static bool	checkNumBytes(int numbytes, RequestType& type, int sockfd)
 		if (numbytes == 0)
 		{
 			std::cout << "selectserver: socket "<< sockfd << " hung up\n";
+			type = UNDEFINED;
 			return false;
 		}
 		if (numbytes == -1)
 		{
  			perror("recv");
-			type = UNDEFINED;
-			return false;
+			// type = UNDEFINED;
+			// return false;
 		}
 		if (numbytes == EWOULDBLOCK)
 		{
@@ -210,41 +206,155 @@ static bool	checkNumBytes(int numbytes, RequestType& type, int sockfd)
 	return true;
 }
 
+void HttpRequest::refererCheck(std::map<std::string, std::string> headers, locationVector& locations)
+{
+	std::string referer = headers["Referer"];
+	size_t lastSlashPos = referer.rfind('/');
+
+	if (lastSlashPos != std::string::npos)
+		referer = referer.substr(lastSlashPos + 1);
+	std::cerr << "Referer: " << referer << std::endl;
+	for (locationVector::iterator it = locations.begin(); it != locations.end(); ++it)
+	{
+		if (isValidPath("/" + referer, it->getPath()))
+		{
+			if (isValidType(type, *it))
+				location = *it;
+			else
+				type = METHOD_ERROR;
+			return;
+		}
+	}
+}
+
+// HttpRequest::HttpRequest(int sockfd, int maxBodySize, locationVector& locations)
+// {
+// 	char buf[1025];
+// 	std::string recvData;
+// 	int numbytes = 1024;
+// 	int bytesRecived = 0;
+
+// 	while (numbytes == 1024)
+// 	{
+// 		numbytes = recv(sockfd, buf, sizeof(buf) - 1, 0);
+// 		if (!checkNumBytes(numbytes, type, sockfd))
+// 			return ;
+
+// 		std::string readData(buf, numbytes);
+// 		bytesRecived += numbytes;
+// 		recvData += readData;;
+
+// 		if (readData.find("HTTP/1.1"))
+// 		{
+// 			saveRequest(recvData);
+// 			if (!checkRequest(locations))
+// 				return ;
+// 		}
+
+// 		if (bytesRecived > maxBodySize)
+// 		{
+// 			type = LENGTH_ERROR;
+// 			std::cout << RED << "Error: MAXBODY_SIZE\n" << WHITE;
+// 			return ;
+// 		}
+// 	}
+// 	saveHeaders(recvData);
+// 	if (type == DELETE)
+// 		refererCheck(headers, locations);
+// 	if (type == POST)
+// 		saveBody(recvData);
+// }
+
+int	HttpRequest::headCheck(const std::string& toProcess, locationVector& locations)
+{
+	std::string request = toProcess.substr(0, toProcess.find('\n'));
+
+	std::vector<std::string> temps;
+	std::istringstream iss(request);
+	for (std::string temp; iss >> temp;) {
+		temps.push_back(temp);
+	}
+	if (temps.size() != 3){
+		std::cerr << "Error: Bad request\n";
+		return 1;
+	}
+	if (temps[2].find("HTTP/") == std::string::npos){
+		std::cerr << "Error: Bad Request\n";
+		return 1;
+	}
+	else{
+		size_t pos = temps[2].find("HTTP/");
+		if (pos == std::string::npos){
+			std::cerr << "Error: HTTP version\n";
+			return 2;
+		}
+		if (temps[2].length() < 8){
+			std::cerr << "Error: HTTP version\n";
+			return 2;
+		}
+		std::string version = temps[2].substr(pos + 5, 3);
+		if (version != "1.1"){
+			std::cerr << "Error: HTTP version\n";
+			return 2;
+		}
+	}
+	if (temps[0] == "GET")
+		type = GET;
+	else if (temps[0] == "POST")
+		type = POST;
+	else if (temps[0] == "DELETE")
+		type = DELETE;
+	else{
+		type = UNDEFINED;
+		return 0;
+	}
+	path = temps[1];
+	checkRequest(locations);
+	return 0;
+}
+
 HttpRequest::HttpRequest(int sockfd, int maxBodySize, locationVector& locations)
 {
-	char buf[1025];
+	int bytes = 1023;
+	char buf[bytes + 1];
 	std::string recvData;
-	int numbytes = 1024;
+	int numbytes = bytes;
 	int bytesRecived = 0;
 
-	while (numbytes == 1024)
+	while (recvData.find("\r\n\r\n") == std::string::npos && numbytes == bytes)
 	{
 		numbytes = recv(sockfd, buf, sizeof(buf) - 1, 0);
 		if (!checkNumBytes(numbytes, type, sockfd))
 			return ;
-
-		std::string readData(buf, numbytes);
+		recvData += std::string(buf, numbytes);
+	}
+	int error_int = headCheck(recvData, locations);
+	if (error_int == 1){
+		type = BAD_REQUEST;
+		return ;
+	}
+	else if (error_int == 2){
+		type = HTTP_VERSION_ERROR;
+		return ;
+	}
+	while (numbytes == bytes)
+	{
+		numbytes = recv(sockfd, buf, sizeof(buf) - 1, 0);
+		if (!checkNumBytes(numbytes, type, sockfd))
+			return ;
+		recvData += std::string(buf, numbytes);
 		bytesRecived += numbytes;
-		recvData += readData;;
-
-		if (readData.find("HTTP/1.1"))
-		{
-			saveRequest(recvData);
-			if (!checkRequest(locations))
-				return ;
-		}
-
-		if (bytesRecived > maxBodySize)
-		{
+		if (bytesRecived > maxBodySize){
 			type = LENGTH_ERROR;
 			std::cout << RED << "Error: MAXBODY_SIZE\n" << WHITE;
 			return ;
 		}
 	}
 	saveHeaders(recvData);
+	if (type == DELETE)
+		refererCheck(headers, locations);
 	if (type == POST)
 		saveBody(recvData);
-
 }
 
 HttpRequest::HttpRequest(const HttpRequest& toCopy)

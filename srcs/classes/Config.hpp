@@ -35,7 +35,6 @@ class Config : protected ifstream
 		size_t	lineNum;
 
 		std::vector<string>			server_name;
-		std::vector<string>			root;
 		std::vector<size_t>			max_body_size;
 		std::vector<intVector>		ports;
 		std::vector<intCharMap>		error_pages;
@@ -61,10 +60,10 @@ class Config : protected ifstream
 
 		size_t 			getServerNum() const;
 		string			getName(size_t index) const;
-		string			getRoot(size_t index) const;
 		intVector		getPorts(size_t index) const;
 		intCharMap		getErrorPages(size_t index) const;
 		locationVector	getLocations(size_t index) const;
+		size_t			getMaxBodySize(size_t index) const;
 };
 
 

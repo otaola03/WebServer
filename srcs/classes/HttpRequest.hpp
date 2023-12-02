@@ -14,7 +14,7 @@
 # include "Location.hpp"
 typedef std::vector<Location> locationVector;
 
-enum RequestType {GET, POST, DELETE, UNDEFINED, METHOD_ERROR, LENGTH_ERROR, PATH_ERROR};
+enum RequestType {GET, POST, DELETE, UNDEFINED, METHOD_ERROR, LENGTH_ERROR, PATH_ERROR, BAD_REQUEST, HTTP_VERSION_ERROR};
 
 class HttpRequest
 {
@@ -39,6 +39,9 @@ class HttpRequest
 		bool		isValidRequest() const;
 		bool		isUnfinishedRequest() const;
 		bool		checkRequest(locationVector& locations);
+		void		refererCheck(std::map<std::string, std::string> headers, locationVector& locations);
+		int			headCheck(const std::string& toProcess, locationVector& locations);
+		void		manageChunked(int sockfd, int maxBodySize, locationVector& locations);
 
 		void		printRequest();
 		void		printHeaders();

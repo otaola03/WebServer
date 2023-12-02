@@ -67,8 +67,8 @@
     <h1>Gallery</h1>
     <div id="imageGallery">
         <?php
+        $carpeta = "resources/bin";
         // while(1)
-        $carpeta = "resources/bin"; // Ruta de la carpeta de imágenes
         $tamañoDeseado = 200; // Ancho deseado en píxeles
 
         // Escanea la carpeta y muestra todas las imágenes
