@@ -348,6 +348,8 @@ int	HttpRequest::recvData(int sockfd, int maxBodySize, locationVector& locations
 			}
 			saveHeaders(recvData);
 			bytesRecived = 0;
+			if (headers["Transfer-Encoding"] != " chunked")
+				bytesRecived = recvData.length() - (recvData.find("\r\n\r\n") + 4);
 		}
 		else
 			bytesRecived += numbytes;

@@ -176,8 +176,6 @@ std::string HttpResponse::postImage(std::string path, std::string body, std::map
 	dir = opendir(destination.c_str());
 	if (dir){
 		while ((entry = readdir(dir)) != NULL) {
-			std::cerr << "FILENAME = " << fileName << std::endl;
-			std::cerr << "DNAME = " << entry->d_name << std::endl;
 			if (entry->d_name == fileName){
 				dir = opendir(destination.c_str());
 				fileName = + "copy_" + fileName;
