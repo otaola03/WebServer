@@ -1,7 +1,7 @@
 server:
     - server_name: pallete
       listen: [8080]
-      max_body_size: 42
+      max_body_size: 1000000
       error_pages:
           - 404: ./resources/html/404.html
           - 406: ./resources/html/foca.html
@@ -15,7 +15,7 @@ server:
             allowed_methods: [GET, POST, DELETE]
             autoindex: on
             redirection: 
-            destination: bin
+            destination: images
 
           - name: Post
             path: /post

@@ -213,7 +213,6 @@ void HttpRequest::refererCheck(std::map<std::string, std::string> headers, locat
 
 	if (lastSlashPos != std::string::npos)
 		referer = referer.substr(lastSlashPos + 1);
-	std::cerr << "Referer: " << referer << std::endl;
 	for (locationVector::iterator it = locations.begin(); it != locations.end(); ++it)
 	{
 		if (isValidPath("/" + referer, it->getPath()))
@@ -313,48 +312,127 @@ int	HttpRequest::headCheck(const std::string& toProcess, locationVector& locatio
 	return 0;
 }
 
-HttpRequest::HttpRequest(int sockfd, int maxBodySize, locationVector& locations)
+int	HttpRequest::recvData(int sockfd, int maxBodySize, locationVector& locations)
 {
 	int bytes = 1023;
 	char buf[bytes + 1];
 	std::string recvData;
 	int numbytes = bytes;
-	int bytesRecived = 0;
+	static int bytesRecived;
 
-	while (recvData.find("\r\n\r\n") == std::string::npos && numbytes == bytes)
-	{
-		numbytes = recv(sockfd, buf, sizeof(buf) - 1, 0);
-		if (!checkNumBytes(numbytes, type, sockfd))
-			return ;
-		recvData += std::string(buf, numbytes);
-	}
-	int error_int = headCheck(recvData, locations);
-	if (error_int == 1){
-		type = BAD_REQUEST;
-		return ;
-	}
-	else if (error_int == 2){
-		type = HTTP_VERSION_ERROR;
-		return ;
-	}
 	while (numbytes == bytes)
 	{
 		numbytes = recv(sockfd, buf, sizeof(buf) - 1, 0);
 		if (!checkNumBytes(numbytes, type, sockfd))
-			return ;
+			return UNDEFINED;
 		recvData += std::string(buf, numbytes);
-		bytesRecived += numbytes;
-		if (bytesRecived > maxBodySize){
-			type = LENGTH_ERROR;
-			std::cout << RED << "Error: MAXBODY_SIZE\n" << WHITE;
-			return ;
+		/* std::cout << recvData << "\n"; */
+
+		if (recvData.find("\r\n\r\n") != std::string::npos && type == UNRECIVED)
+		{
+			int error_int = headCheck(recvData, locations);
+			if (error_int == 1)
+			{
+				type = BAD_REQUEST;
+				return BAD_REQUEST;
+			}
+			else if (error_int == 2)
+			{
+				type = HTTP_VERSION_ERROR;
+				return HTTP_VERSION_ERROR;
+			}
+			saveHeaders(recvData);
+			bytesRecived = 0;
+		}
+		else
+			bytesRecived += numbytes;
+
+		if (headers["Transfer-Encoding"] == " chunked")
+		{
+			if (recvData.find("0\r\n\r\n") != std::string::npos){
+				body += recvData.substr(0, recvData.find("0\r\n\r\n") - 2);
+				return (chunked = false, 0);
+			}
+			if (bytesRecived > maxBodySize){
+				type = LENGTH_ERROR;
+				std::cout << RED << "Error: MAXBODY_SIZE\n" << WHITE;
+				chunked = false;
+				return -1;
+			}
+			if (recvData.find("\r\n\r\n") != std::string::npos)
+				body += recvData;
+			else{
+				// std::cout << "----------------------------\n" << recvData << "\n";
+				size_t pos = recvData.find("\r\n") + 2;
+				if (pos != std::string::npos && pos != 1)
+					recvData = recvData.substr(pos);
+				// std::cout << "+++++++++++++++++++++++++++++\n" << recvData << "\n\n\n";
+				body += recvData;
+			}
+			send(sockfd, "HTTP/1.1 100 Continue\r\n\r\n", 25, 0);
+			chunked = true;
+			return CHUNKED;
 		}
 	}
-	saveHeaders(recvData);
+	if (bytesRecived > maxBodySize){
+		type = LENGTH_ERROR;
+		std::cout << RED << "Error: MAXBODY_SIZE\n" << WHITE;
+		return -1;
+	}
 	if (type == DELETE)
 		refererCheck(headers, locations);
 	if (type == POST)
 		saveBody(recvData);
+	/* std::cout << body << "\n"; */
+	return 0;
+}
+
+
+HttpRequest::HttpRequest(int sockfd, int maxBodySize, locationVector& locations): type(UNRECIVED), chunked(false)
+{
+	recvData(sockfd, maxBodySize, locations);
+	/* exit(-1); */
+
+/* 	int bytes = 1023; */
+/* 	char buf[bytes + 1]; */
+/* 	std::string recvData; */
+/* 	int numbytes = bytes; */
+/* 	int bytesRecived = 0; */
+
+/* 	while (recvData.find("\r\n\r\n") == std::string::npos && numbytes == bytes) */
+/* 	{ */
+/* 		numbytes = recv(sockfd, buf, sizeof(buf) - 1, 0); */
+/* 		if (!checkNumBytes(numbytes, type, sockfd)) */
+/* 			return ; */
+/* 		recvData += std::string(buf, numbytes); */
+/* 	} */
+/* 	int error_int = headCheck(recvData, locations); */
+/* 	if (error_int == 1){ */
+/* 		type = BAD_REQUEST; */
+/* 		return ; */
+/* 	} */
+/* 	else if (error_int == 2){ */
+/* 		type = HTTP_VERSION_ERROR; */
+/* 		return ; */
+/* 	} */
+/* 	while (numbytes == bytes) */
+/* 	{ */
+/* 		numbytes = recv(sockfd, buf, sizeof(buf) - 1, 0); */
+/* 		if (!checkNumBytes(numbytes, type, sockfd)) */
+/* 			return ; */
+/* 		recvData += std::string(buf, numbytes); */
+/* 		bytesRecived += numbytes; */
+/* 		if (bytesRecived > maxBodySize){ */
+/* 			type = LENGTH_ERROR; */
+/* 			std::cout << RED << "Error: MAXBODY_SIZE\n" << WHITE; */
+/* 			return ; */
+/* 		} */
+/* 	} */
+/* 	saveHeaders(recvData); */
+/* 	if (type == DELETE) */
+/* 		refererCheck(headers, locations); */
+/* 	if (type == POST) */
+	/* saveBody(recvData); */
 }
 
 HttpRequest::HttpRequest(const HttpRequest& toCopy)

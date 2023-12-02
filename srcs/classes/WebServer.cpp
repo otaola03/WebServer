@@ -134,7 +134,10 @@ void	WebServer::serverLoop()
 			{
 				/* data += recvData(fd); */
 				/* clientsData[fd] = recvData(fd); */
-				clientsRequests[fd] = new HttpRequest(fd, clientsServers[fd]->getMaxBodySize(), clientsServers[fd]->getLocations());
+				if (clientsRequests.find(fd) == clientsRequests.end() || clientsRequests[fd] == NULL)
+					clientsRequests[fd] = new HttpRequest(fd, clientsServers[fd]->getMaxBodySize(), clientsServers[fd]->getLocations());
+				else
+					clientsRequests[fd]->recvData(fd, clientsServers[fd]->getMaxBodySize(), clientsServers[fd]->getLocations());
 
 				/* if (data == "") */
 				/* if (clientsData[fd] == "") */
@@ -142,8 +145,10 @@ void	WebServer::serverLoop()
 					close(fd);
 				else if (clientsRequests[fd]->isUnfinishedRequest())
 					kq.disableRead(fd);
-				if(!kq.enableWrite(fd))
-					close(fd);
+
+				if (!clientsRequests[fd]->chunked)
+					if(!kq.enableWrite(fd))
+						close(fd);
 			}
 
 			// SEND
@@ -159,6 +164,7 @@ void	WebServer::serverLoop()
 				/* if (send(fd, msg.c_str(), msg.length(), 0) == -1) */
 				/* 	perror("send"); */
 				kq.manageEndedConnection(fd);
+				clientsRequests.erase(fd);
 				close(fd);
 				delete clientsRequests[fd];
 			}
