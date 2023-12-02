@@ -313,48 +313,106 @@ int	HttpRequest::headCheck(const std::string& toProcess, locationVector& locatio
 	return 0;
 }
 
-HttpRequest::HttpRequest(int sockfd, int maxBodySize, locationVector& locations)
+int	HttpRequest::recvData(int sockfd, int maxBodySize, locationVector& locations)
 {
 	int bytes = 1023;
 	char buf[bytes + 1];
 	std::string recvData;
 	int numbytes = bytes;
+	(void)locations;
+	(void)maxBodySize;
 	int bytesRecived = 0;
 
-	while (recvData.find("\r\n\r\n") == std::string::npos && numbytes == bytes)
+	while (bytesRecived < maxBodySize)
 	{
 		numbytes = recv(sockfd, buf, sizeof(buf) - 1, 0);
+		std::cout << "NUMBYTES: " << numbytes << "\n";
 		if (!checkNumBytes(numbytes, type, sockfd))
-			return ;
+			return UNDEFINED;
+		std::cout << "------------HOLA\n";
 		recvData += std::string(buf, numbytes);
-	}
-	int error_int = headCheck(recvData, locations);
-	if (error_int == 1){
-		type = BAD_REQUEST;
-		return ;
-	}
-	else if (error_int == 2){
-		type = HTTP_VERSION_ERROR;
-		return ;
-	}
-	while (numbytes == bytes)
-	{
-		numbytes = recv(sockfd, buf, sizeof(buf) - 1, 0);
-		if (!checkNumBytes(numbytes, type, sockfd))
-			return ;
-		recvData += std::string(buf, numbytes);
-		bytesRecived += numbytes;
-		if (bytesRecived > maxBodySize){
-			type = LENGTH_ERROR;
-			std::cout << RED << "Error: MAXBODY_SIZE\n" << WHITE;
-			return ;
+		std::cout << recvData << "\n\n";
+
+		if (recvData.find("\r\n\r\n") != std::string::npos)
+		{
+			int error_int = headCheck(recvData, locations);
+			if (error_int == 1)
+			{
+				type = BAD_REQUEST;
+				return BAD_REQUEST;
+			}
+			else if (error_int == 2)
+			{
+				type = HTTP_VERSION_ERROR;
+				return HTTP_VERSION_ERROR;
+			}
+			saveHeaders(recvData);
+		}
+
+		if (headers["Transfer-Encoding"] == " chunked")
+		{
+			/* if (recvData.find("\r\n0\r\n")) */
+			/* 	return (chunked = false, 0); */
+			/* else */
+			/* { */
+			/* 	send(sockfd, "HTTP/1.1 100 Continue\r\n\r\n", 29, 0); */
+			/* 	chunked = true; */
+			/* 	return CHUNKED; */
+			/* } */
+				send(sockfd, "HTTP/1.1 100 Continue\r\n\r\n", 25, 0);
+				chunked = true;
+				return CHUNKED;
 		}
 	}
-	saveHeaders(recvData);
-	if (type == DELETE)
-		refererCheck(headers, locations);
-	if (type == POST)
-		saveBody(recvData);
+	return 0;
+}
+
+
+HttpRequest::HttpRequest(int sockfd, int maxBodySize, locationVector& locations): chunked(false)
+{
+	recvData(sockfd, maxBodySize, locations);
+	/* exit(-1); */
+
+/* 	int bytes = 1023; */
+/* 	char buf[bytes + 1]; */
+/* 	std::string recvData; */
+/* 	int numbytes = bytes; */
+/* 	int bytesRecived = 0; */
+
+/* 	while (recvData.find("\r\n\r\n") == std::string::npos && numbytes == bytes) */
+/* 	{ */
+/* 		numbytes = recv(sockfd, buf, sizeof(buf) - 1, 0); */
+/* 		if (!checkNumBytes(numbytes, type, sockfd)) */
+/* 			return ; */
+/* 		recvData += std::string(buf, numbytes); */
+/* 	} */
+/* 	int error_int = headCheck(recvData, locations); */
+/* 	if (error_int == 1){ */
+/* 		type = BAD_REQUEST; */
+/* 		return ; */
+/* 	} */
+/* 	else if (error_int == 2){ */
+/* 		type = HTTP_VERSION_ERROR; */
+/* 		return ; */
+/* 	} */
+/* 	while (numbytes == bytes) */
+/* 	{ */
+/* 		numbytes = recv(sockfd, buf, sizeof(buf) - 1, 0); */
+/* 		if (!checkNumBytes(numbytes, type, sockfd)) */
+/* 			return ; */
+/* 		recvData += std::string(buf, numbytes); */
+/* 		bytesRecived += numbytes; */
+/* 		if (bytesRecived > maxBodySize){ */
+/* 			type = LENGTH_ERROR; */
+/* 			std::cout << RED << "Error: MAXBODY_SIZE\n" << WHITE; */
+/* 			return ; */
+/* 		} */
+/* 	} */
+/* 	saveHeaders(recvData); */
+/* 	if (type == DELETE) */
+/* 		refererCheck(headers, locations); */
+/* 	if (type == POST) */
+	/* saveBody(recvData); */
 }
 
 HttpRequest::HttpRequest(const HttpRequest& toCopy)

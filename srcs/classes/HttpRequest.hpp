@@ -14,7 +14,7 @@
 # include "Location.hpp"
 typedef std::vector<Location> locationVector;
 
-enum RequestType {GET, POST, DELETE, UNDEFINED, METHOD_ERROR, LENGTH_ERROR, PATH_ERROR, BAD_REQUEST, HTTP_VERSION_ERROR};
+enum RequestType {GET, POST, DELETE, UNDEFINED, METHOD_ERROR, LENGTH_ERROR, PATH_ERROR, BAD_REQUEST, HTTP_VERSION_ERROR, CHUNKED};
 
 class HttpRequest
 {
@@ -30,10 +30,13 @@ class HttpRequest
 		void	saveBody(const std::string& toProcess);
 
 	public:
+		bool		chunked;
 		/* HttpRequest(const std::string& toProcess); */
 		HttpRequest(int sockfd, int maxBodySize, locationVector& locations);
 		HttpRequest(const HttpRequest& toCopy);
 		~HttpRequest();
+
+		int	recvData(int sockfd, int maxBodySize, locationVector& locations);
 
 		Location	getLocation() const;
 		bool		isValidRequest() const;
