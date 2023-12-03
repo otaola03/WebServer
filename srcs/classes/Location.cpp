@@ -28,10 +28,10 @@ Location::Location() : GET(false), POST(false), DELETE(false), autoindex(false)
 // 		std::cout << "HOLA\n";
 // }
 
-bool	isOn(const string &on)
+bool	isOn(const string &on, const string &param)
 {
 	if (!(on.find("on") == 0 || on.find("off") == 0))
-		throw (std::runtime_error("A location have autoindex \"" + on + "\" (it must be \"on\" or \"off\")"));
+		throw (std::runtime_error("A location have " + param + " \"" + on + "\" (it must be \"on\" or \"off\")"));
 	return (on.find("on") == 0);
 
 }
@@ -53,10 +53,10 @@ allowed_methods(allowed_methods),
 GET(isAllowed("GET")),
 POST(isAllowed("POST")),
 DELETE(isAllowed("DELETE")),
-autoindex(isOn(autoindex)),
+autoindex(isOn(autoindex, "autoindex")),
 redirection(redirection),
 destination(destination),
-cgi_bin(cgibin)
+cgi_bin(isOn(cgibin, "cgi-bin"))
 {
 	check();
 }
@@ -76,8 +76,6 @@ void Location::check()
 		throw (std::runtime_error("Location has index and autoindex is on"));
 	if (destination.empty())
 		throw (std::runtime_error("Location has an empty destination"));
-	if (cgi_bin.empty())
-		throw (std::runtime_error("Location has an empty cgi-bin"));
 	size_t i = 0;
 	while (allowed_methods[i])
 	{

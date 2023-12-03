@@ -198,7 +198,7 @@ static bool	checkNumBytes(int numbytes, RequestType& type, int sockfd)
 		}
 		if (numbytes == -1)
 		{
- 			perror("recv");
+ 			// perror("recv");
 			// type = UNDEFINED;
 			// return false;
 		}
@@ -332,7 +332,6 @@ int	HttpRequest::recvData(int sockfd, int maxBodySize, locationVector& locations
 			return UNDEFINED;
 		recvData += std::string(buf, numbytes);
 		/* std::cout << recvData << "\n"; */
-
 		if (recvData.find("\r\n\r\n") != std::string::npos && type == UNRECIVED)
 		{
 			int error_int = headCheck(recvData, locations);

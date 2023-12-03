@@ -23,7 +23,7 @@ class Location
 		bool	autoindex;
 		std::string	redirection;
 		std::string	destination;
-		std::string	cgi_bin;
+		bool	cgi_bin;
 
 		// Location();
 		bool	isAllowed(const std::string	&method);
@@ -88,6 +88,10 @@ class Location
 
 		bool hasAutoindex() const{
 			return autoindex;
+		}
+
+		bool hasCGI() const{
+			return cgi_bin;
 		}
 };
 

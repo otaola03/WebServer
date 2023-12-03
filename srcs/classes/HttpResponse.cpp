@@ -248,7 +248,12 @@ std::string HttpResponse::returner(HttpRequest& parser, std::map<int, std::strin
 			(FileFinder::fileFinder(varPath, founDir, root) && varPath.find(".gif") != std::string::npos))
 		return (getImg(founDir));
 	else if (FileFinder::fileFinder(varPath, founDir, root) && varPath.find(".php") != std::string::npos)
-		return (getPhp(founDir, args));
+	{
+		if (parser.getLocation().hasCGI() == false)
+			return (getIndex(C403, "./resources/html/403.html"));
+		else
+			return (getPhp(founDir, args));
+	}
 	else if (FileFinder::fileFinder(varPath, founDir, root) && varPath.find(".ico") != std::string::npos)
 		return (getIco(founDir));
 	if (errors[404].empty() == false)
@@ -336,7 +341,6 @@ std::string HttpResponse::getMessage(HttpRequest& parser, std::map<int, std::str
 std::string HttpResponse::phpCgiHandler(std::string script, std::string args)
 {
 	std::string phpScript = script;
-	std::cerr << "ARGS: " << args << std::endl;
 	int pipefd[2];
 	if (pipe(pipefd) == -1) {
 		std::cerr << "PIPE Error" << std::endl;

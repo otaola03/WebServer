@@ -39,7 +39,7 @@ class Server
 		intPortMap		fdPortsList;	//map(fd, Port*)
 		intCharMap		errorPages;
 		locationVector	locations;
-		int 			maxBodySize;
+		size_t 			maxBodySize;
 
 		Server();
 

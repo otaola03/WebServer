@@ -1,4 +1,6 @@
 #include "Config.hpp"
+#include <iostream>
+#include <sstream>
 
 int Config::firstCheck(const std::string &filePath) //parche guarro
 {
@@ -89,7 +91,7 @@ void	Config::check()
 			throw (std::runtime_error("server_name can not be empty"));
 	
 	for (std::vector<size_t>::const_iterator i = max_body_size.begin(); i != max_body_size.end(); i++)
-		if (*i == 0)
+		if (*i <= 0)
 			throw (std::runtime_error("invalid max_body_size"));
 
 	for (std::vector<locationVector>::const_iterator i = locations.begin(); i != locations.end(); i++)
@@ -118,6 +120,20 @@ string	Config::getToken(const std::string &pre)
 	return(line.substr(strlen(pre.c_str())));
 }
 
+size_t stost(const std::string& str) {
+	if (str[0] == '-')
+		throw std::invalid_argument("Invalid max_body_size");
+	
+    std::istringstream ss(str);
+    size_t resultado;
+
+    if (!(ss >> resultado) || !ss.eof()) {
+        throw std::invalid_argument("Invalid max_body_size");
+    }
+
+    return resultado;
+}
+
 void	Config::init()
 {
 	if (!is_open())
@@ -129,7 +145,7 @@ void	Config::init()
 	{
 	server_name.push_back(getToken(		"    - server_name: "));
 	ports.push_back(parsePorts(getToken("      listen: ").c_str()));
-	max_body_size.push_back(atol(getToken("      max_body_size: ").c_str()));
+	max_body_size.push_back(stost(getToken(("      max_body_size: "))));
 	
 	error_pages.push_back(parseErrorPages());
 
