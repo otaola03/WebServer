@@ -87,7 +87,8 @@ static bool	sendData(int sockfd, std::string msg)
 	{
 		numbytes = send(sockfd, msg.c_str(), msg.length(), 0);
 		if (numbytes == -1)
- 			return (perror("recv"), false);
+			perror("send");
+ 			//return (perror("send"), false);
 		else
 		{
 			totalBitsSend += numbytes;
