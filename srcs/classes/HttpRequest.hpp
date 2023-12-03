@@ -32,11 +32,11 @@ class HttpRequest
 
 	public:
 		/* HttpRequest(const std::string& toProcess); */
-		HttpRequest(int sockfd, int maxBodySize, locationVector& locations);
+		HttpRequest(int sockfd, int maxBodySize, locationVector& locations, std::string serverName);
 		HttpRequest(const HttpRequest& toCopy);
 		~HttpRequest();
 
-		int	recvData(int sockfd, int maxBodySize, locationVector& locations);
+		int	recvData(int sockfd, int maxBodySize, locationVector& locations, std::string serverName);
 
 		Location	getLocation() const;
 		bool		isValidRequest() const;

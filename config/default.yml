@@ -1,7 +1,7 @@
 server:
     - server_name: pallete
       listen: [8080]
-      max_body_size: 100000000000
+      max_body_size: 1000000000
       error_pages:
           - 404: ./resources/html/404.html
           - 406: ./resources/html/foca.html
@@ -16,6 +16,7 @@ server:
             autoindex: on
             redirection: 
             destination: images
+            cgi-bin: cgi-bin
 
           - name: Post
             path: /post
@@ -25,6 +26,7 @@ server:
             autoindex: off
             redirection: 
             destination: bin
+            cgi-bin: cgi-bin
 
           - name: Gallery
             path: /images
@@ -34,6 +36,7 @@ server:
             autoindex: off
             redirection: 
             destination: images
+            cgi-bin: cgi-bin
 
           - name: default
             path: /
@@ -43,6 +46,7 @@ server:
             autoindex: off
             redirection: 
             destination: images
+            cgi-bin: cgi-bin
 
           - name: siege
             path: /siege
@@ -52,6 +56,7 @@ server:
             autoindex: off
             redirection: 
             destination: images
+            cgi-bin: cgi-bin
 
           - name: form
             path: /form
@@ -61,3 +66,4 @@ server:
             autoindex: off
             redirection: 
             destination: images
+            cgi-bin: cgi-bin

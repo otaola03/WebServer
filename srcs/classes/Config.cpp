@@ -199,7 +199,8 @@ locationVector	Config::parseLocations()
 				getToken("            allowed_methods: "),
 				getToken("            autoindex: "),
 				getToken("            redirection: "),
-				getToken("            destination: ")
+				getToken("            destination: "),
+				getToken("            cgi-bin: ")
 				);
 		if (location.getPath() == "/"){
 			temp = location;

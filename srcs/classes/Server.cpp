@@ -73,3 +73,8 @@ std::ostream& Server::operator<<(std::ostream& os) const
 	os << "Name: " << name << "\n";
 	return os;
 }
+
+std::string Server::getServerName()
+{
+	return name;
+}

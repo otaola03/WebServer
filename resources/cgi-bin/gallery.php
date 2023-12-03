@@ -68,7 +68,7 @@
     <div id="imageGallery">
         <?php
         $carpeta = "resources/bin";
-        // while(1)
+        //while(1)
         $tamañoDeseado = 200; // Ancho deseado en píxeles
 
         // Escanea la carpeta y muestra todas las imágenes

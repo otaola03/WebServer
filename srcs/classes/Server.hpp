@@ -60,6 +60,7 @@ class Server
 
 		locationVector& getLocations();
 		int getMaxBodySize();
+		std::string getServerName();
 
 		intPortMap& getPortsList();
 

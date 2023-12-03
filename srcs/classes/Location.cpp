@@ -43,7 +43,8 @@ Location::Location(\
 			const std::string	&allowed_methods, \
 			const std::string	&autoindex, \
 			const std::string	&redirection, \
-			const std::string	&destination \
+			const std::string	&destination, \
+			const std::string	&cgibin \
 ) :
 path(path),
 root(root),
@@ -54,7 +55,8 @@ POST(isAllowed("POST")),
 DELETE(isAllowed("DELETE")),
 autoindex(isOn(autoindex)),
 redirection(redirection),
-destination(destination)
+destination(destination),
+cgi_bin(cgibin)
 {
 	check();
 }
@@ -74,6 +76,8 @@ void Location::check()
 		throw (std::runtime_error("Location has index and autoindex is on"));
 	if (destination.empty())
 		throw (std::runtime_error("Location has an empty destination"));
+	if (cgi_bin.empty())
+		throw (std::runtime_error("Location has an empty cgi-bin"));
 	size_t i = 0;
 	while (allowed_methods[i])
 	{

@@ -317,7 +317,7 @@ int	HttpRequest::headCheck(const std::string& toProcess, locationVector& locatio
 	return 0;
 }
 
-int	HttpRequest::recvData(int sockfd, int maxBodySize, locationVector& locations)
+int	HttpRequest::recvData(int sockfd, int maxBodySize, locationVector& locations, std::string serverName)
 {
 	int bytes = 1023;
 	char buf[bytes + 1];
@@ -347,6 +347,11 @@ int	HttpRequest::recvData(int sockfd, int maxBodySize, locationVector& locations
 				return HTTP_VERSION_ERROR;
 			}
 			saveHeaders(recvData);
+			if (headers["Host"].find("localhost") == std::string::npos && headers["Host"] != serverName)
+			{
+				type = BAD_REQUEST;
+				return BAD_REQUEST;
+			}
 			bytesRecived = 0;
 			if (headers["Transfer-Encoding"] != " chunked")
 				bytesRecived = recvData.length() - (recvData.find("\r\n\r\n") + 4);
@@ -396,9 +401,9 @@ int	HttpRequest::recvData(int sockfd, int maxBodySize, locationVector& locations
 }
 
 
-HttpRequest::HttpRequest(int sockfd, int maxBodySize, locationVector& locations): type(UNRECIVED), chunked(false)
+HttpRequest::HttpRequest(int sockfd, int maxBodySize, locationVector& locations, std::string serverName): type(UNRECIVED), chunked(false)
 {
-	recvData(sockfd, maxBodySize, locations);
+	recvData(sockfd, maxBodySize, locations, serverName);
 	/* exit(-1); */
 
 /* 	int bytes = 1023; */

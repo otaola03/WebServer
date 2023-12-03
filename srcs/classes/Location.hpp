@@ -23,6 +23,7 @@ class Location
 		bool	autoindex;
 		std::string	redirection;
 		std::string	destination;
+		std::string	cgi_bin;
 
 		// Location();
 		bool	isAllowed(const std::string	&method);
@@ -50,7 +51,8 @@ class Location
 			const std::string	&allowed_methods, \
 			const std::string	&autoindex, \
 			const std::string	&redirection, \
-			const std::string	&destination \
+			const std::string	&destination, \
+			const std::string	&cgibin \
 		);
 		/* Location(const Location& toCopy); */
 		~Location();

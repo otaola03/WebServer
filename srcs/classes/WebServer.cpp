@@ -135,9 +135,9 @@ void	WebServer::serverLoop()
 				/* data += recvData(fd); */
 				/* clientsData[fd] = recvData(fd); */
 				if (clientsRequests.find(fd) == clientsRequests.end() || clientsRequests[fd] == NULL)
-					clientsRequests[fd] = new HttpRequest(fd, clientsServers[fd]->getMaxBodySize(), clientsServers[fd]->getLocations());
+					clientsRequests[fd] = new HttpRequest(fd, clientsServers[fd]->getMaxBodySize(), clientsServers[fd]->getLocations(), clientsServers[fd]->getServerName());
 				else
-					clientsRequests[fd]->recvData(fd, clientsServers[fd]->getMaxBodySize(), clientsServers[fd]->getLocations());
+					clientsRequests[fd]->recvData(fd, clientsServers[fd]->getMaxBodySize(), clientsServers[fd]->getLocations(), clientsServers[fd]->getServerName());
 
 				/* if (data == "") */
 				/* if (clientsData[fd] == "") */
