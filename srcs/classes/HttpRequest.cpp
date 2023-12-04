@@ -1,8 +1,13 @@
-#include "HttpRequest.hpp"
+#include "HttpRequest.hpp" 
 
 // HttpRequest::HttpRequest()
 // {
 // }
+
+bool	HttpRequest::isChunked()
+{
+	return chunked;
+}
 
 static	RequestType whatTypeIs(const std::string& type)
 {
@@ -31,20 +36,6 @@ void	HttpRequest::saveRequest(const std::string& toProcess)
 	path = request.substr(p + 1, p2 - p);
 	path = path.erase(path.size() - 1);
 }
-
-/* void	HttpRequest::saveBody(const char* toProcess) */
-/* { */
-/* 	std::string contentLength; */
-/* 	contentLength = std::strstr(toProcess, "content-length: ") ? std::strstr(toProcess, "content-length: ") : std::strstr(toProcess, "Content-Length: "); */
-/* 	if (contentLength.empty()) */
-/* 		return ; */
-/* 	int length = std::atoi(contentLength.c_str() + 16); */
-/* 	const char* body_t = std::strstr(toProcess, "\r\n\r\n"); */
-/* 	body = std::string(body_t, length); */
-/* 	body = body.substr(body.find("\r\n\r\n") + 4); */
-/* 	size_t lastLine = body.find_last_of("\n"); */
-/* 	body = body.substr(0, lastLine); */
-/* } */
 
 void	HttpRequest::saveBody(const std::string& toProcess)
 {
@@ -152,20 +143,37 @@ static bool	isASlashLocation(const std::string& requestedPath, const std::string
 	return false;
 }
 
+static bool	isValidPath(const std::string& path, std::string locationPath)
+{
+	size_t pos = path.find('/', 1);
+	std::string temp = path.substr(0, pos);
+	if (locationPath == temp)
+		return true;
+	return false;
+}
+
 bool	HttpRequest::checkRequest(locationVector& locations)
 {
 	std::string file;
 	for (locationVector::iterator it = locations.begin(); it != locations.end(); ++it)
 	{
-		if (it->getPath() == "/")
-			location = *it;
-		else if (it->getPath() == path.substr(0, it->getPath().length()))
+		if (it->getPath() == "/"){
+			if (isValidType(type, *it))
+			{
+				location = *it;
+				return (true);
+			}
+			else
+				return (type = METHOD_ERROR, false);
+		}
+		else if (isValidPath(path, it->getPath()))
 		{
 			if (isValidType(type, *it))
 			{
 				location = *it;
 				path = path.substr(it->getPath().length());
-				std::cout << "PATH: " << path << "\n";
+				if (path.empty())
+					path = "/";
 				return (true);
 			}
 			else
@@ -185,13 +193,14 @@ static bool	checkNumBytes(int numbytes, RequestType& type, int sockfd)
 		if (numbytes == 0)
 		{
 			std::cout << "selectserver: socket "<< sockfd << " hung up\n";
+			type = UNDEFINED;
 			return false;
 		}
 		if (numbytes == -1)
 		{
- 			perror("recv");
-			type = UNDEFINED;
-			return false;
+ 			// perror("recv");
+			// type = UNDEFINED;
+			// return false;
 		}
 		if (numbytes == EWOULDBLOCK)
 		{
@@ -202,42 +211,240 @@ static bool	checkNumBytes(int numbytes, RequestType& type, int sockfd)
 	return true;
 }
 
-HttpRequest::HttpRequest(int sockfd, int maxBodySize, locationVector& locations)
+void HttpRequest::refererCheck(std::map<std::string, std::string> headers, locationVector& locations)
 {
-	char buf[1025];
-	std::string recvData;
-	int numbytes = 1024;
-	int bytesRecived = 0;
+	std::string referer = headers["Referer"];
+	size_t lastSlashPos = referer.rfind('/');
 
-	while (numbytes == 1024)
+	if (lastSlashPos != std::string::npos)
+		referer = referer.substr(lastSlashPos + 1);
+	for (locationVector::iterator it = locations.begin(); it != locations.end(); ++it)
+	{
+		if (isValidPath("/" + referer, it->getPath()))
+		{
+			if (isValidType(type, *it))
+				location = *it;
+			else
+				type = METHOD_ERROR;
+			return;
+		}
+	}
+}
+
+// HttpRequest::HttpRequest(int sockfd, int maxBodySize, locationVector& locations)
+// {
+// 	char buf[1025];
+// 	std::string recvData;
+// 	int numbytes = 1024;
+// 	int bytesRecived = 0;
+
+// 	while (numbytes == 1024)
+// 	{
+// 		numbytes = recv(sockfd, buf, sizeof(buf) - 1, 0);
+// 		if (!checkNumBytes(numbytes, type, sockfd))
+// 			return ;
+
+// 		std::string readData(buf, numbytes);
+// 		bytesRecived += numbytes;
+// 		recvData += readData;;
+
+// 		if (readData.find("HTTP/1.1"))
+// 		{
+// 			saveRequest(recvData);
+// 			if (!checkRequest(locations))
+// 				return ;
+// 		}
+
+// 		if (bytesRecived > maxBodySize)
+// 		{
+// 			type = LENGTH_ERROR;
+// 			std::cout << RED << "Error: MAXBODY_SIZE\n" << WHITE;
+// 			return ;
+// 		}
+// 	}
+// 	saveHeaders(recvData);
+// 	if (type == DELETE)
+// 		refererCheck(headers, locations);
+// 	if (type == POST)
+// 		saveBody(recvData);
+// }
+
+int	HttpRequest::headCheck(const std::string& toProcess, locationVector& locations)
+{
+	std::string request = toProcess.substr(0, toProcess.find('\n'));
+
+	std::vector<std::string> temps;
+	std::istringstream iss(request);
+	for (std::string temp; iss >> temp;) {
+		temps.push_back(temp);
+	}
+	if (temps.size() != 3){
+		std::cerr << "Error: Bad request\n";
+		return 1;
+	}
+	if (temps[2].find("HTTP/") == std::string::npos){
+		std::cerr << "Error: Bad Request\n";
+		return 1;
+	}
+	else{
+		size_t pos = temps[2].find("HTTP/");
+		if (pos == std::string::npos){
+			std::cerr << "Error: HTTP version\n";
+			return 2;
+		}
+		if (temps[2].length() < 8){
+			std::cerr << "Error: HTTP version\n";
+			return 2;
+		}
+		std::string version = temps[2].substr(pos + 5, 3);
+		if (version != "1.1"){
+			std::cerr << "Error: HTTP version\n";
+			return 2;
+		}
+	}
+	if (temps[0] == "GET")
+		type = GET;
+	else if (temps[0] == "POST")
+		type = POST;
+	else if (temps[0] == "DELETE")
+		type = DELETE;
+	else{
+		type = UNDEFINED;
+		return 0;
+	}
+	path = temps[1];
+	checkRequest(locations);
+	return 0;
+}
+
+int	HttpRequest::recvData(int sockfd, int maxBodySize, locationVector& locations, std::string serverName)
+{
+	int bytes = 1023;
+	char buf[bytes + 1];
+	std::string recvData;
+	int numbytes = bytes;
+	static int bytesRecived;
+
+	while (numbytes == bytes)
 	{
 		numbytes = recv(sockfd, buf, sizeof(buf) - 1, 0);
 		if (!checkNumBytes(numbytes, type, sockfd))
-			return ;
-
-		std::string readData(buf, numbytes);
-		bytesRecived += numbytes;
-		recvData += readData;;
-
-		if (readData.find("HTTP/1.1"))
+			return UNDEFINED;
+		recvData += std::string(buf, numbytes);
+		/* std::cout << recvData << "\n"; */
+		if (recvData.find("\r\n\r\n") != std::string::npos && type == UNRECIVED)
 		{
-			saveRequest(recvData);
-			if (!checkRequest(locations))
-				return ;
+			int error_int = headCheck(recvData, locations);
+			if (error_int == 1)
+			{
+				type = BAD_REQUEST;
+				return BAD_REQUEST;
+			}
+			else if (error_int == 2)
+			{
+				type = HTTP_VERSION_ERROR;
+				return HTTP_VERSION_ERROR;
+			}
+			saveHeaders(recvData);
+			if (headers["Host"].find("localhost") == std::string::npos && headers["Host"] != serverName)
+			{
+				type = BAD_REQUEST;
+				return BAD_REQUEST;
+			}
+			bytesRecived = 0;
+			if (headers["Transfer-Encoding"] != " chunked")
+				bytesRecived = recvData.length() - (recvData.find("\r\n\r\n") + 4);
 		}
+		else
+			bytesRecived += numbytes;
 
-		if (bytesRecived > maxBodySize)
+		if (headers["Transfer-Encoding"] == " chunked")
 		{
-			type = LENGTH_ERROR;
-			std::cout << RED << "Error: MAXBODY_SIZE\n" << WHITE;
-			return ;
+			if (recvData.find("0\r\n\r\n") != std::string::npos){
+				body += recvData.substr(0, recvData.find("0\r\n\r\n") - 2);
+				saveBody(body);
+				return (chunked = false, 0);
+			}
+			if (bytesRecived > maxBodySize){
+				type = LENGTH_ERROR;
+				std::cout << RED << "Error: MAXBODY_SIZE\n" << WHITE;
+				chunked = false;
+				return -1;
+			}
+			if (recvData.find("\r\n\r\n") != std::string::npos)
+				body += recvData;
+			else{
+				// std::cout << "----------------------------\n" << recvData << "\n";
+				size_t pos = recvData.find("\r\n") + 2;
+				if (pos != std::string::npos && pos != 1)
+					recvData = recvData.substr(pos);
+				// std::cout << "+++++++++++++++++++++++++++++\n" << recvData << "\n\n\n";
+				body += recvData;
+			}
+			// send(sockfd, "HTTP/1.1 100 Continue\r\n\r\n", 25, 0);
+			chunked = true;
+			return CHUNKED;
 		}
 	}
-	/* std::cout << recvData << "\n\n"; */
-	saveHeaders(recvData);
+	if (bytesRecived > maxBodySize){
+		type = LENGTH_ERROR;
+		std::cout << RED << "Error: MAXBODY_SIZE\n" << WHITE;
+		return -1;
+	}
+	if (type == DELETE)
+		refererCheck(headers, locations);
 	if (type == POST)
 		saveBody(recvData);
+	/* std::cout << body << "\n"; */
+	return 0;
+}
 
+
+HttpRequest::HttpRequest(int sockfd, int maxBodySize, locationVector& locations, std::string serverName): type(UNRECIVED), chunked(false)
+{
+	recvData(sockfd, maxBodySize, locations, serverName);
+	/* exit(-1); */
+
+/* 	int bytes = 1023; */
+/* 	char buf[bytes + 1]; */
+/* 	std::string recvData; */
+/* 	int numbytes = bytes; */
+/* 	int bytesRecived = 0; */
+
+/* 	while (recvData.find("\r\n\r\n") == std::string::npos && numbytes == bytes) */
+/* 	{ */
+/* 		numbytes = recv(sockfd, buf, sizeof(buf) - 1, 0); */
+/* 		if (!checkNumBytes(numbytes, type, sockfd)) */
+/* 			return ; */
+/* 		recvData += std::string(buf, numbytes); */
+/* 	} */
+/* 	int error_int = headCheck(recvData, locations); */
+/* 	if (error_int == 1){ */
+/* 		type = BAD_REQUEST; */
+/* 		return ; */
+/* 	} */
+/* 	else if (error_int == 2){ */
+/* 		type = HTTP_VERSION_ERROR; */
+/* 		return ; */
+/* 	} */
+/* 	while (numbytes == bytes) */
+/* 	{ */
+/* 		numbytes = recv(sockfd, buf, sizeof(buf) - 1, 0); */
+/* 		if (!checkNumBytes(numbytes, type, sockfd)) */
+/* 			return ; */
+/* 		recvData += std::string(buf, numbytes); */
+/* 		bytesRecived += numbytes; */
+/* 		if (bytesRecived > maxBodySize){ */
+/* 			type = LENGTH_ERROR; */
+/* 			std::cout << RED << "Error: MAXBODY_SIZE\n" << WHITE; */
+/* 			return ; */
+/* 		} */
+/* 	} */
+/* 	saveHeaders(recvData); */
+/* 	if (type == DELETE) */
+/* 		refererCheck(headers, locations); */
+/* 	if (type == POST) */
+	/* saveBody(recvData); */
 }
 
 HttpRequest::HttpRequest(const HttpRequest& toCopy)

@@ -23,7 +23,7 @@ class Location
 		bool	autoindex;
 		std::string	redirection;
 		std::string	destination;
-		std::string	cgi_destinaation;
+		bool	cgi_bin;
 
 		// Location();
 		bool	isAllowed(const std::string	&method);
@@ -34,16 +34,16 @@ class Location
 	public:
 		Location();
 
-		Location(\
-				const std::string	path, \
-				const std::string	root, \
-				const bool			GET, \
-				const bool			POST, \
-				const bool			DELETE, \
-				const bool			autoindex, \
-				std::string			redirection, \
-				std::string			destination \
-		);
+		// Location(\
+		// 		const std::string	path, \
+		// 		const std::string	root, \
+		// 		const bool			GET, \
+		// 		const bool			POST, \
+		// 		const bool			DELETE, \
+		// 		const bool			autoindex, \
+		// 		std::string			redirection, \
+		// 		std::string			destination \
+		// );
 		Location(\
 			const std::string	&path, \
 			const std::string	&root, \
@@ -52,7 +52,7 @@ class Location
 			const std::string	&autoindex, \
 			const std::string	&redirection, \
 			const std::string	&destination, \
-			const std::string	&cgi_destinaation \
+			const std::string	&cgibin \
 		);
 		/* Location(const Location& toCopy); */
 		~Location();
@@ -86,11 +86,12 @@ class Location
 			return destination;
 		}
 
-		std::string getCGIDestination() const {
-			return cgi_destinaation;
-		}
 		bool hasAutoindex() const{
 			return autoindex;
+		}
+
+		bool hasCGI() const{
+			return cgi_bin;
 		}
 };
 

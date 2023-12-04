@@ -67,8 +67,8 @@
     <h1>Gallery</h1>
     <div id="imageGallery">
         <?php
-        // while(1)
-        $carpeta = "resources/bin"; // Ruta de la carpeta de imágenes
+        $carpeta = "resources/bin";
+        //while(1)
         $tamañoDeseado = 200; // Ancho deseado en píxeles
 
         // Escanea la carpeta y muestra todas las imágenes
@@ -102,6 +102,12 @@
             <img id="modalImage" src="">
         </div>
     </div>
+    <h1>Upload a photo</h1>
+        <form id="upload-form" enctype="multipart/form-data">
+          <input type="file" id="file-input" name="file" accept="image/png, image/jpg, image/jpeg, image/gif">
+          <button type="button" id="upload-button">Subir</button>
+        </form>
+        <div id="upload-status"></div>
     <script>
         function mostrarImagen(src) {
             var modal = document.getElementById("imageModal");
@@ -133,6 +139,33 @@
             }
             location.reload();
         }
+    </script>
+    <script>
+    const uploadForm = document.getElementById('upload-form');
+    const fileInput = document.getElementById('file-input');
+    const uploadButton = document.getElementById('upload-button');
+    const uploadStatus = document.getElementById('upload-status');
+
+    uploadButton.addEventListener('click', () => {
+      const formData = new FormData();
+      formData.append('file', fileInput.files[0]);
+      uploadFile(formData);
+
+      async function uploadFile(formData) {
+        const res = await fetch('', {
+          method: 'POST',
+          body: formData
+        });
+        console.log("res =", res);
+        if (res.status === 201) {
+          uploadStatus.innerHTML = 'File uploaded successfully';
+        } else if (res.status === 413) {
+          uploadStatus.innerHTML = 'File too large';
+        } else {
+          uploadStatus.innerHTML = 'Something went wrong';
+        }
+      }
+      });
     </script>
 </body>
 </html>

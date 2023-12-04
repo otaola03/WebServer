@@ -120,7 +120,6 @@ int	Port::acceptConnection()
 
 Port& Port::operator=(const Port& toAssign)
 {
-	std::cout << "ASGINADO\n"; 
 	sockfd = toAssign.sockfd;
 	port = toAssign.port;
 	return *this;

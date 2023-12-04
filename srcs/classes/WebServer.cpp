@@ -13,30 +13,30 @@ Server*	WebServer::getServerFromPort(int portFd)
 	return NULL;
 }
 
-WebServer::WebServer()
-{
-	intVector	portsNum;
-	portsNum.push_back(8080);
-	portsNum.push_back(9090);
+// WebServer::WebServer()
+// {
+// 	intVector	portsNum;
+// 	portsNum.push_back(8080);
+// 	portsNum.push_back(9090);
 
-	intCharMap	errorPages;
-	errorPages[404] = "/404.html";
+// 	intCharMap	errorPages;
+// 	errorPages[404] = "/404.html";
 
-	Location	location;
-	locationVector	locations;
-	locations.push_back(location);
+// 	Location	location;
+// 	locationVector	locations;
+// 	locations.push_back(location);
 
-	Server *server = new Server("server1", "/", portsNum, errorPages, locations);
+// 	Server *server = new Server("server1", "/", portsNum, errorPages, locations);
 
-	intPortMap& serverPorts = server->getPortsList();
-	for (intPortMap::iterator it = serverPorts.begin(); it != serverPorts.end(); ++it)
-	{
-		kq.addPort(it->first);
-		ports[it->first] = it->second;
-	}
+// 	intPortMap& serverPorts = server->getPortsList();
+// 	for (intPortMap::iterator it = serverPorts.begin(); it != serverPorts.end(); ++it)
+// 	{
+// 		kq.addPort(it->first);
+// 		ports[it->first] = it->second;
+// 	}
 
-	serversList.push_back(server);
-}
+// 	serversList.push_back(server);
+// }
 
 WebServer::WebServer(const Config& config)
 {
@@ -44,7 +44,7 @@ WebServer::WebServer(const Config& config)
 
     while (i < config.getServerNum())
     {
-        serversList.push_back(new Server(config.getName(i), config.getRoot(i), config.getPorts(i), config.getErrorPages(i), config.getLocations(i)));
+        serversList.push_back(new Server(config.getName(i), config.getPorts(i), config.getErrorPages(i), config.getLocations(i), config.getMaxBodySize(i)));
         serversList[i]->addPortsToPortsList(ports);
         /* serversList[i]->addPortsToKq(kq); */
 
@@ -87,7 +87,8 @@ static bool	sendData(int sockfd, std::string msg)
 	{
 		numbytes = send(sockfd, msg.c_str(), msg.length(), 0);
 		if (numbytes == -1)
- 			return (perror("recv"), false);
+			perror("send");
+ 			//return (perror("send"), false);
 		else
 		{
 			totalBitsSend += numbytes;
@@ -129,12 +130,15 @@ void	WebServer::serverLoop()
 				clientsServers[fd] = getServerFromPort(portFd);
 			}
 
-			// RECIVE DATA ------- MIRA LO DEL MAXBODY SIZE
+			// RECIVE DATA
 			else if (kq.getEvSet(i).filter == EVFILT_READ)
 			{
 				/* data += recvData(fd); */
 				/* clientsData[fd] = recvData(fd); */
-				clientsRequests[fd] = new HttpRequest(fd, clientsServers[fd]->getMaxBodySize(), clientsServers[fd]->getLocations());
+				if (clientsRequests.find(fd) == clientsRequests.end() || clientsRequests[fd] == NULL)
+					clientsRequests[fd] = new HttpRequest(fd, clientsServers[fd]->getMaxBodySize(), clientsServers[fd]->getLocations(), clientsServers[fd]->getServerName());
+				else
+					clientsRequests[fd]->recvData(fd, clientsServers[fd]->getMaxBodySize(), clientsServers[fd]->getLocations(), clientsServers[fd]->getServerName());
 
 				/* if (data == "") */
 				/* if (clientsData[fd] == "") */
@@ -142,16 +146,16 @@ void	WebServer::serverLoop()
 					close(fd);
 				else if (clientsRequests[fd]->isUnfinishedRequest())
 					kq.disableRead(fd);
-				if(!kq.enableWrite(fd))
-					close(fd);
-				std::cout << clientsRequests[fd]->getType() << "\n";
+
+				if (!clientsRequests[fd]->isChunked())
+					if(!kq.enableWrite(fd))
+						close(fd);
 			}
 
 			// SEND
 			else if (kq.getEvSet(i).filter == EVFILT_WRITE)
 			{
 				/* HttpRequest parser(clientsData[fd]); */
-
 				/* HttpResponse response(parser); */
 				std::map<int, std::string> errorPagesMap = clientsServers[fd]->getErrorPages();
 				HttpResponse response(*clientsRequests[fd], errorPagesMap);
@@ -161,12 +165,12 @@ void	WebServer::serverLoop()
 				/* if (send(fd, msg.c_str(), msg.length(), 0) == -1) */
 				/* 	perror("send"); */
 				kq.manageEndedConnection(fd);
+				clientsRequests.erase(fd);
 				close(fd);
 				delete clientsRequests[fd];
 			}
 		}
 	}
-	system("leaks webserver");
 }
 
 void	WebServer::signalHandler(int signal)

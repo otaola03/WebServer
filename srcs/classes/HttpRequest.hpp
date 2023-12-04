@@ -14,7 +14,7 @@
 # include "Location.hpp"
 typedef std::vector<Location> locationVector;
 
-enum RequestType {GET, POST, DELETE, UNDEFINED, METHOD_ERROR, LENGTH_ERROR, PATH_ERROR};
+enum RequestType {GET, POST, DELETE, UNDEFINED, METHOD_ERROR, LENGTH_ERROR, PATH_ERROR, BAD_REQUEST, HTTP_VERSION_ERROR, CHUNKED, UNRECIVED};
 
 class HttpRequest
 {
@@ -28,17 +28,24 @@ class HttpRequest
 		void	saveRequest(const std::string& toProcess);
 		void	saveHeaders(const std::string& toProcess);
 		void	saveBody(const std::string& toProcess);
+		bool		chunked;
 
 	public:
 		/* HttpRequest(const std::string& toProcess); */
-		HttpRequest(int sockfd, int maxBodySize, locationVector& locations);
+		HttpRequest(int sockfd, int maxBodySize, locationVector& locations, std::string serverName);
 		HttpRequest(const HttpRequest& toCopy);
 		~HttpRequest();
+
+		int	recvData(int sockfd, int maxBodySize, locationVector& locations, std::string serverName);
 
 		Location	getLocation() const;
 		bool		isValidRequest() const;
 		bool		isUnfinishedRequest() const;
 		bool		checkRequest(locationVector& locations);
+		void		refererCheck(std::map<std::string, std::string> headers, locationVector& locations);
+		int			headCheck(const std::string& toProcess, locationVector& locations);
+		void		manageChunked(int sockfd, int maxBodySize, locationVector& locations);
+		bool		isChunked();
 
 		void		printRequest();
 		void		printHeaders();

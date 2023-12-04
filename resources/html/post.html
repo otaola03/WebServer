@@ -30,6 +30,8 @@
         console.log("res =", res);
         if (res.status === 201) {
           uploadStatus.innerHTML = 'File uploaded successfully';
+        } else if (res.status === 413) {
+          uploadStatus.innerHTML = 'File too large';
         } else {
           uploadStatus.innerHTML = 'Something went wrong';
         }

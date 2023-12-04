@@ -5,7 +5,6 @@ bool isDirectory(const std::string& path)
     struct stat info = {};
     if (stat(path.c_str(), &info) != 0)
         return false;
-	std::cout << S_ISDIR(info.st_mode) << std::endl;
     return S_ISDIR(info.st_mode);
 }
 
@@ -15,30 +14,37 @@ Location::Location() : GET(false), POST(false), DELETE(false), autoindex(false)
 		std::cout << "HOLA\n";
 }
 
-Location::Location(
-	const std::string	path, \
-	const std::string	root, \
-	const bool			GET, \
-	const bool			POST, \
-	const bool			DELETE, \
-	const bool			autoindex, \
-	std::string			redirection, \
-	std::string			destination
-) : path(path), root(root), GET(GET), POST(POST), DELETE(DELETE), autoindex(autoindex), redirection(redirection), destination(destination)
+// Location::Location(
+// 	const std::string	path, \
+// 	const std::string	root, \
+// 	const bool			GET, \
+// 	const bool			POST, \
+// 	const bool			DELETE, \
+// 	const bool			autoindex, \
+// 	std::string			redirection \
+// ) : path(path), root(root), GET(GET), POST(POST), DELETE(DELETE), autoindex(autoindex)
+// {
+// 	if (GET && POST && DELETE && autoindex)
+// 		std::cout << "HOLA\n";
+// }
+
+bool	isOn(const string &on, const string &param)
 {
-	if (GET && POST && DELETE && autoindex)
-		std::cout << "HOLA\n";
+	if (!(on.find("on") == 0 || on.find("off") == 0))
+		throw (std::runtime_error("A location have " + param + " \"" + on + "\" (it must be \"on\" or \"off\")"));
+	return (on.find("on") == 0);
+
 }
 
 Location::Location(\
-				const std::string	&path, \
-				const std::string	&root, \
-				const std::string	&index, \
-				const std::string	&allowed_methods, \
-				const std::string	&autoindex, \
-				const std::string	&redirection, \
-				const std::string	&destination, \
-				const std::string	&cgi_destinaation \
+			const std::string	&path, \
+			const std::string	&root, \
+			const std::string	&index, \
+			const std::string	&allowed_methods, \
+			const std::string	&autoindex, \
+			const std::string	&redirection, \
+			const std::string	&destination, \
+			const std::string	&cgibin \
 ) :
 path(path),
 root(root),
@@ -47,15 +53,12 @@ allowed_methods(allowed_methods),
 GET(isAllowed("GET")),
 POST(isAllowed("POST")),
 DELETE(isAllowed("DELETE")),
-autoindex(autoindex.find("on") == 0),///hmmmm
+autoindex(isOn(autoindex, "autoindex")),
 redirection(redirection),
 destination(destination),
-cgi_destinaation(cgi_destinaation)
+cgi_bin(isOn(cgibin, "cgi-bin"))
 {
 	check();
-	// if (autoindex)
-	// 	createAutoindex();
-	
 }
 
 
@@ -71,8 +74,33 @@ void Location::check()
 		throw (std::runtime_error("Location has not index and autoindex is not on"));
 	if (!index.empty() && autoindex)
 		throw (std::runtime_error("Location has index and autoindex is on"));
-	// if (!index.empty() && isDirectory(index))
-	// 	throw (std::runtime_error("Location's index is not a directory"));//??
+	if (destination.empty())
+		throw (std::runtime_error("Location has an empty destination"));
+	size_t i = 0;
+	while (allowed_methods[i])
+	{
+		if (allowed_methods[i] == '[')
+			i++;
+		while (isspace(allowed_methods[i]))
+			i++;
+		if (allowed_methods.find("GET", i) == i)
+			i += 3;
+		else if (allowed_methods.find("POST", i) == i)
+			i += 4;
+		else if (allowed_methods.find("DELETE", i) == i)
+			i += 5;
+		else
+			throw (std::runtime_error("Location has an invalid allowed_method \"" + allowed_methods + "\""));
+		i++;
+		while (isspace(allowed_methods[i]))
+			i++;
+		if (allowed_methods[i] == ']')
+			break;
+	}
+
+
+	
+	
 }
 
 /* Location::Location(const Location& toCopy) */

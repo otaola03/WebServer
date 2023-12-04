@@ -36,11 +36,10 @@ class Server
 {
 	private:
 		std::string 	name;
-		std::string 	root;
 		intPortMap		fdPortsList;	//map(fd, Port*)
 		intCharMap		errorPages;
 		locationVector	locations;
-		int 			maxBodySize;
+		size_t 			maxBodySize;
 
 		Server();
 
@@ -50,10 +49,10 @@ class Server
 	public:
 		Server(\
 				const std::string& name, \
-				const std::string& root, \
 				const intVector& ports, \
 				const intCharMap& errorPages, \
-				const locationVector& locations\
+				const locationVector& locations,\
+				const int& BodySize\
 		);
 		Server(const std::string& name, const std::vector<int> ports);
 		Server(const Server& toCopy);
@@ -61,6 +60,7 @@ class Server
 
 		locationVector& getLocations();
 		int getMaxBodySize();
+		std::string getServerName();
 
 		intPortMap& getPortsList();
 

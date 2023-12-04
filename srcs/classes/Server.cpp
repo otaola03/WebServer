@@ -11,13 +11,12 @@ std::map <int, std::string> Server::getErrorPages()
 
 Server::Server(\
 	const std::string& name, \
-	const std::string& root, \
 	const intVector& ports, \
 	const intCharMap& errorPages, \
-	const locationVector& locations\
-) : name(name), root(root), errorPages(errorPages), locations(locations), maxBodySize(5000000)
+	const locationVector& locations,\
+	const int& BodySize\
+) : name(name),errorPages(errorPages), locations(locations), maxBodySize(BodySize)
 {
-	std::cerr << "construimos " << name << "\n";
 	for (int i = 0; i != (int)ports.size(); i++)
 	{
 		std::cerr << "Creating port " << ports[i] << "\n";
@@ -26,7 +25,6 @@ Server::Server(\
 		port->activatePort();
 		fdPortsList[port->getSockFd()] = port;
 	}
-	std::cout << "fdMax: " << fdMax << "\n";
 }
 
 Server::Server(const Server& toCopy)
@@ -73,6 +71,10 @@ Server& Server::operator=(const Server& toAssign)
 std::ostream& Server::operator<<(std::ostream& os) const
 {
 	os << "Name: " << name << "\n";
-	os << "root: " << root << "\n";
 	return os;
+}
+
+std::string Server::getServerName()
+{
+	return name;
 }
