@@ -15,7 +15,7 @@ server:
             allowed_methods: [GET, POST, DELETE]
             autoindex: on
             redirection: 
-            destination: images
+            destination: bin
             cgi-bin: on
 
           - name: Post
@@ -32,10 +32,10 @@ server:
             path: /images
             root: ./resources
             index: gallery.php
-            allowed_methods: [GET, POST]
+            allowed_methods: [GET, POST, DELETE]
             autoindex: off
             redirection: 
-            destination: images
+            destination: bin
             cgi-bin: on
 
           - name: default
@@ -45,7 +45,7 @@ server:
             allowed_methods: [GET, POST, DELETE]
             autoindex: off
             redirection: 
-            destination: images
+            destination: bin
             cgi-bin: on
 
           - name: siege
@@ -55,7 +55,7 @@ server:
             allowed_methods: [GET, POST, DELETE]
             autoindex: off
             redirection: 
-            destination: images
+            destination: bin
             cgi-bin: on
 
           - name: form
@@ -65,5 +65,5 @@ server:
             allowed_methods: [GET, POST, DELETE]
             autoindex: off
             redirection: 
-            destination: images
+            destination: bin
             cgi-bin: on

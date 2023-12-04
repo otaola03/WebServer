@@ -149,7 +149,8 @@ std::string HttpResponse::getIndex(std::string code, std::string path){
 	return msg;
 }
 
-std::string HttpResponse::postImage(std::string path, std::string body, std::map<std::string, std::string> headers, std::string destination, std::string root){
+std::string HttpResponse::postImage(std::string path, std::string body, std::map<std::string, std::string> headers,
+									std::string destination, std::string root, Location& location){
 
 	(void)path;
 	std::string body_content = body;
@@ -166,10 +167,9 @@ std::string HttpResponse::postImage(std::string path, std::string body, std::map
 	else if (path.find(".php") != std::string::npos){
 		std::string findPath;
 		std::string args = body_content;
+		if (location.hasCGI() == false)
+			return (getIndex(C403, "./resources/html/403.html"));
 		FileFinder::fileFinder(path.substr(1), findPath, root);
-		std::cerr << "FINDPATH: " << findPath << std::endl;
-		std::cerr << "PATH: " << path << std::endl;
-		std::cerr << "ROOT: " << root << std::endl;
 		std::string php = phpCgiHandler(findPath, args);
 		std::string html_name = path;
 		std::ifstream file(html_name.c_str());
@@ -326,7 +326,7 @@ std::string HttpResponse::getMessage(HttpRequest& parser, std::map<int, std::str
 	}
 
 	else if (parser.getType() == POST){
-		return (postImage(getPath, parser.getBody(), parser.getHeaders(), location.getRoot() + "/" + location.getDestination(), location.getRoot()));
+		return (postImage(getPath, parser.getBody(), parser.getHeaders(), location.getRoot() + "/" + location.getDestination(), location.getRoot(), location));
 	}
 	else if (parser.getType() == DELETE){
 		if (FileFinder::fileFinder(getPath.substr(1), founDir, root)){
