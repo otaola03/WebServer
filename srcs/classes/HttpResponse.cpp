@@ -144,7 +144,7 @@ std::string HttpResponse::getIndex(std::string code, std::string path){
 		msg.append(content);
 		file.close();
 	} else {
-		std::cerr << "Index Fatal" << std::endl;
+		std::cerr << RED << "Index Fatal" << WHITE << std::endl;
 	}
 	return msg;
 }
@@ -178,7 +178,7 @@ std::string HttpResponse::postImage(std::string path, std::string body, std::map
 		return msg;
 	}
 	else{
-		if (headers["Content-Type"] == "plain/text")
+		if (headers["Content-Type"] == " plain/text")
 			fileName = "archivo.txt";
 		else
 			fileName = "archivo";

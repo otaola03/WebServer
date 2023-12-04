@@ -1,7 +1,7 @@
 server:
     - server_name: pallete
       listen: [8080]
-      max_body_size: 446744073709551615
+      max_body_size: 446744073709551614
       error_pages:
           - 404: ./resources/html/404.html
           - 406: ./resources/html/foca.html

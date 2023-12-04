@@ -91,7 +91,7 @@ void	Config::check()
 			throw (std::runtime_error("server_name can not be empty"));
 	
 	for (std::vector<size_t>::const_iterator i = max_body_size.begin(); i != max_body_size.end(); i++)
-		if (*i <= 0)
+		if (*i <= 0 || *i > 446744073709551615)
 			throw (std::runtime_error("invalid max_body_size"));
 
 	for (std::vector<locationVector>::const_iterator i = locations.begin(); i != locations.end(); i++)
