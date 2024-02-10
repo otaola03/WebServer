@@ -9,5 +9,5 @@ The aim of this project is to construct an HTTP web server from scratch, compati
 ## Usage
 ```bash
 make
-./webserv [Config File] ## leave empty to use the default configuration.
+./webserver [Config File] ## leave empty to use the default configuration.
 ```
